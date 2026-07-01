@@ -12,7 +12,7 @@ struct ManageDataTab: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Manage Default Visa Data").font(.headline)
-                Text("Add or remove visa-free and visa-on-arrival countries for your selected passport.")
+                Text("Add or remove visa-free, visa-on-arrival, and ETA countries for your selected passport.")
                     .font(.caption).foregroundStyle(.secondary)
 
                 VStack(alignment: .leading, spacing: 10) {
@@ -20,8 +20,9 @@ struct ManageDataTab: View {
                         HStack {
                             Text(country.map { "\($0.flag)  \($0.name)" } ?? "Select country…")
                                 .foregroundStyle(country == nil ? .secondary : .primary)
+                                .foregroundStyle(.black)
                             Spacer()
-                            Image(systemName: "chevron.down").foregroundStyle(.secondary)
+                            Image(systemName: "chevron.down").foregroundStyle(.black)
                         }
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
@@ -30,6 +31,7 @@ struct ManageDataTab: View {
                     Picker("Visa type", selection: $category) {
                         Text("Visa Free").tag(VisaCategory.visaFree)
                         Text("Visa on Arrival").tag(VisaCategory.visaOnArrival)
+                        Text("ETA").tag(VisaCategory.eta)
                     }
                     .pickerStyle(.segmented)
 
@@ -58,6 +60,7 @@ struct ManageDataTab: View {
                     Text("RESET TO DEFAULT DATA")
                         .font(.subheadline.bold())
                         .frame(maxWidth: .infinity).padding()
+                        .foregroundStyle(.black)
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                 }
                 .confirmationDialog(
@@ -107,7 +110,7 @@ struct ManageDataTab: View {
             Button {
                 appState.removeDefaultVisa(entry.countryCode)
             } label: {
-                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                Image(systemName: "xmark.circle.fill").foregroundStyle(.black)
             }
         }
         .padding()

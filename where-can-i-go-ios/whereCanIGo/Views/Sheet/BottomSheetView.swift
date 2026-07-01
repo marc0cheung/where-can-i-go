@@ -16,15 +16,6 @@ struct BottomSheetView: View {
             VStack(spacing: 0) {
                 header
 
-                Picker("", selection: $selectedTab) {
-                    ForEach(PanelTab.allCases, id: \.self) { tab in
-                        Text(tab.rawValue).tag(tab)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.bottom, 8)
-
                 Divider()
 
                 Group {
@@ -34,6 +25,7 @@ struct BottomSheetView: View {
                     case .manageData: ManageDataTab()
                     }
                 }
+                .padding(.bottom, 96)
             }
             .sheet(isPresented: $showPassportPicker) {
                 PassportPickerView(isFirstLaunch: false)
@@ -56,6 +48,7 @@ struct BottomSheetView: View {
             } label: {
                 Image(systemName: "person.text.rectangle.fill")
                     .font(.title3)
+                    .foregroundStyle(.black)
                     .padding(10)
                     .background(.thinMaterial, in: Circle())
             }
