@@ -20,8 +20,9 @@ struct ManageDataTab: View {
                         HStack {
                             Text(country.map { "\($0.flag)  \($0.name)" } ?? "Select country…")
                                 .foregroundStyle(country == nil ? .secondary : .primary)
+                                .foregroundStyle(.black)
                             Spacer()
-                            Image(systemName: "chevron.down").foregroundStyle(.secondary)
+                            Image(systemName: "chevron.down").foregroundStyle(.black)
                         }
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
@@ -59,6 +60,7 @@ struct ManageDataTab: View {
                     Text("RESET TO DEFAULT DATA")
                         .font(.subheadline.bold())
                         .frame(maxWidth: .infinity).padding()
+                        .foregroundStyle(.black)
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                 }
                 .confirmationDialog(
@@ -108,7 +110,7 @@ struct ManageDataTab: View {
             Button {
                 appState.removeDefaultVisa(entry.countryCode)
             } label: {
-                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                Image(systemName: "xmark.circle.fill").foregroundStyle(.black)
             }
         }
         .padding()

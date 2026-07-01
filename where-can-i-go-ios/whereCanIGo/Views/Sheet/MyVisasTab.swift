@@ -19,8 +19,9 @@ struct MyVisasTab: View {
                     HStack {
                         Text(country.map { "\($0.flag)  \($0.name)" } ?? "Select a country…")
                             .foregroundStyle(country == nil ? .secondary : .primary)
+                            .foregroundStyle(.black)
                         Spacer()
-                        Image(systemName: "chevron.down").foregroundStyle(.secondary)
+                        Image(systemName: "chevron.down").foregroundStyle(.black)
                     }
                     .padding()
                     .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
@@ -129,7 +130,7 @@ struct MyVisasTab: View {
             Button(role: .destructive) {
                 appState.removePersonalVisa(v.id)
             } label: {
-                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                Image(systemName: "xmark.circle.fill").foregroundStyle(.black)
             }
         }
         .padding()

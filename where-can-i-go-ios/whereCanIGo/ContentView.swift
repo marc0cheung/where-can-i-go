@@ -9,7 +9,7 @@ struct ContentView: View {
         CountryMapView()
             .ignoresSafeArea()
             .sheet(isPresented: $sheetPresented) {
-                BottomSheetView(selectedTab: $selectedTab)
+                BottomSheetContainerView(selectedTab: $selectedTab)
                     .presentationDetents([.height(290), .medium, .large])
                     .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                     .presentationCornerRadius(28)
