@@ -10,7 +10,7 @@ struct ContentView: View {
             .ignoresSafeArea()
             .sheet(isPresented: $sheetPresented) {
                 BottomSheetView(selectedTab: $selectedTab)
-                    .presentationDetents([.height(180), .medium, .large])
+                    .presentationDetents([.height(290), .medium, .large])
                     .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                     .presentationCornerRadius(28)
                     .presentationDragIndicator(.visible)

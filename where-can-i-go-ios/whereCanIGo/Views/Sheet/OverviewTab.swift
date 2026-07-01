@@ -4,42 +4,65 @@ struct OverviewTab: View {
     @EnvironmentObject var appState: AppState
     @State private var search: String = ""
 
-    private var counts: (vf: Int, voa: Int, mine: Int, total: Int) {
+    private var counts: (vf: Int, voa: Int, eta: Int, mine: Int, total: Int) {
         let vf = appState.data.defaultVisas.filter { $0.category == .visaFree }.count
         let voa = appState.data.defaultVisas.filter { $0.category == .visaOnArrival }.count
+        let eta = appState.data.defaultVisas.filter { $0.category == .eta }.count
         let mine = appState.data.personalVisas.count
-        return (vf, voa, mine, vf + voa + mine)
+        return (vf, voa, eta, mine, vf + voa + eta + mine)
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    StatCard(value: counts.vf,    label: "Visa Free",        color: VisaCategory.visaFree.color)
-                    StatCard(value: counts.voa,   label: "Visa on Arrival",  color: VisaCategory.visaOnArrival.color)
-                    StatCard(value: counts.mine,  label: "My Visas",         color: VisaCategory.myVisa.color)
-                    StatCard(value: counts.total, label: "Total Accessible", color: .primary)
-                }
-                .padding(.horizontal)
+        GeometryReader { proxy in
+            let isCompactHeight = proxy.size.height < 430
 
-                HStack {
-                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                    TextField("Search countries…", text: $search)
-                        .autocorrectionDisabled()
-                }
-                .padding(10)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                .padding(.horizontal)
-
-                LazyVStack(spacing: 8) {
-                    ForEach(filteredCountries) { country in
-                        CountryRow(country: country)
+            ScrollView {
+                VStack(spacing: 16) {
+                    if isCompactHeight {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                StatCard(value: counts.vf,    label: "Visa Free",        color: VisaCategory.visaFree.color)
+                                StatCard(value: counts.voa,   label: "Visa on Arrival",  color: VisaCategory.visaOnArrival.color)
+                                StatCard(value: counts.eta,   label: "ETA",              color: VisaCategory.eta.color)
+                                StatCard(value: counts.mine,  label: "My Visas",         color: VisaCategory.myVisa.color)
+                                StatCard(value: counts.total, label: "Total Accessible", color: .primary)
+                            }
+                            .padding(.horizontal)
+                        }
+                    } else {
+                        VStack(spacing: 10) {
+                            HStack(spacing: 10) {
+                                StatCard(value: counts.vf, label: "Visa Free", color: VisaCategory.visaFree.color, width: .flexible)
+                                StatCard(value: counts.voa, label: "Visa on Arrival", color: VisaCategory.visaOnArrival.color, width: .flexible)
+                                StatCard(value: counts.eta, label: "ETA", color: VisaCategory.eta.color, width: .flexible)
+                            }
+                            HStack(spacing: 10) {
+                                StatCard(value: counts.mine, label: "My Visas", color: VisaCategory.myVisa.color, width: .flexible)
+                                StatCard(value: counts.total, label: "Total Accessible", color: .primary, width: .flexible)
+                            }
+                        }
+                        .padding(.horizontal)
                     }
+
+                    HStack {
+                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                        TextField("Search countries…", text: $search)
+                            .autocorrectionDisabled()
+                    }
+                    .padding(10)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal)
+
+                    LazyVStack(spacing: 8) {
+                        ForEach(filteredCountries) { country in
+                            CountryRow(country: country)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 24)
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 24)
+                .padding(.top, 12)
             }
-            .padding(.top, 12)
         }
     }
 
@@ -50,9 +73,15 @@ struct OverviewTab: View {
 }
 
 private struct StatCard: View {
+    enum WidthMode {
+        case fixed(CGFloat)
+        case flexible
+    }
+
     let value: Int
     let label: String
     let color: Color
+    var width: WidthMode = .fixed(152)
 
     var body: some View {
         VStack(spacing: 4) {
@@ -62,13 +91,28 @@ private struct StatCard: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: isFlexible ? .infinity : nil)
+        .frame(width: fixedWidth)
         .padding(.vertical, 16)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(color.opacity(0.4), lineWidth: 1)
         )
+    }
+
+    private var isFlexible: Bool {
+        switch width {
+        case .fixed: return false
+        case .flexible: return true
+        }
+    }
+
+    private var fixedWidth: CGFloat? {
+        switch width {
+        case .fixed(let value): return value
+        case .flexible: return nil
+        }
     }
 }
 

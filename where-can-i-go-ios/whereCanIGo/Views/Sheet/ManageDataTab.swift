@@ -12,7 +12,7 @@ struct ManageDataTab: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Manage Default Visa Data").font(.headline)
-                Text("Add or remove visa-free and visa-on-arrival countries for your selected passport.")
+                Text("Add or remove visa-free, visa-on-arrival, and ETA countries for your selected passport.")
                     .font(.caption).foregroundStyle(.secondary)
 
                 VStack(alignment: .leading, spacing: 10) {
@@ -30,6 +30,7 @@ struct ManageDataTab: View {
                     Picker("Visa type", selection: $category) {
                         Text("Visa Free").tag(VisaCategory.visaFree)
                         Text("Visa on Arrival").tag(VisaCategory.visaOnArrival)
+                        Text("ETA").tag(VisaCategory.eta)
                     }
                     .pickerStyle(.segmented)
 
