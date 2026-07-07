@@ -75,3 +75,10 @@ private extension PanelTab {
         }
     }
 }
+
+#Preview("Bottom Sheet Container") {
+    @Previewable @State var selectedTab: PanelTab = .overview
+    
+    return BottomSheetContainerView(selectedTab: $selectedTab)
+        .environmentObject(AppState())
+}
