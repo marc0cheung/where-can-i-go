@@ -76,6 +76,9 @@ struct ManageDataTab: View {
         .sheet(isPresented: $showCountryPicker) {
             CountryPickerSheet(selected: $country)
         }
+        .onDisappear {
+            resetDraft()
+        }
     }
 
     private var sortedDefaults: [DefaultVisaEntry] {
@@ -94,6 +97,13 @@ struct ManageDataTab: View {
         )
         appState.addDefaultVisa(entry)
         country = nil; duration = ""
+    }
+
+    private func resetDraft() {
+        country = nil
+        category = .visaFree
+        duration = ""
+        showCountryPicker = false
     }
 
     @ViewBuilder
