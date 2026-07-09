@@ -28,6 +28,7 @@ struct OverviewTab: View {
                                 StatCard(value: counts.total, label: "Total Accessible", color: .primary)
                             }
                             .padding(.horizontal)
+                            .padding(.vertical)
                         }
                     } else {
                         VStack(spacing: 10) {
@@ -97,7 +98,7 @@ private struct StatCard: View {
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(color.opacity(0.4), lineWidth: 1)
+                .stroke(color, lineWidth: 1)
         )
     }
 
