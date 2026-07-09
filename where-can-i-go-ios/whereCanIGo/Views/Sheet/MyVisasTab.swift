@@ -238,7 +238,7 @@ struct MyVisasTab: View {
             Button(role: .destructive) {
                 appState.removePersonalVisa(v.id)
             } label: {
-                Image(systemName: "xmark.circle.fill").foregroundStyle(.black)
+                Image(systemName: "xmark.circle.fill").foregroundStyle(.gray)
             }
         }
         .padding()
