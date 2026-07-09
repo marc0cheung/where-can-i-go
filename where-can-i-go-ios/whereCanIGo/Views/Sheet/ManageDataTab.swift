@@ -20,9 +20,9 @@ struct ManageDataTab: View {
                         HStack {
                             Text(country.map { "\($0.flag)  \($0.name)" } ?? "Select country…")
                                 .foregroundStyle(country == nil ? .secondary : .primary)
-                                .foregroundStyle(.black)
+                                .foregroundStyle(.gray)
                             Spacer()
-                            Image(systemName: "chevron.down").foregroundStyle(.black)
+                            Image(systemName: "chevron.down").foregroundStyle(.gray)
                         }
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
@@ -42,7 +42,7 @@ struct ManageDataTab: View {
                         Text("ADD")
                             .font(.headline).foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding()
-                            .background(country == nil ? Color.gray.opacity(0.6) : Color.black,
+                            .background(country == nil ? Color.gray.opacity(0.6) : Color.primary,
                                         in: RoundedRectangle(cornerRadius: 10))
                     }
                     .disabled(country == nil)
@@ -60,7 +60,7 @@ struct ManageDataTab: View {
                     Text("RESET TO DEFAULT DATA")
                         .font(.subheadline.bold())
                         .frame(maxWidth: .infinity).padding()
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.primary)
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                 }
                 .confirmationDialog(
@@ -110,7 +110,7 @@ struct ManageDataTab: View {
             Button {
                 appState.removeDefaultVisa(entry.countryCode)
             } label: {
-                Image(systemName: "xmark.circle.fill").foregroundStyle(.black)
+                Image(systemName: "xmark.circle.fill").foregroundStyle(.gray)
             }
         }
         .padding()

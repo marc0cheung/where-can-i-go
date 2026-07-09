@@ -36,7 +36,7 @@ struct PassportPickerView: View {
                         Text(country.name)
                         Spacer()
                         if country.code == selectedCode {
-                            Image(systemName: "checkmark.circle.fill").foregroundStyle(.black)
+                            Image(systemName: "checkmark.circle.fill").foregroundStyle(.primary)
                         }
                     }
                     .contentShape(Rectangle())

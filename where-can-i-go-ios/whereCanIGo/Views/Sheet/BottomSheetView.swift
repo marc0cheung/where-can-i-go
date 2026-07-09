@@ -29,7 +29,7 @@ struct SheetHeader: View {
                 } label: {
                     Image(systemName: "person.text.rectangle.fill")
                         .font(.title3)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.primary)
                         .padding(10)
                 }
                 .buttonStyle(.glass)
