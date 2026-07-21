@@ -11,18 +11,34 @@ struct CountryMapView: UIViewRepresentable {
     func makeUIView(context: Context) -> MKMapView {
         let map = MKMapView()
         map.delegate = context.coordinator
-        map.mapType = .mutedStandard
+
+        // Use a globe-capable style so zooming out transitions into 3D Earth.
+        if #available(iOS 16.0, *) {
+            map.preferredConfiguration = MKHybridMapConfiguration(
+                elevationStyle: .realistic
+            )
+        } else {
+            map.mapType = .mutedStandard
+        }
+
         map.pointOfInterestFilter = .excludingAll
         map.showsCompass = false
         map.showsScale = false
-        map.isRotateEnabled = false
-        map.isPitchEnabled = false
+        map.isRotateEnabled = true
+        map.isPitchEnabled = true
 
-        // Initial world view
-        map.setRegion(MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 20, longitude: 20),
-            span: MKCoordinateSpan(latitudeDelta: 140, longitudeDelta: 140)
-        ), animated: false)
+        // Keep the map unconstrained so users can continuously zoom out.
+        map.setCameraBoundary(nil, animated: false)
+        map.setCameraZoomRange(nil, animated: false)
+
+        // Initialize with camera distance (instead of region) for globe-friendly behavior.
+        let worldCamera = MKMapCamera(
+            lookingAtCenter: CLLocationCoordinate2D(latitude: 20, longitude: 20),
+            fromDistance: 35_000_000,
+            pitch: 0,
+            heading: 0
+        )
+        map.setCamera(worldCamera, animated: false)
 
         context.coordinator.loadGeoJSON(into: map)
         return map
