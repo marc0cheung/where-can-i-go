@@ -111,6 +111,18 @@ struct MyVisasTab: View {
         .onChange(of: country) { _, _ in
             errorMessage = nil
         }
+        .onChange(of: appState.pendingAddVisaCountryCode) { _, newCode in
+            if let code = newCode {
+                country = appState.country(for: code)
+                appState.pendingAddVisaCountryCode = nil
+            }
+        }
+        .onAppear {
+            if let code = appState.pendingAddVisaCountryCode {
+                country = appState.country(for: code)
+                appState.pendingAddVisaCountryCode = nil
+            }
+        }
         .onDisappear {
             // Requirement: wipe everything when user leaves this tab
             resetDraft()

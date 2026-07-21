@@ -13,6 +13,20 @@ struct ContentView: View {
     var body: some View {
         CountryMapView()
             .ignoresSafeArea()
+            .overlay(alignment: .bottom) {
+                if let code = appState.selectedCountryCode,
+                   appState.country(for: code) != nil {
+                    CountryDetailCard(countryCode: code, selectedTab: $selectedTab, selectedDetent: $selectedDetent)
+                        .padding(.bottom, 310)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(.smooth(duration: 0.25), value: appState.selectedCountryCode)
+            .onChange(of: appState.selectedCountryCode) { _, newCode in
+                if newCode != nil {
+                    withAnimation(.smooth(duration: 0.25)) { selectedDetent = .height(290) }
+                }
+            }
             .sheet(isPresented: $sheetPresented) {
                 VStack(spacing: 0) {
                     SheetHeader()

@@ -40,6 +40,10 @@ struct CountryMapView: UIViewRepresentable {
         )
         map.setCamera(worldCamera, animated: false)
 
+        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
+        tap.cancelsTouchesInView = false
+        map.addGestureRecognizer(tap)
+
         context.coordinator.loadGeoJSON(into: map)
         return map
     }
@@ -60,6 +64,7 @@ struct CountryMapView: UIViewRepresentable {
         }
 
         private var lastDataSignature: Int? = nil
+        private var lastSelectedCode: String? = nil
         private var categoryByISO3: [String: VisaCategory] = [:]
         private var rendererCache: [ObjectIdentifier: MKOverlayPathRenderer] = [:]
         private var highDetailOverlays: [MKOverlay] = []
@@ -72,6 +77,53 @@ struct CountryMapView: UIViewRepresentable {
         private let lowDetailTolerance: CLLocationDegrees = 0.22
 
         init(appState: AppState) { self.appState = appState }
+
+        // MARK: - Tap handling
+
+        @objc func handleTap(_ recognizer: UITapGestureRecognizer) {
+            guard let mapView = recognizer.view as? MKMapView else { return }
+            let touchPoint = recognizer.location(in: mapView)
+            let coordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
+            let mapPoint = MKMapPoint(coordinate)
+            let tappedISO = hitTest(mapPoint: mapPoint, in: mapView)
+
+            Task { @MainActor in
+                if let code = tappedISO, code == appState.selectedCountryCode {
+                    appState.selectCountry(code: nil)
+                } else {
+                    appState.selectCountry(code: tappedISO)
+                }
+            }
+        }
+
+        private func hitTest(mapPoint: MKMapPoint, in mapView: MKMapView) -> String? {
+            var bestISO: String? = nil
+            var bestArea: Double = .infinity
+
+            for overlay in mapView.overlays {
+                let key = ObjectIdentifier(overlay)
+                guard let renderer = rendererCache[key] else { continue }
+                let rendererPoint = renderer.point(for: mapPoint)
+
+                let hit: Bool
+                if let pr = renderer as? MKPolygonRenderer {
+                    hit = pr.path?.contains(rendererPoint) == true
+                } else if let mr = renderer as? MKMultiPolygonRenderer {
+                    hit = mr.path?.contains(rendererPoint) == true
+                } else {
+                    continue
+                }
+
+                guard hit else { continue }
+                let rect = overlay.boundingMapRect
+                let area = rect.size.width * rect.size.height
+                if area < bestArea {
+                    bestArea = area
+                    bestISO = (overlay as? MKShape)?.title ?? nil
+                }
+            }
+            return bestISO
+        }
 
         func loadGeoJSON(into map: MKMapView) {
             // Accept either filename, since some downloads omit a dot in the extension.
@@ -137,26 +189,52 @@ struct CountryMapView: UIViewRepresentable {
         func refreshOverlayColors(on map: MKMapView) {
             updateOverlayDetailIfNeeded(on: map)
 
+            let newSelected = appState.selectedCountryCode
+            let selectionChanged = newSelected != lastSelectedCode
+
             let signature = Self.dataSignature(for: appState)
-            guard signature != lastDataSignature else { return }
-            lastDataSignature = signature
+            let dataChanged = signature != lastDataSignature
 
-            categoryByISO3 = Self.buildCategoryLookup(from: appState)
+            guard dataChanged || selectionChanged else { return }
 
-            for overlay in map.overlays {
-                let key = ObjectIdentifier(overlay)
-                guard let renderer = rendererCache[key] else { continue }
-                apply(renderer: renderer, for: overlay)
-                renderer.setNeedsDisplay()
+            if dataChanged {
+                lastDataSignature = signature
+                categoryByISO3 = Self.buildCategoryLookup(from: appState)
+                for overlay in map.overlays {
+                    let key = ObjectIdentifier(overlay)
+                    guard let renderer = rendererCache[key] else { continue }
+                    apply(renderer: renderer, for: overlay)
+                    renderer.setNeedsDisplay()
+                }
+            } else {
+                // Selection-only change: only redraw previously-selected and newly-selected overlays.
+                let codesToRedraw = Set([lastSelectedCode, newSelected].compactMap { $0 })
+                for overlay in map.overlays {
+                    guard let iso = (overlay as? MKShape)?.title,
+                          codesToRedraw.contains(iso) else { continue }
+                    let key = ObjectIdentifier(overlay)
+                    guard let renderer = rendererCache[key] else { continue }
+                    apply(renderer: renderer, for: overlay)
+                    renderer.setNeedsDisplay()
+                }
             }
+
+            lastSelectedCode = newSelected
         }
 
         private func apply(renderer: MKOverlayPathRenderer, for overlay: MKOverlay) {
             let iso = (overlay as? MKShape)?.title ?? nil
             let category = iso.flatMap { categoryByISO3[$0] } ?? .visaRequired
-            renderer.fillColor = UIColor(category.color).withAlphaComponent(0.85)
-            renderer.strokeColor = UIColor.white.withAlphaComponent(0.7)
-            renderer.lineWidth = 0.5
+            let isSelected = iso != nil && iso == appState.selectedCountryCode
+            if isSelected {
+                renderer.fillColor = UIColor(category.color).withAlphaComponent(1.0)
+                renderer.strokeColor = UIColor.label
+                renderer.lineWidth = 2.5
+            } else {
+                renderer.fillColor = UIColor(category.color).withAlphaComponent(0.85)
+                renderer.strokeColor = UIColor.white.withAlphaComponent(0.7)
+                renderer.lineWidth = 0.5
+            }
         }
 
         private func updateOverlayDetailIfNeeded(on map: MKMapView) {
@@ -175,6 +253,7 @@ struct CountryMapView: UIViewRepresentable {
 
             map.removeOverlays(map.overlays)
             map.addOverlays(currentDetail == .low ? lowDetailOverlays : highDetailOverlays)
+            lastDataSignature = nil  // force full re-apply after swap
         }
 
         static func simplified(multiPolygon: MKMultiPolygon, tolerance: CLLocationDegrees) -> MKMultiPolygon {
