@@ -10,6 +10,7 @@ final class AppState: ObservableObject {
     @Published var countries: [Country] = []
     @Published var selectedCountryCode: String? = nil
     @Published var pendingAddVisaCountryCode: String? = nil
+    @Published var diceSpinTarget: String? = nil
 
     private let store = DataStore()
 

@@ -51,6 +51,7 @@ struct CountryMapView: UIViewRepresentable {
     func updateUIView(_ uiView: MKMapView, context: Context) {
         context.coordinator.appState = appState
         context.coordinator.refreshOverlayColors(on: uiView)
+        context.coordinator.handleDiceSpinTargetIfNeeded(appState.diceSpinTarget, in: uiView)
     }
 
     // MARK: - Coordinator
@@ -76,7 +77,120 @@ struct CountryMapView: UIViewRepresentable {
         private let highToLowLatitudeDelta: CLLocationDegrees = 40
         private let lowDetailTolerance: CLLocationDegrees = 0.22
 
+        // MARK: - Dice spin state
+        private var lastDiceSpinTarget: String? = nil
+        private var spinTimer: Timer?
+        private var spinStartTime: Date = .now
+        private let spinDuration: TimeInterval = 2.5
+        private var spinStartLon: Double = 0
+        private var spinStartLat: Double = 20
+        private var spinStartDistance: Double = 35_000_000
+        private var spinEndCoordinate: CLLocationCoordinate2D = .init(latitude: 20, longitude: 20)
+        private let spinEndDistance: Double = 12_000_000
+        private var spinTotalLonTravel: Double = 0
+        private var spinTargetCode: String = ""
+        private var spinEndCameraLat: Double = 20
+        private weak var spinMapView: MKMapView?
+
+        /// How many degrees south the camera center is offset from the target country,
+        /// so the country appears above the CountryDetailCard rather than behind it.
+        private let spinCameraLatOffset: Double = -18.0
+
         init(appState: AppState) { self.appState = appState }
+
+        // MARK: - Dice spin animation
+
+        /// Computes the centroid of the named country from already-loaded GeoJSON overlays.
+        func centroid(for isoCode: String) -> CLLocationCoordinate2D? {
+            let all = highDetailOverlays.isEmpty ? lowDetailOverlays : highDetailOverlays
+            let matching = all.filter { ($0 as? MKShape)?.title == isoCode }
+            guard !matching.isEmpty else { return nil }
+
+            var unionRect = matching[0].boundingMapRect
+            for overlay in matching.dropFirst() {
+                unionRect = unionRect.union(overlay.boundingMapRect)
+            }
+            return MKMapPoint(x: unionRect.midX, y: unionRect.midY).coordinate
+        }
+
+        /// Called from `updateUIView` whenever `appState.diceSpinTarget` may have changed.
+        func handleDiceSpinTargetIfNeeded(_ target: String?, in mapView: MKMapView) {
+            if let target {
+                guard target != lastDiceSpinTarget else { return }
+                lastDiceSpinTarget = target
+                if let coordinate = centroid(for: target) {
+                    startSpinAnimation(to: coordinate, targetCode: target, in: mapView)
+                } else {
+                    // No GeoJSON data for this code — fall back to instant select.
+                    appState.selectCountry(code: target)
+                    appState.diceSpinTarget = nil
+                    lastDiceSpinTarget = nil
+                }
+            } else {
+                lastDiceSpinTarget = nil
+            }
+        }
+
+        private func startSpinAnimation(to coordinate: CLLocationCoordinate2D,
+                                        targetCode: String,
+                                        in mapView: MKMapView) {
+            spinTimer?.invalidate()
+
+            let cam = mapView.camera
+            spinStartTime = Date()
+            spinStartLon = cam.centerCoordinate.longitude
+            spinStartLat = cam.centerCoordinate.latitude
+            spinStartDistance = cam.altitude
+            spinEndCoordinate = coordinate
+            // Bias the camera's final latitude southward so the country appears
+            // above the CountryDetailCard rather than behind it.
+            spinEndCameraLat = min(max(coordinate.latitude + spinCameraLatOffset, -75), 75)
+            spinTargetCode = targetCode
+            spinMapView = mapView
+
+            // Shortest-path longitude delta, then add two full rotations for the spin effect.
+            var lonDelta = coordinate.longitude - spinStartLon
+            while lonDelta > 180  { lonDelta -= 360 }
+            while lonDelta < -180 { lonDelta += 360 }
+            spinTotalLonTravel = 2 * 360 + lonDelta
+
+            spinTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+                self?.spinTick()
+            }
+        }
+
+        private func spinTick() {
+            guard let mapView = spinMapView else { spinTimer?.invalidate(); return }
+
+            let elapsed = Date().timeIntervalSince(spinStartTime)
+            let t = min(elapsed / spinDuration, 1.0)
+
+            // Ease-out cubic: fast start → smooth deceleration → precise stop.
+            let ease = 1.0 - pow(1.0 - t, 3.0)
+
+            let lon      = spinStartLon + spinTotalLonTravel * ease
+            let lat      = spinStartLat + (spinEndCameraLat - spinStartLat) * ease
+            let distance = spinStartDistance + (spinEndDistance - spinStartDistance) * ease
+
+            // MKMapCamera requires longitude in [-180, 180]; wrap the accumulated value.
+            var wrappedLon = lon.truncatingRemainder(dividingBy: 360)
+            if wrappedLon > 180  { wrappedLon -= 360 }
+            if wrappedLon < -180 { wrappedLon += 360 }
+
+            let camera = MKMapCamera(
+                lookingAtCenter: CLLocationCoordinate2D(latitude: lat, longitude: wrappedLon),
+                fromDistance: max(distance, 1_000_000),
+                pitch: 0,
+                heading: 0
+            )
+            mapView.setCamera(camera, animated: false)
+
+            guard t >= 1.0 else { return }
+            spinTimer?.invalidate()
+            spinTimer = nil
+            appState.selectCountry(code: spinTargetCode)
+            appState.diceSpinTarget = nil
+        }
 
         // MARK: - Tap handling
 

@@ -25,6 +25,17 @@ struct SheetHeader: View {
                 }
                 Spacer()
                 Button {
+                    randomSelectAccessibleCountry()
+                } label: {
+                    Image(systemName: "dice.fill")
+                        .font(.title3)
+                        .foregroundStyle(.primary)
+                        .padding(10)
+                }
+                .buttonStyle(.glass)
+                .disabled(appState.diceSpinTarget != nil)
+                .accessibilityLabel("Random select a country")
+                Button {
                     showPassportPicker = true
                 } label: {
                     Image(systemName: "person.text.rectangle.fill")
@@ -49,5 +60,22 @@ struct SheetHeader: View {
     private var passportLabel: String {
         let c = appState.country(for: appState.data.passportCode)
         return "\(c?.flag ?? "🛂") \(c?.name ?? appState.data.passportCode) Passport"
+    }
+
+    private func randomSelectAccessibleCountry() {
+        let now = Date()
+        let eligible = appState.countries.filter { country in
+            let code = country.code
+            if let personal = appState.data.personalVisas.first(where: { $0.countryCode == code }) {
+                return personal.expiryDate > now
+            }
+            if let entry = appState.data.defaultVisas.first(where: { $0.countryCode == code }) {
+                return entry.category == .visaFree || entry.category == .visaOnArrival
+            }
+            return false
+        }
+        if let picked = eligible.randomElement() {
+            appState.diceSpinTarget = picked.code
+        }
     }
 }
