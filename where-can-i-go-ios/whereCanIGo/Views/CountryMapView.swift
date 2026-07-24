@@ -40,6 +40,10 @@ struct CountryMapView: UIViewRepresentable {
         )
         map.setCamera(worldCamera, animated: false)
 
+        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
+        tap.cancelsTouchesInView = false
+        map.addGestureRecognizer(tap)
+
         context.coordinator.loadGeoJSON(into: map)
         return map
     }
@@ -47,6 +51,7 @@ struct CountryMapView: UIViewRepresentable {
     func updateUIView(_ uiView: MKMapView, context: Context) {
         context.coordinator.appState = appState
         context.coordinator.refreshOverlayColors(on: uiView)
+        context.coordinator.handleDiceSpinTargetIfNeeded(appState.diceSpinTarget, in: uiView)
     }
 
     // MARK: - Coordinator
@@ -60,6 +65,7 @@ struct CountryMapView: UIViewRepresentable {
         }
 
         private var lastDataSignature: Int? = nil
+        private var lastSelectedCode: String? = nil
         private var categoryByISO3: [String: VisaCategory] = [:]
         private var rendererCache: [ObjectIdentifier: MKOverlayPathRenderer] = [:]
         private var highDetailOverlays: [MKOverlay] = []
@@ -71,7 +77,167 @@ struct CountryMapView: UIViewRepresentable {
         private let highToLowLatitudeDelta: CLLocationDegrees = 40
         private let lowDetailTolerance: CLLocationDegrees = 0.22
 
+        // MARK: - Dice spin state
+        private var lastDiceSpinTarget: String? = nil
+        private var spinTimer: Timer?
+        private var spinStartTime: Date = .now
+        private let spinDuration: TimeInterval = 2.5
+        private var spinStartLon: Double = 0
+        private var spinStartLat: Double = 20
+        private var spinStartDistance: Double = 35_000_000
+        private var spinEndCoordinate: CLLocationCoordinate2D = .init(latitude: 20, longitude: 20)
+        private let spinEndDistance: Double = 12_000_000
+        private var spinTotalLonTravel: Double = 0
+        private var spinTargetCode: String = ""
+        private var spinEndCameraLat: Double = 20
+        private weak var spinMapView: MKMapView?
+
+        /// How many degrees south the camera center is offset from the target country,
+        /// so the country appears above the CountryDetailCard rather than behind it.
+        private let spinCameraLatOffset: Double = -18.0
+
         init(appState: AppState) { self.appState = appState }
+
+        // MARK: - Dice spin animation
+
+        /// Computes the centroid of the named country from already-loaded GeoJSON overlays.
+        func centroid(for isoCode: String) -> CLLocationCoordinate2D? {
+            let all = highDetailOverlays.isEmpty ? lowDetailOverlays : highDetailOverlays
+            let matching = all.filter { ($0 as? MKShape)?.title == isoCode }
+            guard !matching.isEmpty else { return nil }
+
+            var unionRect = matching[0].boundingMapRect
+            for overlay in matching.dropFirst() {
+                unionRect = unionRect.union(overlay.boundingMapRect)
+            }
+            return MKMapPoint(x: unionRect.midX, y: unionRect.midY).coordinate
+        }
+
+        /// Called from `updateUIView` whenever `appState.diceSpinTarget` may have changed.
+        func handleDiceSpinTargetIfNeeded(_ target: String?, in mapView: MKMapView) {
+            if let target {
+                guard target != lastDiceSpinTarget else { return }
+                lastDiceSpinTarget = target
+                if let coordinate = centroid(for: target) {
+                    startSpinAnimation(to: coordinate, targetCode: target, in: mapView)
+                } else {
+                    // No GeoJSON data for this code — fall back to instant select.
+                    appState.selectCountry(code: target)
+                    appState.diceSpinTarget = nil
+                    lastDiceSpinTarget = nil
+                }
+            } else {
+                lastDiceSpinTarget = nil
+            }
+        }
+
+        private func startSpinAnimation(to coordinate: CLLocationCoordinate2D,
+                                        targetCode: String,
+                                        in mapView: MKMapView) {
+            spinTimer?.invalidate()
+
+            let cam = mapView.camera
+            spinStartTime = Date()
+            spinStartLon = cam.centerCoordinate.longitude
+            spinStartLat = cam.centerCoordinate.latitude
+            spinStartDistance = cam.altitude
+            spinEndCoordinate = coordinate
+            // Bias the camera's final latitude southward so the country appears
+            // above the CountryDetailCard rather than behind it.
+            spinEndCameraLat = min(max(coordinate.latitude + spinCameraLatOffset, -75), 75)
+            spinTargetCode = targetCode
+            spinMapView = mapView
+
+            // Shortest-path longitude delta, then add two full rotations for the spin effect.
+            var lonDelta = coordinate.longitude - spinStartLon
+            while lonDelta > 180  { lonDelta -= 360 }
+            while lonDelta < -180 { lonDelta += 360 }
+            spinTotalLonTravel = 2 * 360 + lonDelta
+
+            spinTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+                self?.spinTick()
+            }
+        }
+
+        private func spinTick() {
+            guard let mapView = spinMapView else { spinTimer?.invalidate(); return }
+
+            let elapsed = Date().timeIntervalSince(spinStartTime)
+            let t = min(elapsed / spinDuration, 1.0)
+
+            // Ease-out cubic: fast start → smooth deceleration → precise stop.
+            let ease = 1.0 - pow(1.0 - t, 3.0)
+
+            let lon      = spinStartLon + spinTotalLonTravel * ease
+            let lat      = spinStartLat + (spinEndCameraLat - spinStartLat) * ease
+            let distance = spinStartDistance + (spinEndDistance - spinStartDistance) * ease
+
+            // MKMapCamera requires longitude in [-180, 180]; wrap the accumulated value.
+            var wrappedLon = lon.truncatingRemainder(dividingBy: 360)
+            if wrappedLon > 180  { wrappedLon -= 360 }
+            if wrappedLon < -180 { wrappedLon += 360 }
+
+            let camera = MKMapCamera(
+                lookingAtCenter: CLLocationCoordinate2D(latitude: lat, longitude: wrappedLon),
+                fromDistance: max(distance, 1_000_000),
+                pitch: 0,
+                heading: 0
+            )
+            mapView.setCamera(camera, animated: false)
+
+            guard t >= 1.0 else { return }
+            spinTimer?.invalidate()
+            spinTimer = nil
+            appState.selectCountry(code: spinTargetCode)
+            appState.diceSpinTarget = nil
+        }
+
+        // MARK: - Tap handling
+
+        @objc func handleTap(_ recognizer: UITapGestureRecognizer) {
+            guard let mapView = recognizer.view as? MKMapView else { return }
+            let touchPoint = recognizer.location(in: mapView)
+            let coordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
+            let mapPoint = MKMapPoint(coordinate)
+            let tappedISO = hitTest(mapPoint: mapPoint, in: mapView)
+
+            Task { @MainActor in
+                if let code = tappedISO, code == appState.selectedCountryCode {
+                    appState.selectCountry(code: nil)
+                } else {
+                    appState.selectCountry(code: tappedISO)
+                }
+            }
+        }
+
+        private func hitTest(mapPoint: MKMapPoint, in mapView: MKMapView) -> String? {
+            var bestISO: String? = nil
+            var bestArea: Double = .infinity
+
+            for overlay in mapView.overlays {
+                let key = ObjectIdentifier(overlay)
+                guard let renderer = rendererCache[key] else { continue }
+                let rendererPoint = renderer.point(for: mapPoint)
+
+                let hit: Bool
+                if let pr = renderer as? MKPolygonRenderer {
+                    hit = pr.path?.contains(rendererPoint) == true
+                } else if let mr = renderer as? MKMultiPolygonRenderer {
+                    hit = mr.path?.contains(rendererPoint) == true
+                } else {
+                    continue
+                }
+
+                guard hit else { continue }
+                let rect = overlay.boundingMapRect
+                let area = rect.size.width * rect.size.height
+                if area < bestArea {
+                    bestArea = area
+                    bestISO = (overlay as? MKShape)?.title ?? nil
+                }
+            }
+            return bestISO
+        }
 
         func loadGeoJSON(into map: MKMapView) {
             // Accept either filename, since some downloads omit a dot in the extension.
@@ -137,26 +303,52 @@ struct CountryMapView: UIViewRepresentable {
         func refreshOverlayColors(on map: MKMapView) {
             updateOverlayDetailIfNeeded(on: map)
 
+            let newSelected = appState.selectedCountryCode
+            let selectionChanged = newSelected != lastSelectedCode
+
             let signature = Self.dataSignature(for: appState)
-            guard signature != lastDataSignature else { return }
-            lastDataSignature = signature
+            let dataChanged = signature != lastDataSignature
 
-            categoryByISO3 = Self.buildCategoryLookup(from: appState)
+            guard dataChanged || selectionChanged else { return }
 
-            for overlay in map.overlays {
-                let key = ObjectIdentifier(overlay)
-                guard let renderer = rendererCache[key] else { continue }
-                apply(renderer: renderer, for: overlay)
-                renderer.setNeedsDisplay()
+            if dataChanged {
+                lastDataSignature = signature
+                categoryByISO3 = Self.buildCategoryLookup(from: appState)
+                for overlay in map.overlays {
+                    let key = ObjectIdentifier(overlay)
+                    guard let renderer = rendererCache[key] else { continue }
+                    apply(renderer: renderer, for: overlay)
+                    renderer.setNeedsDisplay()
+                }
+            } else {
+                // Selection-only change: only redraw previously-selected and newly-selected overlays.
+                let codesToRedraw = Set([lastSelectedCode, newSelected].compactMap { $0 })
+                for overlay in map.overlays {
+                    guard let iso = (overlay as? MKShape)?.title,
+                          codesToRedraw.contains(iso) else { continue }
+                    let key = ObjectIdentifier(overlay)
+                    guard let renderer = rendererCache[key] else { continue }
+                    apply(renderer: renderer, for: overlay)
+                    renderer.setNeedsDisplay()
+                }
             }
+
+            lastSelectedCode = newSelected
         }
 
         private func apply(renderer: MKOverlayPathRenderer, for overlay: MKOverlay) {
             let iso = (overlay as? MKShape)?.title ?? nil
             let category = iso.flatMap { categoryByISO3[$0] } ?? .visaRequired
-            renderer.fillColor = UIColor(category.color).withAlphaComponent(0.85)
-            renderer.strokeColor = UIColor.white.withAlphaComponent(0.7)
-            renderer.lineWidth = 0.5
+            let isSelected = iso != nil && iso == appState.selectedCountryCode
+            if isSelected {
+                renderer.fillColor = UIColor(category.color).withAlphaComponent(1.0)
+                renderer.strokeColor = UIColor.label
+                renderer.lineWidth = 2.5
+            } else {
+                renderer.fillColor = UIColor(category.color).withAlphaComponent(0.85)
+                renderer.strokeColor = UIColor.white.withAlphaComponent(0.7)
+                renderer.lineWidth = 0.5
+            }
         }
 
         private func updateOverlayDetailIfNeeded(on map: MKMapView) {
@@ -175,6 +367,7 @@ struct CountryMapView: UIViewRepresentable {
 
             map.removeOverlays(map.overlays)
             map.addOverlays(currentDetail == .low ? lowDetailOverlays : highDetailOverlays)
+            lastDataSignature = nil  // force full re-apply after swap
         }
 
         static func simplified(multiPolygon: MKMultiPolygon, tolerance: CLLocationDegrees) -> MKMultiPolygon {

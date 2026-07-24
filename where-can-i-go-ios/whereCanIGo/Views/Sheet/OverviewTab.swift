@@ -3,6 +3,7 @@ import SwiftUI
 struct OverviewTab: View {
     @EnvironmentObject var appState: AppState
     @State private var search: String = ""
+    @State private var isCompactHeight = false
 
     private var counts: (vf: Int, voa: Int, eta: Int, mine: Int, total: Int) {
         let vf = appState.data.defaultVisas.filter { $0.category == .visaFree }.count
@@ -14,8 +15,6 @@ struct OverviewTab: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let isCompactHeight = proxy.size.height < 430
-
             ScrollView {
                 VStack(spacing: 16) {
                     if isCompactHeight {
@@ -30,6 +29,7 @@ struct OverviewTab: View {
                             .padding(.horizontal)
                             .padding(.vertical)
                         }
+                        .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)))
                     } else {
                         VStack(spacing: 10) {
                             HStack(spacing: 10) {
@@ -43,6 +43,7 @@ struct OverviewTab: View {
                             }
                         }
                         .padding(.horizontal)
+                        .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)))
                     }
 
                     HStack {
@@ -63,6 +64,14 @@ struct OverviewTab: View {
                     .padding(.bottom, 24)
                 }
                 .padding(.top, 12)
+            }
+            .onAppear {
+                isCompactHeight = proxy.size.height < 430
+            }
+            .onChange(of: proxy.size.height) { _, newHeight in
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    isCompactHeight = newHeight < 430
+                }
             }
         }
     }

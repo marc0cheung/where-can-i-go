@@ -9,6 +9,8 @@ final class AppState: ObservableObject {
     @Published var data: AppData = AppData(passportCode: "HKG", defaultVisas: [], personalVisas: [])
     @Published var countries: [Country] = []
     @Published var selectedCountryCode: String? = nil
+    @Published var pendingAddVisaCountryCode: String? = nil
+    @Published var diceSpinTarget: String? = nil
 
     private let store = DataStore()
 
@@ -77,4 +79,12 @@ final class AppState: ObservableObject {
     func save() {
         try? store.saveAppData(data)
     }
+    // MARK: - Selection
+
+    func selectCountry(code: String?) {
+        withAnimation(.smooth(duration: 0.25)) {
+            selectedCountryCode = code
+        }
+    }
+
 }
