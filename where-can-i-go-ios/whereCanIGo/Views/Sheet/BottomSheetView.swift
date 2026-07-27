@@ -9,6 +9,7 @@ enum PanelTab: String, CaseIterable, Hashable {
 /// Persistent sheet header shown above the TabView across all tabs.
 struct SheetHeader: View {
     @EnvironmentObject var appState: AppState
+    @Binding var selectedDetent: PresentationDetent
     @State private var showPassportPicker = false
 
     var body: some View {
@@ -26,6 +27,7 @@ struct SheetHeader: View {
                 Spacer()
                 Button {
                     randomSelectAccessibleCountry()
+                    withAnimation(.smooth(duration: 0.25)) { selectedDetent = .height(290) }
                 } label: {
                     Image(systemName: "dice.fill")
                         .font(.title3)
@@ -75,6 +77,7 @@ struct SheetHeader: View {
             return false
         }
         if let picked = eligible.randomElement() {
+            appState.selectedCountryCode = nil
             appState.diceSpinTarget = picked.code
         }
     }

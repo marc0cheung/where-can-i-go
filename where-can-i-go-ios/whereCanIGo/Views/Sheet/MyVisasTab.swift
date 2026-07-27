@@ -11,7 +11,6 @@ struct MyVisasTab: View {
     @State private var notes: String = ""
 
     // MARK: - Sheet presentation
-    @State private var showCountryPicker = false
     @State private var showVisaDetailsSheet = false
 
     // MARK: - Error handling
@@ -25,7 +24,7 @@ struct MyVisasTab: View {
                 // MARK: Input Cards (Flighty-style)
                 HStack(spacing: 10) {
                     Button {
-                        showCountryPicker = true
+                        showVisaDetailsSheet = true
                     } label: {
                         countryCard
                     }
@@ -61,6 +60,19 @@ struct MyVisasTab: View {
 
                 Divider().padding(.vertical, 8)
 
+                // MARK: Saved list (unchanged)
+                Text("Saved Personal Visas").font(.headline)
+                if appState.data.personalVisas.isEmpty {
+                    Text("No personal visas yet.")
+                        .font(.caption).foregroundStyle(.secondary)
+                } else {
+                    ForEach(appState.data.personalVisas) { visa in
+                        personalVisaRow(visa)
+                    }
+                }
+
+                Divider().padding(.vertical, 8)
+
                 // MARK: Excel import (unchanged)
                 Text("Import from Excel").font(.headline)
                 Text("Load visa records from the MyVisa sheet of an .xlsx file.\nColumns: Country, Visa Type, Duration, Expire Date (dd-mm-yyyy), Notes.")
@@ -74,27 +86,12 @@ struct MyVisasTab: View {
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                 }
                 .disabled(true)
-
-                Divider().padding(.vertical, 8)
-
-                // MARK: Saved list (unchanged)
-                Text("Saved Personal Visas").font(.headline)
-                if appState.data.personalVisas.isEmpty {
-                    Text("No personal visas yet.")
-                        .font(.caption).foregroundStyle(.secondary)
-                } else {
-                    ForEach(appState.data.personalVisas) { visa in
-                        personalVisaRow(visa)
-                    }
-                }
             }
             .padding()
         }
-        .sheet(isPresented: $showCountryPicker) {
-            CountryPickerSheet(selected: $country)
-        }
         .sheet(isPresented: $showVisaDetailsSheet) {
             VisaDetailsSheet(
+                country: $country,
                 visaType: visaType,
                 duration: duration,
                 expiry: expiry,
@@ -263,6 +260,10 @@ struct MyVisasTab: View {
 private struct VisaDetailsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
+    // Country binding — committed immediately on selection
+    @Binding var country: Country?
+    @State private var showCountryPicker = false
+
     // Local draft — only committed to parent on "Done"
     @State private var draftVisaType: String
     @State private var draftDuration: String
@@ -272,11 +273,13 @@ private struct VisaDetailsSheet: View {
 
     let onDone: (String, String, Date?, String) -> Void
 
-    init(visaType: String,
+    init(country: Binding<Country?>,
+         visaType: String,
          duration: String,
          expiry: Date?,
          notes: String,
          onDone: @escaping (String, String, Date?, String) -> Void) {
+        _country = country
         _draftVisaType = State(initialValue: visaType)
         _draftDuration = State(initialValue: duration)
         _draftExpiry   = State(initialValue: expiry ?? Date().addingTimeInterval(60 * 60 * 24 * 365))
@@ -289,6 +292,30 @@ private struct VisaDetailsSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    formLabel("COUNTRY")
+                    Button {
+                        showCountryPicker = true
+                    } label: {
+                        HStack {
+                            if let country {
+                                Text(country.flag)
+                                    .font(.title2)
+                                Text(country.name)
+                                    .foregroundStyle(.primary)
+                            } else {
+                                Text("Select a country")
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                        .padding()
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                    .buttonStyle(.plain)
+
                     formLabel("VISA TYPE")
                     TextField("e.g., Single / Multiple / Student / Work", text: $draftVisaType)
                         .padding()
@@ -362,6 +389,9 @@ private struct VisaDetailsSheet: View {
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showCountryPicker) {
+            CountryPickerSheet(selected: $country)
+        }
     }
 
     private func formLabel(_ text: String) -> some View {

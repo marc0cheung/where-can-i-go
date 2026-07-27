@@ -11,7 +11,7 @@ struct ManageDataTab: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Manage Default Visa Data").font(.headline)
+                Text("Manage Default Entry Policy").font(.headline)
                 Text("Add or remove visa-free, visa-on-arrival, and ETA countries for your selected passport.")
                     .font(.caption).foregroundStyle(.secondary)
 
