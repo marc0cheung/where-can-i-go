@@ -46,6 +46,12 @@ final class AppState: ObservableObject {
         data.personalVisas.append(visa); save()
     }
 
+    func updatePersonalVisa(_ visa: PersonalVisa) {
+        guard let index = data.personalVisas.firstIndex(where: { $0.id == visa.id }) else { return }
+        data.personalVisas[index] = visa
+        save()
+    }
+
     func removePersonalVisa(_ id: UUID) {
         data.personalVisas.removeAll { $0.id == id }; save()
     }

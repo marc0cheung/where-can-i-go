@@ -12,6 +12,8 @@ struct MyVisasTab: View {
 
     // MARK: - Sheet presentation
     @State private var showVisaDetailsSheet = false
+    @State private var visaBeingEdited: PersonalVisa? = nil
+    @State private var editingCountry: Country? = nil
 
     // MARK: - Error handling
     @State private var errorMessage: String? = nil
@@ -103,6 +105,28 @@ struct MyVisasTab: View {
                 expiry = newExpiry
                 notes = newNotes
                 errorMessage = nil
+            }
+        }
+        .sheet(item: $visaBeingEdited) { visa in
+            VisaDetailsSheet(
+                country: $editingCountry,
+                visaType: visa.visaType,
+                duration: visa.duration,
+                expiry: visa.expiryDate,
+                notes: visa.notes ?? ""
+            ) { newVisaType, newDuration, newExpiry, newNotes in
+                guard let updatedCountry = editingCountry, let newExpiry else { return }
+
+                appState.updatePersonalVisa(
+                    PersonalVisa(
+                        id: visa.id,
+                        countryCode: updatedCountry.code,
+                        visaType: newVisaType,
+                        duration: newDuration,
+                        expiryDate: newExpiry,
+                        notes: newNotes.isEmpty ? nil : newNotes
+                    )
+                )
             }
         }
         .onChange(of: country) { _, _ in
@@ -227,31 +251,40 @@ struct MyVisasTab: View {
         errorMessage = nil
     }
 
-    // MARK: - Saved visa row (unchanged)
+    // MARK: - Saved visa row
 
     @ViewBuilder
     private func personalVisaRow(_ v: PersonalVisa) -> some View {
         let c = appState.country(for: v.countryCode)
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(c?.flag ?? "")  \(c?.name ?? v.countryCode)")
-                    .font(.subheadline.bold())
-                Text("\(v.visaType) · \(v.duration)").font(.caption)
-                Text("Expires \(v.expiryDate.formatted(date: .abbreviated, time: .omitted))")
-                    .font(.caption2).foregroundStyle(.secondary)
-                if let notes = v.notes, !notes.isEmpty {
-                    Text(notes).font(.caption2).foregroundStyle(.secondary)
+        Button {
+            editingCountry = c
+            visaBeingEdited = v
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(c?.flag ?? "")  \(c?.name ?? v.countryCode)")
+                        .font(.subheadline.bold())
+                    Text("\(v.visaType) · \(v.duration)").font(.caption)
+                    Text("Expires \(v.expiryDate.formatted(date: .abbreviated, time: .omitted))")
+                        .font(.caption2).foregroundStyle(.secondary)
+                    if let notes = v.notes, !notes.isEmpty {
+                        Text(notes).font(.caption2).foregroundStyle(.secondary)
+                    }
                 }
+                Spacer()
             }
-            Spacer()
+            .padding()
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .overlay(alignment: .trailing) {
             Button(role: .destructive) {
                 appState.removePersonalVisa(v.id)
             } label: {
                 Image(systemName: "xmark.circle.fill").foregroundStyle(.gray)
             }
+            .padding(.trailing)
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
     }
 }
 
@@ -331,6 +364,7 @@ private struct VisaDetailsSheet: View {
                         HStack {
                             DatePicker("", selection: $draftExpiry, displayedComponents: .date)
                                 .labelsHidden()
+                                .datePickerStyle(.graphical)
                             Spacer()
                             Button {
                                 withAnimation { draftHasExpiry = false }

@@ -29,7 +29,7 @@ struct ContentView: View {
             }
             .sheet(isPresented: $sheetPresented) {
                 VStack(spacing: 0) {
-                    SheetHeader()
+                    SheetHeader(selectedDetent: $selectedDetent)
 
                     TabView(selection: $selectedTab) {
                         Tab(PanelTab.overview.rawValue,
