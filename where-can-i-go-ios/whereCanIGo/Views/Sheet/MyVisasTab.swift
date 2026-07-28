@@ -251,6 +251,21 @@ struct MyVisasTab: View {
         errorMessage = nil
     }
 
+    private func expiryReminderColor(for expiryDate: Date) -> Color {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let expiryDay = calendar.startOfDay(for: expiryDate)
+
+        if today > expiryDay {
+            return .red
+        }
+        if let warningStart = calendar.date(byAdding: .day, value: -31, to: expiryDay),
+           today >= warningStart {
+            return .orange
+        }
+        return .secondary
+    }
+
     // MARK: - Saved visa row
 
     @ViewBuilder
@@ -266,7 +281,8 @@ struct MyVisasTab: View {
                         .font(.subheadline.bold())
                     Text("\(v.visaType) · \(v.duration)").font(.caption)
                     Text("Expires \(v.expiryDate.formatted(date: .abbreviated, time: .omitted))")
-                        .font(.caption2).foregroundStyle(.secondary)
+                        .font(.caption2)
+                        .foregroundStyle(expiryReminderColor(for: v.expiryDate))
                     if let notes = v.notes, !notes.isEmpty {
                         Text(notes).font(.caption2).foregroundStyle(.secondary)
                     }

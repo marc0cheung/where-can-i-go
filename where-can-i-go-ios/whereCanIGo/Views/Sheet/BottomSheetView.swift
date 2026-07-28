@@ -65,11 +65,12 @@ struct SheetHeader: View {
     }
 
     private func randomSelectAccessibleCountry() {
-        let now = Date()
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
         let eligible = appState.countries.filter { country in
             let code = country.code
             if let personal = appState.data.personalVisas.first(where: { $0.countryCode == code }) {
-                return personal.expiryDate > now
+                return calendar.startOfDay(for: personal.expiryDate) >= today
             }
             if let entry = appState.data.defaultVisas.first(where: { $0.countryCode == code }) {
                 return entry.category == .visaFree || entry.category == .visaOnArrival
