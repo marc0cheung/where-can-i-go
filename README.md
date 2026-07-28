@@ -62,7 +62,16 @@ Guidelines:
 - Travel Policy for the listed passports are not accurate, and need to add more supported passports with correct and up-to-date data.
 - The area coverage of each country is NOT accurate to maintain the map rendering performance.
 - For selected country, the border lines thickness are not the same.
-- (iOS) Only supports iOS 26 or above.
+- (iOS) Only supports iOS 26 or above. Currently iPadOS may experience UI issues. 
+
+## Feature Backlog
+- Integrate "Manage Data" tab with "Overview" tab
+- Upload photos / scanned copies of visa pages
+- Detect (with GPS permission ON) & save visited countries
+- Shareable cards: Export a country's visa summary / visited countries as an image
+- Filter function on Overview Tab
+- Multiple passport(s) support
+- Multiple languages support
 
 ## License
 
