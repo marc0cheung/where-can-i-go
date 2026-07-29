@@ -4,6 +4,8 @@ struct OverviewTab: View {
     @EnvironmentObject var appState: AppState
     @State private var search: String = ""
     @State private var isCompactHeight = false
+    @State private var countryBeingEdited: Country? = nil
+    @State private var confirmReset = false
 
     private var counts: (vf: Int, voa: Int, eta: Int, mine: Int, total: Int) {
         let vf = appState.data.defaultVisas.filter { $0.category == .visaFree }.count
@@ -57,7 +59,34 @@ struct OverviewTab: View {
 
                     LazyVStack(spacing: 8) {
                         ForEach(filteredCountries) { country in
-                            CountryRow(country: country)
+                            Button {
+                                countryBeingEdited = country
+                            } label: {
+                                CountryRow(country: country)
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        if search.isEmpty {
+                            Button {
+                                confirmReset = true
+                            } label: {
+                                Text("RESET TO DEFAULT DATA")
+                                    .font(.subheadline.bold())
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .foregroundStyle(.primary)
+                                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                            }
+                            .padding(.top, 8)
+                            .confirmationDialog(
+                                "Reset to bundled defaults? Your custom edits will be lost.",
+                                isPresented: $confirmReset,
+                                titleVisibility: .visible
+                            ) {
+                                Button("Reset", role: .destructive) { appState.resetDefaultsToBundled() }
+                                Button("Cancel", role: .cancel) {}
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -72,6 +101,12 @@ struct OverviewTab: View {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                     isCompactHeight = newHeight < 430
                 }
+            }
+            .sheet(item: $countryBeingEdited) { country in
+                EntryPolicySheet(
+                    country: country,
+                    existingEntry: appState.data.defaultVisas.first { $0.countryCode == country.code }
+                )
             }
         }
     }
@@ -145,7 +180,7 @@ private struct CountryRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(country.flag).font(.title3)
+            CountryFlag(country: country)
             VStack(alignment: .leading, spacing: 2) {
                 Text(country.name).font(.subheadline.weight(.semibold))
                 Text(subtitle).font(.caption).foregroundStyle(.secondary)
@@ -156,5 +191,144 @@ private struct CountryRow: View {
         .padding(.vertical, 8)
         .padding(.horizontal, 10)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+    }
+}
+
+private struct CountryFlag: View {
+    let country: Country
+
+    var body: some View {
+        Group {
+            if country.flag.isEmpty {
+                Image(systemName: "flag.fill")
+                    .foregroundStyle(.secondary)
+            } else {
+                Text(country.flag)
+            }
+        }
+        .font(.title3)
+        .frame(width: 24)
+        .accessibilityLabel(country.flag.isEmpty ? "Flag unavailable" : "Flag of \(country.name)")
+    }
+}
+
+private struct EntryPolicySheet: View {
+    @EnvironmentObject private var appState: AppState
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var selectedCountry: Country?
+    @State private var category: VisaCategory
+    @State private var duration: String
+    @State private var showCountryPicker = false
+
+    init(country: Country, existingEntry: DefaultVisaEntry?) {
+        _selectedCountry = State(initialValue: country)
+        _category = State(initialValue: existingEntry?.category ?? .visaFree)
+        _duration = State(initialValue: existingEntry?.duration ?? "")
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    formLabel("COUNTRY")
+                    Button {
+                        showCountryPicker = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            if let selectedCountry {
+                                CountryFlag(country: selectedCountry)
+                                Text(selectedCountry.name)
+                                    .foregroundStyle(.primary)
+                            } else {
+                                Text("Select a country")
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding()
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                    .buttonStyle(.plain)
+
+                    formLabel("ENTRY POLICY TYPE")
+                    Picker("Entry policy type", selection: $category) {
+                        Text("Visa Free").tag(VisaCategory.visaFree)
+                        Text("Visa on Arrival").tag(VisaCategory.visaOnArrival)
+                        Text("ETA").tag(VisaCategory.eta)
+                    }
+                    .pickerStyle(.segmented)
+
+                    formLabel("DURATION")
+                    TextField("e.g., 30 days", text: $duration)
+                        .padding()
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+
+                    if hasExistingPolicy {
+                        Button("Remove Policy", role: .destructive) {
+                            guard let selectedCountry else { return }
+                            appState.removeDefaultVisa(selectedCountry.code)
+                            dismiss()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 8)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Entry Policy")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { savePolicy() }
+                        .fontWeight(.semibold)
+                        .disabled(selectedCountry == nil)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showCountryPicker) {
+            CountryPickerSheet(selected: $selectedCountry)
+        }
+        .onChange(of: selectedCountry) { _, country in
+            loadPolicy(for: country)
+        }
+    }
+
+    private var hasExistingPolicy: Bool {
+        guard let selectedCountry else { return false }
+        return appState.data.defaultVisas.contains { $0.countryCode == selectedCountry.code }
+    }
+
+    private func savePolicy() {
+        guard let selectedCountry else { return }
+        appState.addDefaultVisa(
+            DefaultVisaEntry(
+                countryCode: selectedCountry.code,
+                category: category,
+                duration: duration.isEmpty ? nil : duration
+            )
+        )
+        dismiss()
+    }
+
+    private func loadPolicy(for country: Country?) {
+        guard let country else { return }
+        let entry = appState.data.defaultVisas.first { $0.countryCode == country.code }
+        category = entry?.category ?? .visaFree
+        duration = entry?.duration ?? ""
+    }
+
+    private func formLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
     }
 }

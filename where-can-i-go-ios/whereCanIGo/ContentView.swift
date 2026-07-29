@@ -6,6 +6,9 @@ struct ContentView: View {
     @State private var selectedTab: PanelTab = .overview
     @State private var selectedDetent: PresentationDetent = .height(290)
 
+    // Set to true to compare the original Manage Data tab with the integrated flow.
+    private let showsManageDataTab = false
+
     private var sheetSolidBackground: Color {
         Color(.systemBackground)
     }
@@ -44,10 +47,12 @@ struct ContentView: View {
                             MyVisasTab()
                         }
 
-                        Tab(PanelTab.manageData.rawValue,
-                            systemImage: "slider.horizontal.3",
-                            value: PanelTab.manageData) {
-                            ManageDataTab()
+                        if showsManageDataTab {
+                            Tab(PanelTab.manageData.rawValue,
+                                systemImage: "slider.horizontal.3",
+                                value: PanelTab.manageData) {
+                                ManageDataTab()
+                            }
                         }
                     }
                     .toolbarBackground(sheetSolidBackground, for: .tabBar)
