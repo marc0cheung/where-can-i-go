@@ -6,10 +6,46 @@ enum PanelTab: String, CaseIterable, Hashable {
     case manageData = "Manage Data"
 }
 
+/// Height state shared by the compact-width system sheet (iPhone / narrow iPad
+/// window) and the regular-width floating panel (wide iPad window). This gives
+/// both surfaces the same three-detent behavior.
+enum PanelState: Hashable, CaseIterable {
+    case low
+    case medium
+    case high
+
+    /// Detent used when the compact-width `.sheet` is presented.
+    var presentationDetent: PresentationDetent {
+        switch self {
+        case .low:    return .height(290)
+        case .medium: return .medium
+        case .high:   return .large
+        }
+    }
+
+    static func from(detent: PresentationDetent) -> PanelState {
+        if detent == .medium { return .medium }
+        if detent == .large  { return .high }
+        return .low
+    }
+
+    /// Target height (points) for the regular-width floating panel.
+    func iPadHeight(availableHeight: CGFloat) -> CGFloat {
+        switch self {
+        case .low:
+            return 310
+        case .medium:
+            return max(400, availableHeight * 0.55)
+        case .high:
+            return max(500, availableHeight - 40)
+        }
+    }
+}
+
 /// Persistent sheet header shown above the TabView across all tabs.
 struct SheetHeader: View {
     @EnvironmentObject var appState: AppState
-    @Binding var selectedDetent: PresentationDetent
+    @Binding var panelState: PanelState
     @State private var showPassportPicker = false
 
     var body: some View {
@@ -27,7 +63,7 @@ struct SheetHeader: View {
                 Spacer()
                 Button {
                     randomSelectAccessibleCountry()
-                    withAnimation(.smooth(duration: 0.25)) { selectedDetent = .height(290) }
+                    withAnimation(.smooth(duration: 0.25)) { panelState = .low }
                 } label: {
                     Image(systemName: "dice.fill")
                         .font(.title3)
