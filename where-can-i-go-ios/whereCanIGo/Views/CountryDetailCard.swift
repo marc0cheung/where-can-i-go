@@ -6,7 +6,7 @@ struct CountryDetailCard: View {
     @EnvironmentObject var appState: AppState
     let countryCode: String
     @Binding var selectedTab: PanelTab
-    @Binding var selectedDetent: PresentationDetent
+    @Binding var panelState: PanelState
 
     private var country: Country? { appState.country(for: countryCode) }
 
@@ -49,7 +49,7 @@ struct CountryDetailCard: View {
                     Button {
                         appState.pendingAddVisaCountryCode = countryCode
                         selectedTab = .myVisas
-                        withAnimation(.smooth(duration: 0.25)) { selectedDetent = .medium }
+                        withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
                         appState.selectCountry(code: nil)
                     } label: {
                         Text("Add Visa")
