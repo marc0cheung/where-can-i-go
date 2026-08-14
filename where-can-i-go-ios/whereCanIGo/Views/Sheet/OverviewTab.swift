@@ -1,4 +1,6 @@
 import SwiftUI
+import PhotosUI
+import UniformTypeIdentifiers
 
 struct OverviewTab: View {
     @EnvironmentObject var appState: AppState
@@ -52,6 +54,13 @@ struct OverviewTab: View {
                         Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                         TextField("Search countries…", text: $search)
                             .autocorrectionDisabled()
+                        if !search.isEmpty {
+                            Button { search = "" } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                     .padding(10)
                     .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
@@ -255,6 +264,15 @@ private struct EntryPolicySheet: View {
     @State private var visaNotes: String
     @State private var showVisaError: Bool = false
 
+    // Attachment state
+    @State private var attachmentFileNames: [String]
+    @State private var showAttachmentActionSheet = false
+    @State private var showCamera = false
+    @State private var showPhotoPicker = false
+    @State private var photoPickerItem: PhotosPickerItem? = nil
+    @State private var showFilePicker = false
+    @State private var previewingAttachment: AttachmentPreviewItem? = nil
+
     init(country: Country, existingEntry: DefaultVisaEntry?, existingPersonalVisa: PersonalVisa?) {
         _selectedCountry = State(initialValue: country)
         _category = State(initialValue: existingEntry?.category ?? .visaFree)
@@ -268,6 +286,7 @@ private struct EntryPolicySheet: View {
         )
         _hasVisaExpiry = State(initialValue: existingPersonalVisa?.expiryDate != nil)
         _visaNotes = State(initialValue: existingPersonalVisa?.notes ?? "")
+        _attachmentFileNames = State(initialValue: existingPersonalVisa?.attachmentFileNames ?? [])
     }
 
     var body: some View {
@@ -306,9 +325,17 @@ private struct EntryPolicySheet: View {
                     .pickerStyle(.segmented)
 
                     formLabel("DURATION")
-                    TextField("e.g., 30 days", text: $policyDuration)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    HStack {
+                        TextField("e.g., 30 days", text: $policyDuration)
+                        if !policyDuration.isEmpty {
+                            Button { policyDuration = "" } label: {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding()
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                     if hasExistingPolicy {
                         Button("Remove Policy", role: .destructive) {
@@ -326,14 +353,30 @@ private struct EntryPolicySheet: View {
                         Text("Personal Visa").font(.headline)
 
                         formLabel("VISA TYPE")
-                        TextField("e.g., Single / Multiple / Student / Work", text: $visaType)
-                            .padding()
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        HStack {
+                            TextField("e.g., Single / Multiple / Student / Work", text: $visaType)
+                            if !visaType.isEmpty {
+                                Button { visaType = "" } label: {
+                                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding()
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                         formLabel("DURATION PER VISIT")
-                        TextField("e.g., 90 days", text: $visaDuration)
-                            .padding()
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        HStack {
+                            TextField("e.g., 90 days", text: $visaDuration)
+                            if !visaDuration.isEmpty {
+                                Button { visaDuration = "" } label: {
+                                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding()
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                         formLabel("EXPIRY DATE")
                         if hasVisaExpiry {
@@ -374,6 +417,47 @@ private struct EntryPolicySheet: View {
                             .padding()
                             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
+                        Divider()
+                            .padding(.vertical, 4)
+
+                        formLabel("ATTACHMENTS (OPTIONAL)")
+                        Button {
+                            showAttachmentActionSheet = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "paperclip")
+                                Text("Add Attachment")
+                                Spacer()
+                            }
+                            .padding()
+                            .foregroundStyle(.primary)
+                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        }
+                        .buttonStyle(.plain)
+                        .confirmationDialog("Add Attachment", isPresented: $showAttachmentActionSheet) {
+                            Button("Take a Photo") { showCamera = true }
+                            Button("Choose from Photo Album") { showPhotoPicker = true }
+                            Button("Choose from File") { showFilePicker = true }
+                        }
+
+                        if !attachmentFileNames.isEmpty {
+                            LazyVGrid(
+                                columns: [GridItem(.adaptive(minimum: 80), spacing: 8)],
+                                spacing: 8
+                            ) {
+                                ForEach(attachmentFileNames, id: \.self) { name in
+                                    if let id = personalVisaID {
+                                        AttachmentThumbnailView(
+                                            fileName: name,
+                                            visaID: id,
+                                            onTap: { previewingAttachment = AttachmentPreviewItem(id: name) },
+                                            onDelete: { attachmentFileNames.removeAll { $0 == name } }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
                         if showVisaError, let message = visaValidationMessage {
                             HStack(spacing: 6) {
                                 Image(systemName: "exclamationmark.triangle.fill")
@@ -404,6 +488,45 @@ private struct EntryPolicySheet: View {
         .presentationDragIndicator(.visible)
         .sheet(isPresented: $showCountryPicker) {
             CountryPickerSheet(selected: $selectedCountry)
+        }
+        .sheet(item: $previewingAttachment) { item in
+            if let id = personalVisaID {
+                VisaAttachmentPreviewSheet(fileName: item.id, visaID: id)
+            }
+        }
+        .photosPicker(isPresented: $showPhotoPicker, selection: $photoPickerItem, matching: .images)
+        .onChange(of: photoPickerItem) { _, item in
+            Task { @MainActor in
+                defer { photoPickerItem = nil }
+                guard let item,
+                      let data = try? await item.loadTransferable(type: Data.self),
+                      let image = UIImage(data: data),
+                      let jpeg = image.jpegData(compressionQuality: 0.85),
+                      let id = personalVisaID else { return }
+                saveAttachment(data: jpeg, ext: "jpg", visaID: id)
+            }
+        }
+        .fileImporter(
+            isPresented: $showFilePicker,
+            allowedContentTypes: [.image, .pdf],
+            allowsMultipleSelection: false
+        ) { result in
+            guard case .success(let urls) = result, let url = urls.first,
+                  let id = personalVisaID else { return }
+            guard url.startAccessingSecurityScopedResource() else { return }
+            defer { url.stopAccessingSecurityScopedResource() }
+            guard let data = try? Data(contentsOf: url) else { return }
+            let ext = url.pathExtension.isEmpty ? "dat" : url.pathExtension
+            saveAttachment(data: data, ext: ext, visaID: id)
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            if let id = personalVisaID {
+                CameraImagePicker { image in
+                    guard let jpeg = image.jpegData(compressionQuality: 0.85) else { return }
+                    saveAttachment(data: jpeg, ext: "jpg", visaID: id)
+                }
+                .ignoresSafeArea()
+            }
         }
         .onChange(of: selectedCountry) { _, country in
             loadDataForCountry(country)
@@ -459,7 +582,8 @@ private struct EntryPolicySheet: View {
                     visaType: visaType,
                     duration: visaDuration,
                     expiryDate: visaExpiry,
-                    notes: visaNotes.isEmpty ? nil : visaNotes
+                    notes: visaNotes.isEmpty ? nil : visaNotes,
+                    attachmentFileNames: attachmentFileNames
                 )
             )
         }
@@ -480,12 +604,19 @@ private struct EntryPolicySheet: View {
         visaExpiry = visa?.expiryDate ?? Date().addingTimeInterval(60 * 60 * 24 * 365)
         hasVisaExpiry = visa?.expiryDate != nil
         visaNotes = visa?.notes ?? ""
+        attachmentFileNames = visa?.attachmentFileNames ?? []
         showVisaError = false
     }
 
     private func refreshVisaErrorVisibility() {
         guard showVisaError, isPersonalVisaValid else { return }
         withAnimation { showVisaError = false }
+    }
+
+    private func saveAttachment(data: Data, ext: String, visaID: UUID) {
+        if let name = try? VisaAttachmentStore.save(data: data, fileExtension: ext, for: visaID) {
+            attachmentFileNames.append(name)
+        }
     }
 
     private func formLabel(_ text: String) -> some View {

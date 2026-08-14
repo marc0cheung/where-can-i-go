@@ -53,7 +53,9 @@ final class AppState: ObservableObject {
     }
 
     func removePersonalVisa(_ id: UUID) {
-        data.personalVisas.removeAll { $0.id == id }; save()
+        data.personalVisas.removeAll { $0.id == id }
+        VisaAttachmentStore.deleteFolder(for: id)
+        save()
     }
 
     func addDefaultVisa(_ entry: DefaultVisaEntry) {

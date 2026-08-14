@@ -1,4 +1,6 @@
 import SwiftUI
+import PhotosUI
+import UniformTypeIdentifiers
 
 struct MyVisasTab: View {
     @EnvironmentObject var appState: AppState
@@ -14,6 +16,10 @@ struct MyVisasTab: View {
     @State private var showVisaDetailsSheet = false
     @State private var visaBeingEdited: PersonalVisa? = nil
     @State private var editingCountry: Country? = nil
+
+    // MARK: - Draft attachment state (Add flow)
+    @State private var attachmentFileNames: [String] = []
+    @State private var draftVisaID: UUID = UUID()
 
     // MARK: - Error handling
     @State private var errorMessage: String? = nil
@@ -94,29 +100,34 @@ struct MyVisasTab: View {
         .sheet(isPresented: $showVisaDetailsSheet) {
             VisaDetailsSheet(
                 country: $country,
+                visaID: draftVisaID,
+                attachmentFileNames: attachmentFileNames,
                 visaType: visaType,
                 duration: duration,
                 expiry: expiry,
                 notes: notes
-            ) { newVisaType, newDuration, newExpiry, newNotes in
-                // Commit only when user taps Done
+            ) { newVisaType, newDuration, newExpiry, newNotes, newAttachments in
                 visaType = newVisaType
                 duration = newDuration
                 expiry = newExpiry
                 notes = newNotes
+                attachmentFileNames = newAttachments
                 errorMessage = nil
             }
         }
         .sheet(item: $visaBeingEdited) { visa in
             VisaDetailsSheet(
                 country: $editingCountry,
+                visaID: visa.id,
+                attachmentFileNames: visa.attachmentFileNames,
                 visaType: visa.visaType,
                 duration: visa.duration,
                 expiry: visa.expiryDate,
                 notes: visa.notes ?? ""
-            ) { newVisaType, newDuration, newExpiry, newNotes in
+            ) { newVisaType, newDuration, newExpiry, newNotes, newAttachments in
                 guard let updatedCountry = editingCountry, let newExpiry else { return }
-
+                let removed = visa.attachmentFileNames.filter { !newAttachments.contains($0) }
+                removed.forEach { VisaAttachmentStore.delete(fileName: $0, for: visa.id) }
                 appState.updatePersonalVisa(
                     PersonalVisa(
                         id: visa.id,
@@ -124,7 +135,8 @@ struct MyVisasTab: View {
                         visaType: newVisaType,
                         duration: newDuration,
                         expiryDate: newExpiry,
-                        notes: newNotes.isEmpty ? nil : newNotes
+                        notes: newNotes.isEmpty ? nil : newNotes,
+                        attachmentFileNames: newAttachments
                     )
                 )
             }
@@ -232,11 +244,13 @@ struct MyVisasTab: View {
         withAnimation { errorMessage = nil }
 
         let visa = PersonalVisa(
+            id: draftVisaID,
             countryCode: c.code,
             visaType: visaType,
             duration: duration,
             expiryDate: expiryDate,
-            notes: notes.isEmpty ? nil : notes
+            notes: notes.isEmpty ? nil : notes,
+            attachmentFileNames: attachmentFileNames
         )
         appState.addPersonalVisa(visa)
         resetDraft()
@@ -248,6 +262,8 @@ struct MyVisasTab: View {
         duration = ""
         expiry = nil
         notes = ""
+        attachmentFileNames = []
+        draftVisaID = UUID()
         errorMessage = nil
     }
 
@@ -320,15 +336,29 @@ private struct VisaDetailsSheet: View {
     @State private var draftHasExpiry: Bool
     @State private var draftNotes: String
 
-    let onDone: (String, String, Date?, String) -> Void
+    // Attachment draft
+    @State private var draftAttachmentFileNames: [String]
+    @State private var showAttachmentActionSheet = false
+    @State private var showCamera = false
+    @State private var showPhotoPicker = false
+    @State private var photoPickerItem: PhotosPickerItem? = nil
+    @State private var showFilePicker = false
+    @State private var previewingAttachment: AttachmentPreviewItem? = nil
+
+    let visaID: UUID
+    let onDone: (String, String, Date?, String, [String]) -> Void
 
     init(country: Binding<Country?>,
+         visaID: UUID,
+         attachmentFileNames: [String] = [],
          visaType: String,
          duration: String,
          expiry: Date?,
          notes: String,
-         onDone: @escaping (String, String, Date?, String) -> Void) {
+         onDone: @escaping (String, String, Date?, String, [String]) -> Void) {
         _country = country
+        self.visaID = visaID
+        _draftAttachmentFileNames = State(initialValue: attachmentFileNames)
         _draftVisaType = State(initialValue: visaType)
         _draftDuration = State(initialValue: duration)
         _draftExpiry   = State(initialValue: expiry ?? Date().addingTimeInterval(60 * 60 * 24 * 365))
@@ -356,24 +386,46 @@ private struct VisaDetailsSheet: View {
                                     .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundStyle(.secondary)
-                                .font(.caption)
                         }
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                     }
                     .buttonStyle(.plain)
+                    .overlay(alignment: .trailing) {
+                        if country != nil {
+                            Button { country = nil } label: {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.trailing, 16)
+                        }
+                    }
 
                     formLabel("VISA TYPE")
-                    TextField("e.g., Single / Multiple / Student / Work", text: $draftVisaType)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    HStack {
+                        TextField("e.g., Single / Multiple / Student / Work", text: $draftVisaType)
+                        if !draftVisaType.isEmpty {
+                            Button { draftVisaType = "" } label: {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding()
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                     formLabel("DURATION PER VISIT")
-                    TextField("e.g., 90 days", text: $draftDuration)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    HStack {
+                        TextField("e.g., 90 days", text: $draftDuration)
+                        if !draftDuration.isEmpty {
+                            Button { draftDuration = "" } label: {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding()
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                     formLabel("EXPIRY DATE")
                     if draftHasExpiry {
@@ -413,6 +465,45 @@ private struct VisaDetailsSheet: View {
                         .lineLimit(3...6)
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+
+                    Divider()
+                        .padding(.vertical, 4)
+
+                    formLabel("ATTACHMENTS (OPTIONAL)")
+                    Button {
+                        showAttachmentActionSheet = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "paperclip")
+                            Text("Add Attachment")
+                            Spacer()
+                        }
+                        .padding()
+                        .foregroundStyle(.primary)
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                    .buttonStyle(.plain)
+                    .confirmationDialog("Add Attachment", isPresented: $showAttachmentActionSheet) {
+                        Button("Take a Photo") { showCamera = true }
+                        Button("Choose from Photo Album") { showPhotoPicker = true }
+                        Button("Choose from File") { showFilePicker = true }
+                    }
+
+                    if !draftAttachmentFileNames.isEmpty {
+                        LazyVGrid(
+                            columns: [GridItem(.adaptive(minimum: 80), spacing: 8)],
+                            spacing: 8
+                        ) {
+                            ForEach(draftAttachmentFileNames, id: \.self) { name in
+                                AttachmentThumbnailView(
+                                    fileName: name,
+                                    visaID: visaID,
+                                    onTap: { previewingAttachment = AttachmentPreviewItem(id: name) },
+                                    onDelete: { draftAttachmentFileNames.removeAll { $0 == name } }
+                                )
+                            }
+                        }
+                    }
                 }
                 .padding()
             }
@@ -429,11 +520,13 @@ private struct VisaDetailsSheet: View {
                             draftVisaType,
                             draftDuration,
                             draftHasExpiry ? draftExpiry : nil,
-                            draftNotes
+                            draftNotes,
+                            draftAttachmentFileNames
                         )
                         dismiss()
                     }
                     .fontWeight(.semibold)
+                    .disabled(!canDone)
                 }
             }
         }
@@ -441,6 +534,53 @@ private struct VisaDetailsSheet: View {
         .presentationDragIndicator(.visible)
         .sheet(isPresented: $showCountryPicker) {
             CountryPickerSheet(selected: $country)
+        }
+        .sheet(item: $previewingAttachment) { item in
+            VisaAttachmentPreviewSheet(fileName: item.id, visaID: visaID)
+        }
+        .photosPicker(isPresented: $showPhotoPicker, selection: $photoPickerItem, matching: .images)
+        .onChange(of: photoPickerItem) { _, item in
+            Task { @MainActor in
+                defer { photoPickerItem = nil }
+                guard let item,
+                      let data = try? await item.loadTransferable(type: Data.self),
+                      let image = UIImage(data: data),
+                      let jpeg = image.jpegData(compressionQuality: 0.85) else { return }
+                saveAttachment(data: jpeg, ext: "jpg")
+            }
+        }
+        .fileImporter(
+            isPresented: $showFilePicker,
+            allowedContentTypes: [.image, .pdf],
+            allowsMultipleSelection: false
+        ) { result in
+            guard case .success(let urls) = result, let url = urls.first else { return }
+            guard url.startAccessingSecurityScopedResource() else { return }
+            defer { url.stopAccessingSecurityScopedResource() }
+            guard let data = try? Data(contentsOf: url) else { return }
+            let ext = url.pathExtension.isEmpty ? "dat" : url.pathExtension
+            saveAttachment(data: data, ext: ext)
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraImagePicker { image in
+                guard let jpeg = image.jpegData(compressionQuality: 0.85) else { return }
+                saveAttachment(data: jpeg, ext: "jpg")
+            }
+            .ignoresSafeArea()
+        }
+    }
+
+    // MARK: - Validation
+
+    private var canDone: Bool {
+        country != nil && !draftVisaType.isEmpty && !draftDuration.isEmpty && draftHasExpiry
+    }
+
+    // MARK: - Save helper
+
+    private func saveAttachment(data: Data, ext: String) {
+        if let name = try? VisaAttachmentStore.save(data: data, fileExtension: ext, for: visaID) {
+            draftAttachmentFileNames.append(name)
         }
     }
 

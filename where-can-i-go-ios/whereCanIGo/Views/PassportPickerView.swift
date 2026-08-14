@@ -25,6 +25,13 @@ struct PassportPickerView: View {
                     Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                     TextField("Search countries…", text: $search)
                         .autocorrectionDisabled()
+                    if !search.isEmpty {
+                        Button { search = "" } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 .padding(10)
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
