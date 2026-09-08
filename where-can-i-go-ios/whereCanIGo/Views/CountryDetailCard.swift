@@ -63,6 +63,21 @@ struct CountryDetailCard: View {
                 }
 
                 Button {
+                    appState.pendingAddVisitCountryCode = countryCode
+                    selectedTab = .myTravels
+                    withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
+                    appState.selectCountry(code: nil)
+                } label: {
+                    Image(systemName: "mappin.and.ellipse")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 28, height: 28)
+                        .background(.white.opacity(0.18), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Mark as visited")
+
+                Button {
                     appState.selectCountry(code: nil)
                 } label: {
                     Image(systemName: "xmark")

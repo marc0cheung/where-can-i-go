@@ -67,6 +67,32 @@ struct CountryMapView: UIViewRepresentable {
         private var lastDataSignature: Int? = nil
         private var lastSelectedCode: String? = nil
         private var categoryByISO3: [String: VisaCategory] = [:]
+        private var visitedCodes: Set<String> = []
+        private var visitedAnnotations: [VisitedAnnotation] = []
+
+        /// Small amber badge placed on countries the user has visited.
+        private static let visitedMarkerImage: UIImage = {
+            let size = CGSize(width: 20, height: 20)
+            let amber = UIColor(red: 0.95, green: 0.61, blue: 0.24, alpha: 1.0)
+            return UIGraphicsImageRenderer(size: size).image { _ in
+                let rect = CGRect(origin: .zero, size: size).insetBy(dx: 1.5, dy: 1.5)
+                amber.setFill()
+                UIBezierPath(ovalIn: rect).fill()
+                let check = UIBezierPath()
+                check.lineWidth = 2
+                check.lineCapStyle = .round
+                check.lineJoinStyle = .round
+                check.move(to: CGPoint(x: size.width * 0.30, y: size.height * 0.52))
+                check.addLine(to: CGPoint(x: size.width * 0.44, y: size.height * 0.67))
+                check.addLine(to: CGPoint(x: size.width * 0.72, y: size.height * 0.34))
+                UIColor.white.setStroke()
+                check.stroke()
+                UIColor.white.withAlphaComponent(0.9).setStroke()
+                let ring = UIBezierPath(ovalIn: rect)
+                ring.lineWidth = 1.5
+                ring.stroke()
+            }
+        }()
         private var rendererCache: [ObjectIdentifier: MKOverlayPathRenderer] = [:]
         private var highDetailOverlays: [MKOverlay] = []
         private var lowDetailOverlays: [MKOverlay] = []
@@ -314,12 +340,16 @@ struct CountryMapView: UIViewRepresentable {
             if dataChanged {
                 lastDataSignature = signature
                 categoryByISO3 = Self.buildCategoryLookup(from: appState)
+                let newVisited = appState.visitedCountryCodes
+                let visitedChanged = newVisited != visitedCodes
+                visitedCodes = newVisited
                 for overlay in map.overlays {
                     let key = ObjectIdentifier(overlay)
                     guard let renderer = rendererCache[key] else { continue }
                     apply(renderer: renderer, for: overlay)
                     renderer.setNeedsDisplay()
                 }
+                if visitedChanged { refreshVisitedAnnotations(on: map) }
             } else {
                 // Selection-only change: only redraw previously-selected and newly-selected overlays.
                 let codesToRedraw = Set([lastSelectedCode, newSelected].compactMap { $0 })
@@ -349,6 +379,22 @@ struct CountryMapView: UIViewRepresentable {
                 renderer.strokeColor = UIColor.white.withAlphaComponent(0.7)
                 renderer.lineWidth = 0.5
             }
+        }
+
+        /// Rebuilds the amber "visited" badges pinned at each visited country's centroid.
+        private func refreshVisitedAnnotations(on map: MKMapView) {
+            if !visitedAnnotations.isEmpty {
+                map.removeAnnotations(visitedAnnotations)
+                visitedAnnotations.removeAll()
+            }
+            for code in visitedCodes {
+                guard let coordinate = centroid(for: code) else { continue }
+                let annotation = VisitedAnnotation()
+                annotation.coordinate = coordinate
+                annotation.title = code
+                visitedAnnotations.append(annotation)
+            }
+            map.addAnnotations(visitedAnnotations)
         }
 
         private func updateOverlayDetailIfNeeded(on map: MKMapView) {
@@ -462,6 +508,9 @@ struct CountryMapView: UIViewRepresentable {
         static func dataSignature(for appState: AppState) -> Int {
             var hasher = Hasher()
             hasher.combine(appState.data.passportCode)
+            for visit in appState.data.visits {
+                hasher.combine(visit.countryCode)
+            }
             for entry in appState.data.defaultVisas {
                 hasher.combine(entry.countryCode)
                 hasher.combine(entry.category)
@@ -510,6 +559,19 @@ struct CountryMapView: UIViewRepresentable {
             return MKOverlayRenderer(overlay: overlay)
         }
 
+        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            guard annotation is VisitedAnnotation else { return nil }
+            let id = "visited-badge"
+            let view = mapView.dequeueReusableAnnotationView(withIdentifier: id)
+                ?? MKAnnotationView(annotation: annotation, reuseIdentifier: id)
+            view.annotation = annotation
+            view.image = Self.visitedMarkerImage
+            view.canShowCallout = false
+            view.displayPriority = .required
+            view.collisionMode = .circle
+            return view
+        }
+
         func mapView(_ mapView: MKMapView, didRemove overlays: [any MKOverlay]) {
             for overlay in overlays {
                 rendererCache.removeValue(forKey: ObjectIdentifier(overlay))
@@ -521,3 +583,6 @@ struct CountryMapView: UIViewRepresentable {
         }
     }
 }
+
+/// Marker identifying a country the user has visited (kept distinct from other annotations).
+final class VisitedAnnotation: MKPointAnnotation {}

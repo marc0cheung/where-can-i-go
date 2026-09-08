@@ -46,6 +46,12 @@ struct ContentView: View {
                     MyVisasTab()
                 }
 
+                Tab(PanelTab.myTravels.rawValue,
+                    systemImage: "airplane",
+                    value: PanelTab.myTravels) {
+                    MyTravelsTab()
+                }
+
                 if showsManageDataTab {
                     Tab(PanelTab.manageData.rawValue,
                         systemImage: "slider.horizontal.3",
