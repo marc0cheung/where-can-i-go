@@ -52,14 +52,14 @@ struct CountryDetailCard: View {
                         withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
                         appState.selectCountry(code: nil)
                     } label: {
-                        Text("Add Visa")
-                            .font(.caption.bold())
-                            .foregroundStyle(.black)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(.white, in: Capsule())
+                        Image(systemName: "doc.badge.plus")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 28, height: 28)
+                            .background(.white.opacity(0.18), in: Circle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Add Visa")
                 }
 
                 Button {
