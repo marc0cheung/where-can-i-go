@@ -10,6 +10,7 @@ final class AppState: ObservableObject {
     @Published var countries: [Country] = []
     @Published var selectedCountryCode: String? = nil
     @Published var pendingAddVisaCountryCode: String? = nil
+    @Published var pendingAddVisitCountryCode: String? = nil
     @Published var diceSpinTarget: String? = nil
 
     private let store = DataStore()
@@ -70,6 +71,34 @@ final class AppState: ObservableObject {
     func resetDefaultsToBundled() {
         data.defaultVisas = (try? CountryRepository.loadDefaultVisas(passport: data.passportCode)) ?? []
         save()
+    }
+
+    // MARK: - Visits
+
+    func addVisit(_ visit: Visit) {
+        data.visits.append(visit); save()
+    }
+
+    func updateVisit(_ visit: Visit) {
+        guard let index = data.visits.firstIndex(where: { $0.id == visit.id }) else { return }
+        data.visits[index] = visit
+        save()
+    }
+
+    func removeVisit(_ id: UUID) {
+        data.visits.removeAll { $0.id == id }; save()
+    }
+
+    /// All visits for a country, most recent first.
+    func visits(for code: String) -> [Visit] {
+        data.visits
+            .filter { $0.countryCode == code }
+            .sorted { ($0.startDate ?? .distantPast) > ($1.startDate ?? .distantPast) }
+    }
+
+    /// Set of ISO3 codes with at least one logged visit.
+    var visitedCountryCodes: Set<String> {
+        Set(data.visits.map { $0.countryCode })
     }
 
     // MARK: - Helpers

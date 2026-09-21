@@ -3,6 +3,7 @@ import SwiftUI
 enum PanelTab: String, CaseIterable, Hashable {
     case overview   = "Overview"
     case myVisas    = "My Visas"
+    case myTravels  = "My Travels"
     case manageData = "Manage Data"
 }
 

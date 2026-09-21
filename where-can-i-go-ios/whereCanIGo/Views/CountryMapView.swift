@@ -64,9 +64,36 @@ struct CountryMapView: UIViewRepresentable {
             case high
         }
 
-        private var lastDataSignature: Int? = nil
+        private var lastVisaSignature: Int? = nil
+        private var lastVisitSignature: Int? = nil
         private var lastSelectedCode: String? = nil
         private var categoryByISO3: [String: VisaCategory] = [:]
+        private var visitedCodes: Set<String> = []
+        private var visitedAnnotations: [VisitedAnnotation] = []
+
+        /// Small amber badge placed on countries the user has visited.
+        private static let visitedMarkerImage: UIImage = {
+            let size = CGSize(width: 20, height: 20)
+            let amber = UIColor(red: 0.95, green: 0.61, blue: 0.24, alpha: 1.0)
+            return UIGraphicsImageRenderer(size: size).image { _ in
+                let rect = CGRect(origin: .zero, size: size).insetBy(dx: 1.5, dy: 1.5)
+                amber.setFill()
+                UIBezierPath(ovalIn: rect).fill()
+                let check = UIBezierPath()
+                check.lineWidth = 2
+                check.lineCapStyle = .round
+                check.lineJoinStyle = .round
+                check.move(to: CGPoint(x: size.width * 0.30, y: size.height * 0.52))
+                check.addLine(to: CGPoint(x: size.width * 0.44, y: size.height * 0.67))
+                check.addLine(to: CGPoint(x: size.width * 0.72, y: size.height * 0.34))
+                UIColor.white.setStroke()
+                check.stroke()
+                UIColor.white.withAlphaComponent(0.9).setStroke()
+                let ring = UIBezierPath(ovalIn: rect)
+                ring.lineWidth = 1.5
+                ring.stroke()
+            }
+        }()
         private var rendererCache: [ObjectIdentifier: MKOverlayPathRenderer] = [:]
         private var highDetailOverlays: [MKOverlay] = []
         private var lowDetailOverlays: [MKOverlay] = []
@@ -100,17 +127,42 @@ struct CountryMapView: UIViewRepresentable {
 
         // MARK: - Dice spin animation
 
-        /// Computes the centroid of the named country from already-loaded GeoJSON overlays.
+        /// Computes a representative point for the named country from already-loaded GeoJSON overlays.
+        ///
+        /// Uses the single largest sub-polygon (by bounding-box area) instead of unioning the
+        /// bounding rects of every disjoint part. Countries with far-flung exclaves that cross
+        /// the antimeridian (e.g. the USA's westernmost Aleutian Islands, recorded near +179°
+        /// while the mainland sits near -125°..-67°) would otherwise produce a union rect that
+        /// spans almost the entire globe width, placing the point near longitude 0 instead of
+        /// over the country (this caused the USA's "visited" marker to appear near London/UK).
         func centroid(for isoCode: String) -> CLLocationCoordinate2D? {
             let all = highDetailOverlays.isEmpty ? lowDetailOverlays : highDetailOverlays
             let matching = all.filter { ($0 as? MKShape)?.title == isoCode }
             guard !matching.isEmpty else { return nil }
 
-            var unionRect = matching[0].boundingMapRect
-            for overlay in matching.dropFirst() {
-                unionRect = unionRect.union(overlay.boundingMapRect)
+            var bestRect: MKMapRect?
+            var bestArea: Double = -1
+
+            func consider(_ rect: MKMapRect) {
+                let area = rect.size.width * rect.size.height
+                if area > bestArea {
+                    bestArea = area
+                    bestRect = rect
+                }
             }
-            return MKMapPoint(x: unionRect.midX, y: unionRect.midY).coordinate
+
+            for overlay in matching {
+                if let multi = overlay as? MKMultiPolygon {
+                    for polygon in multi.polygons { consider(polygon.boundingMapRect) }
+                } else if let polygon = overlay as? MKPolygon {
+                    consider(polygon.boundingMapRect)
+                } else {
+                    consider(overlay.boundingMapRect)
+                }
+            }
+
+            guard let rect = bestRect else { return nil }
+            return MKMapPoint(x: rect.midX, y: rect.midY).coordinate
         }
 
         /// Called from `updateUIView` whenever `appState.diceSpinTarget` may have changed.
@@ -306,13 +358,19 @@ struct CountryMapView: UIViewRepresentable {
             let newSelected = appState.selectedCountryCode
             let selectionChanged = newSelected != lastSelectedCode
 
-            let signature = Self.dataSignature(for: appState)
-            let dataChanged = signature != lastDataSignature
+            let visaSignature = Self.visaSignature(for: appState)
+            let visaChanged = visaSignature != lastVisaSignature
 
-            guard dataChanged || selectionChanged else { return }
+            let visitSignature = Self.visitSignature(for: appState)
+            let visitDataChanged = visitSignature != lastVisitSignature
 
-            if dataChanged {
-                lastDataSignature = signature
+            guard visaChanged || visitDataChanged || selectionChanged else { return }
+
+            // Recoloring every overlay is comparatively expensive on the realistic-elevation
+            // globe, so only do it when something that affects fill color actually changed
+            // (passport, default visas, or personal visas) — not on every visit log/removal.
+            if visaChanged {
+                lastVisaSignature = visaSignature
                 categoryByISO3 = Self.buildCategoryLookup(from: appState)
                 for overlay in map.overlays {
                     let key = ObjectIdentifier(overlay)
@@ -320,7 +378,17 @@ struct CountryMapView: UIViewRepresentable {
                     apply(renderer: renderer, for: overlay)
                     renderer.setNeedsDisplay()
                 }
-            } else {
+            }
+
+            if visitDataChanged {
+                lastVisitSignature = visitSignature
+                let newVisited = appState.visitedCountryCodes
+                let visitedChanged = newVisited != visitedCodes
+                visitedCodes = newVisited
+                if visitedChanged { refreshVisitedAnnotations(on: map) }
+            }
+
+            if !visaChanged && !visitDataChanged {
                 // Selection-only change: only redraw previously-selected and newly-selected overlays.
                 let codesToRedraw = Set([lastSelectedCode, newSelected].compactMap { $0 })
                 for overlay in map.overlays {
@@ -351,6 +419,22 @@ struct CountryMapView: UIViewRepresentable {
             }
         }
 
+        /// Rebuilds the amber "visited" badges pinned at each visited country's centroid.
+        private func refreshVisitedAnnotations(on map: MKMapView) {
+            if !visitedAnnotations.isEmpty {
+                map.removeAnnotations(visitedAnnotations)
+                visitedAnnotations.removeAll()
+            }
+            for code in visitedCodes {
+                guard let coordinate = centroid(for: code) else { continue }
+                let annotation = VisitedAnnotation()
+                annotation.coordinate = coordinate
+                annotation.title = code
+                visitedAnnotations.append(annotation)
+            }
+            map.addAnnotations(visitedAnnotations)
+        }
+
         private func updateOverlayDetailIfNeeded(on map: MKMapView) {
             guard !highDetailOverlays.isEmpty, !lowDetailOverlays.isEmpty else { return }
 
@@ -367,7 +451,7 @@ struct CountryMapView: UIViewRepresentable {
 
             map.removeOverlays(map.overlays)
             map.addOverlays(currentDetail == .low ? lowDetailOverlays : highDetailOverlays)
-            lastDataSignature = nil  // force full re-apply after swap
+            lastVisaSignature = nil  // force full re-apply after swap
         }
 
         static func simplified(multiPolygon: MKMultiPolygon, tolerance: CLLocationDegrees) -> MKMultiPolygon {
@@ -459,7 +543,8 @@ struct CountryMapView: UIViewRepresentable {
             return numerator / denominator
         }
 
-        static func dataSignature(for appState: AppState) -> Int {
+        /// Signature of only the data that affects overlay fill color.
+        static func visaSignature(for appState: AppState) -> Int {
             var hasher = Hasher()
             hasher.combine(appState.data.passportCode)
             for entry in appState.data.defaultVisas {
@@ -474,6 +559,15 @@ struct CountryMapView: UIViewRepresentable {
                 hasher.combine(visa.duration)
                 hasher.combine(visa.expiryDate.timeIntervalSince1970)
                 hasher.combine(visa.notes)
+            }
+            return hasher.finalize()
+        }
+
+        /// Signature of only the data that affects the "visited" annotations.
+        static func visitSignature(for appState: AppState) -> Int {
+            var hasher = Hasher()
+            for visit in appState.data.visits {
+                hasher.combine(visit.countryCode)
             }
             return hasher.finalize()
         }
@@ -510,6 +604,19 @@ struct CountryMapView: UIViewRepresentable {
             return MKOverlayRenderer(overlay: overlay)
         }
 
+        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            guard annotation is VisitedAnnotation else { return nil }
+            let id = "visited-badge"
+            let view = mapView.dequeueReusableAnnotationView(withIdentifier: id)
+                ?? MKAnnotationView(annotation: annotation, reuseIdentifier: id)
+            view.annotation = annotation
+            view.image = Self.visitedMarkerImage
+            view.canShowCallout = false
+            view.displayPriority = .required
+            view.collisionMode = .circle
+            return view
+        }
+
         func mapView(_ mapView: MKMapView, didRemove overlays: [any MKOverlay]) {
             for overlay in overlays {
                 rendererCache.removeValue(forKey: ObjectIdentifier(overlay))
@@ -521,3 +628,6 @@ struct CountryMapView: UIViewRepresentable {
         }
     }
 }
+
+/// Marker identifying a country the user has visited (kept distinct from other annotations).
+final class VisitedAnnotation: MKPointAnnotation {}
