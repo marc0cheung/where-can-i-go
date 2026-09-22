@@ -8,7 +8,9 @@ enum CountryRepository {
         }
         let data = try Data(contentsOf: url)
         let list = try JSONDecoder().decode([Country].self, from: data)
-        return list.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        return list.sorted {
+            $0.localizedName().localizedCaseInsensitiveCompare($1.localizedName()) == .orderedAscending
+        }
     }
 
     /// Loads bundled defaults named `default_visas_<ISO3>.json`.

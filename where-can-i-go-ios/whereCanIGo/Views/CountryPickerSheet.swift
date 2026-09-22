@@ -26,7 +26,7 @@ struct CountryPickerSheet: View {
                     } label: {
                         HStack {
                             Text(country.flag)
-                            Text(country.name).foregroundStyle(.primary)
+                            Text(country.localizedName()).foregroundStyle(.primary)
                             Spacer()
                         }
                     }
@@ -45,6 +45,9 @@ struct CountryPickerSheet: View {
 
     private var filtered: [Country] {
         if search.isEmpty { return appState.countries }
-        return appState.countries.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        return appState.countries.filter {
+            $0.localizedName().localizedCaseInsensitiveContains(search) ||
+            $0.name.localizedCaseInsensitiveContains(search)
+        }
     }
 }

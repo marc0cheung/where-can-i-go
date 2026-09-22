@@ -19,7 +19,7 @@ struct MyTravelsTab: View {
         .sorted { lhs, rhs in
             let l = lhs.1.first?.startDate ?? .distantPast
             let r = rhs.1.first?.startDate ?? .distantPast
-            if l == r { return lhs.0.name < rhs.0.name }
+            if l == r { return lhs.0.localizedName() < rhs.0.localizedName() }
             return l > r
         }
     }
@@ -102,17 +102,18 @@ struct MyTravelsTab: View {
     }
 
     private func countryRow(_ country: Country, visits: [Visit]) -> some View {
-        HStack(spacing: 12) {
+        let tripNoun = visits.count == 1 ? String(localized: "trip") : String(localized: "trips")
+        return HStack(spacing: 12) {
             Text(country.flag).font(.title2).frame(width: 30)
             VStack(alignment: .leading, spacing: 2) {
-                Text(country.name).font(.subheadline.weight(.semibold))
+                Text(country.localizedName()).font(.subheadline.weight(.semibold))
                 Text(rowSubtitle(for: visits))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
             Spacer()
-            Text("\(visits.count) \(visits.count == 1 ? "trip" : "trips")")
+            Text("\(visits.count) \(tripNoun)")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 8)
@@ -128,7 +129,7 @@ struct MyTravelsTab: View {
     }
 
     private func rowSubtitle(for visits: [Visit]) -> String {
-        guard let latest = visits.first else { return "No dates" }
+        guard let latest = visits.first else { return String(localized: "No dates") }
         return TravelFormat.dateRange(latest)
     }
 }
@@ -413,7 +414,7 @@ struct CountryTripsSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle(country.name)
+            .navigationTitle(country.localizedName())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -433,11 +434,13 @@ struct CountryTripsSheet: View {
     }
 
     private var header: some View {
-        HStack(spacing: 14) {
+        let tripNoun = visits.count == 1 ? String(localized: "trip") : String(localized: "trips")
+        let dayNoun = totalDays == 1 ? String(localized: "day") : String(localized: "days")
+        return HStack(spacing: 14) {
             Text(country.flag).font(.system(size: 44))
             VStack(alignment: .leading, spacing: 2) {
-                Text(country.name).font(.title3.bold())
-                Text("\(visits.count) \(visits.count == 1 ? "trip" : "trips") · \(totalDays) days")
+                Text(country.localizedName()).font(.title3.bold())
+                Text("\(visits.count) \(tripNoun) · \(totalDays) \(dayNoun)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -455,11 +458,11 @@ struct CountryTripsSheet: View {
                     Text(TravelFormat.dateRange(visit))
                         .font(.subheadline.weight(.semibold))
                     HStack(spacing: 6) {
-                        Text(visit.purpose.displayName)
+                        Text(visit.purpose.localizedDisplayName)
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(visit.purpose.color)
                         if let days = visit.dayCount {
-                            Text("· \(days) days")
+                            Text("· \(days) \(days == 1 ? String(localized: "day") : String(localized: "days"))")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
@@ -535,7 +538,7 @@ struct TripEditorSheet: View {
                         HStack(spacing: 12) {
                             if let country {
                                 Text(country.flag).font(.title2)
-                                Text(country.name).foregroundStyle(.primary)
+                                Text(country.localizedName()).foregroundStyle(.primary)
                             } else {
                                 Text("Select a country").foregroundStyle(.secondary)
                             }
@@ -624,7 +627,7 @@ struct TripEditorSheet: View {
     private func purposeChip(_ p: VisitPurpose) -> some View {
         let selected = purpose == p
         return Button { purpose = p } label: {
-            Label(p.displayName, systemImage: p.systemImage)
+            Label(p.localizedDisplayName, systemImage: p.systemImage)
                 .font(.caption.weight(.semibold))
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -639,7 +642,7 @@ struct TripEditorSheet: View {
         .buttonStyle(.plain)
     }
 
-    private func label(_ text: String) -> some View {
+    private func label(_ text: LocalizedStringResource) -> some View {
         Text(text)
             .font(.caption.weight(.semibold))
             .foregroundStyle(.secondary)
@@ -674,9 +677,9 @@ enum TravelFormat {
         case let (start?, nil):
             return short(start)
         case let (nil, end?):
-            return "Until \(short(end))"
+            return String(localized: "Until \(short(end))")
         default:
-            return "No dates set"
+            return String(localized: "No dates set")
         }
     }
 

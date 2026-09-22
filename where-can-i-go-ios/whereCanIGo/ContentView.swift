@@ -34,26 +34,26 @@ struct ContentView: View {
             SheetHeader(panelState: $panelState)
 
             TabView(selection: $selectedTab) {
-                Tab(PanelTab.overview.rawValue,
+                Tab(PanelTab.overview.localizedTitle,
                     systemImage: "globe.asia.australia.fill",
                     value: PanelTab.overview) {
                     OverviewTab()
                 }
 
-                Tab(PanelTab.myVisas.rawValue,
+                Tab(PanelTab.myVisas.localizedTitle,
                     systemImage: "person.text.rectangle.fill",
                     value: PanelTab.myVisas) {
                     MyVisasTab()
                 }
 
-                Tab(PanelTab.myTravels.rawValue,
+                Tab(PanelTab.myTravels.localizedTitle,
                     systemImage: "airplane",
                     value: PanelTab.myTravels) {
                     MyTravelsTab()
                 }
 
                 if showsManageDataTab {
-                    Tab(PanelTab.manageData.rawValue,
+                    Tab(PanelTab.manageData.localizedTitle,
                         systemImage: "slider.horizontal.3",
                         value: PanelTab.manageData) {
                         ManageDataTab()
