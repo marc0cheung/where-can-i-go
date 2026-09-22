@@ -1504,6 +1504,12 @@
     },
     "RESET TO DEFAULT DATA" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset to Default Data"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",

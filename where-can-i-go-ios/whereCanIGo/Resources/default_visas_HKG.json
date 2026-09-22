@@ -1,4 +1,5 @@
 [
+  {"countryCode":"HKG","category":"visa_free","duration":"Home Sweet Home"},
   {"countryCode":"ALB","category":"visa_free","duration":"90 days"},
   {"countryCode":"DZA","category":"visa_free","duration":"14 days"},
   {"countryCode":"AND","category":"visa_free","duration":"90 days"},
@@ -155,7 +156,7 @@
   {"countryCode":"SWE","category":"visa_free","duration":"90 days"},
   {"countryCode":"CHE","category":"visa_free","duration":"90 days"},
   {"countryCode":"TZA","category":"visa_free","duration":"90 days"},
-  {"countryCode":"THA","category":"visa_free","duration":"60 days"},
+  {"countryCode":"THA","category":"visa_free","duration":"30 days"},
   {"countryCode":"TLS","category":"visa_on_arrival","duration":"14 days"},
   {"countryCode":"TGO","category":"visa_on_arrival","duration":"30 days"},
   {"countryCode":"TON","category":"visa_on_arrival","duration":"30 days"},
@@ -174,6 +175,8 @@
   {"countryCode":"VEN","category":"visa_free","duration":"90 days"},
   {"countryCode":"WLF","category":"visa_free","duration":"90 days"},
   {"countryCode":"YEM","category":"visa_free","duration":"30 days"},
+  {"countryCode":"NIC","category":"visa_free","duration":"30 days"},
+  {"countryCode":"SLB","category":"visa_free","duration":"30 days"},
   {"countryCode":"ZMB","category":"visa_on_arrival","duration":"varies"},
   {"countryCode":"ZWE","category":"visa_free","duration":"180 days"}
 ]
