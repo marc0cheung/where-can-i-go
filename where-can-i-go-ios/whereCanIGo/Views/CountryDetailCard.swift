@@ -27,11 +27,11 @@ struct CountryDetailCard: View {
 
             // Info
             VStack(alignment: .leading, spacing: 3) {
-                Text(country?.name ?? countryCode)
+                Text(country?.localizedName() ?? countryCode)
                     .font(.title3.bold())
                     .foregroundStyle(.white)
 
-                Text(category.displayName)
+                Text(category.localizedDisplayName)
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.8))
 

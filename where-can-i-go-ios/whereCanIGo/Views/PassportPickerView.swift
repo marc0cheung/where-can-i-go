@@ -40,7 +40,7 @@ struct PassportPickerView: View {
                 List(filtered, id: \.code) { country in
                     HStack {
                         Text(country.flag)
-                        Text(country.name)
+                        Text(country.localizedName())
                         Spacer()
                         if country.code == selectedCode {
                             Image(systemName: "checkmark.circle.fill").foregroundStyle(.primary)
@@ -77,6 +77,9 @@ struct PassportPickerView: View {
 
     private var filtered: [Country] {
         if search.isEmpty { return appState.countries }
-        return appState.countries.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        return appState.countries.filter {
+            $0.localizedName().localizedCaseInsensitiveContains(search) ||
+            $0.name.localizedCaseInsensitiveContains(search)
+        }
     }
 }

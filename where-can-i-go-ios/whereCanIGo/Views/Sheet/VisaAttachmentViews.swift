@@ -112,7 +112,9 @@ struct VisaAttachmentPreviewSheet: View {
 
     private var displayTitle: String {
         let ext = (fileName as NSString).pathExtension.uppercased()
-        return ext.isEmpty ? "Attachment" : "\(ext) Document"
+        return ext.isEmpty
+            ? String(localized: "Attachment")
+            : String(localized: "\(ext) Document")
     }
 }
 

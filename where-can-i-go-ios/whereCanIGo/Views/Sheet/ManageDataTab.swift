@@ -18,7 +18,7 @@ struct ManageDataTab: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Button { showCountryPicker = true } label: {
                         HStack {
-                            Text(country.map { "\($0.flag)  \($0.name)" } ?? "Select country…")
+                            Text(country.map { "\($0.flag)  \($0.localizedName())" } ?? String(localized: "Select country…"))
                                 .foregroundStyle(country == nil ? .secondary : .primary)
                                 .foregroundStyle(.gray)
                             Spacer()
@@ -83,8 +83,8 @@ struct ManageDataTab: View {
 
     private var sortedDefaults: [DefaultVisaEntry] {
         appState.data.defaultVisas.sorted { a, b in
-            (appState.country(for: a.countryCode)?.name ?? "") <
-            (appState.country(for: b.countryCode)?.name ?? "")
+            (appState.country(for: a.countryCode)?.localizedName() ?? "") <
+            (appState.country(for: b.countryCode)?.localizedName() ?? "")
         }
     }
 
@@ -112,8 +112,8 @@ struct ManageDataTab: View {
         HStack {
             Text(c?.flag ?? "")
             VStack(alignment: .leading, spacing: 2) {
-                Text(c?.name ?? entry.countryCode).font(.subheadline.bold())
-                Text("\(entry.category.displayName)\(entry.duration.map { " – \($0)" } ?? "")")
+                Text(c?.localizedName() ?? entry.countryCode).font(.subheadline.bold())
+                Text("\(entry.category.localizedDisplayName)\(entry.duration.map { " – \($0)" } ?? "")")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()

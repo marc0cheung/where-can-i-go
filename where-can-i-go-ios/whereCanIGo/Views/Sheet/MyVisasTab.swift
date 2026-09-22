@@ -81,7 +81,7 @@ struct MyVisasTab: View {
 
                 Divider().padding(.vertical, 8)
 
-                // MARK: Excel import (unchanged)
+                // MARK: Excel import
                 Text("Import from Excel").font(.headline)
                 Text("Load visa records from the MyVisa sheet of an .xlsx file.\nColumns: Country, Visa Type, Duration, Expire Date (dd-mm-yyyy), Notes.")
                     .font(.caption).foregroundStyle(.secondary)
@@ -170,7 +170,7 @@ struct MyVisasTab: View {
             VStack(spacing: 4) {
                 Text(country.flag)
                     .font(.system(size: 28))
-                Text(country.name)
+                Text(country.localizedName())
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -230,12 +230,12 @@ struct MyVisasTab: View {
     private func addVisa() {
         // Validation with clear per-field messages
         guard let c = country else {
-            withAnimation { errorMessage = "Please select a country." }
+            withAnimation { errorMessage = String(localized: "Please select a country.") }
             return
         }
         if visaType.isEmpty || duration.isEmpty || expiry == nil {
             withAnimation {
-                errorMessage = "Please fill in Visa Type, Duration and Expiry Date."
+                errorMessage = String(localized: "Please fill in Visa Type, Duration and Expiry Date.")
             }
             return
         }
@@ -293,7 +293,7 @@ struct MyVisasTab: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(c?.flag ?? "")  \(c?.name ?? v.countryCode)")
+                    Text("\(c?.flag ?? "")  \(c?.localizedName() ?? v.countryCode)")
                         .font(.subheadline.bold())
                     Text("\(v.visaType) · \(v.duration)").font(.caption)
                     Text("Expires \(v.expiryDate.formatted(date: .abbreviated, time: .omitted))")
@@ -379,7 +379,7 @@ private struct VisaDetailsSheet: View {
                             if let country {
                                 Text(country.flag)
                                     .font(.title2)
-                                Text(country.name)
+                                Text(country.localizedName())
                                     .foregroundStyle(.primary)
                             } else {
                                 Text("Select a country")
@@ -584,7 +584,7 @@ private struct VisaDetailsSheet: View {
         }
     }
 
-    private func formLabel(_ text: String) -> some View {
+    private func formLabel(_ text: LocalizedStringResource) -> some View {
         Text(text)
             .font(.caption.weight(.semibold))
             .foregroundStyle(.secondary)
@@ -594,13 +594,13 @@ private struct VisaDetailsSheet: View {
 // MARK: - Button Card (unchanged shape)
 
 private struct ButtonCard: View {
-    let label: String
-    let remark: String
+    let label: LocalizedStringResource
+    let remark: LocalizedStringResource
     let color: Color
 
     var body: some View {
         VStack(spacing: 4) {
-            Text(label.uppercased())
+            Text(String(localized: label).uppercased(with: .current))
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

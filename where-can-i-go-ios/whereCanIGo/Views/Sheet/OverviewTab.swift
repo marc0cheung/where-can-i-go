@@ -123,7 +123,10 @@ struct OverviewTab: View {
 
     private var filteredCountries: [Country] {
         if search.isEmpty { return appState.countries }
-        return appState.countries.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        return appState.countries.filter {
+            $0.localizedName().localizedCaseInsensitiveContains(search) ||
+            $0.name.localizedCaseInsensitiveContains(search)
+        }
     }
 }
 
@@ -134,14 +137,14 @@ private struct StatCard: View {
     }
 
     let value: Int
-    let label: String
+    let label: LocalizedStringResource
     let color: Color
     var width: WidthMode = .fixed(152)
 
     var body: some View {
         VStack(spacing: 4) {
             Text("\(value)").font(.system(size: 32, weight: .bold))
-            Text(label.uppercased())
+            Text(String(localized: label).uppercased(with: .current))
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -179,14 +182,14 @@ private struct CountryRow: View {
 
     private var subtitleText: String {
         if let p = appState.data.personalVisas.first(where: { $0.countryCode == country.code }) {
-            let expiry = "Expires \(p.expiryDate.formatted(date: .abbreviated, time: .omitted))"
+            let expiry = String(localized: "Expires \(p.expiryDate.formatted(date: .abbreviated, time: .omitted))")
             return "\(p.visaType) · \(p.duration) · \(expiry)"
         }
         if let d = appState.data.defaultVisas.first(where: { $0.countryCode == country.code }) {
-            if let dur = d.duration, !dur.isEmpty { return "\(d.category.displayName) – \(dur)" }
-            return d.category.displayName
+            if let dur = d.duration, !dur.isEmpty { return "\(d.category.localizedDisplayName) – \(dur)" }
+            return d.category.localizedDisplayName
         }
-        return "Visa Required"
+        return String(localized: "Visa Required")
     }
 
     private var subtitleColor: Color {
@@ -200,7 +203,7 @@ private struct CountryRow: View {
         HStack(spacing: 12) {
             CountryFlag(country: country)
             VStack(alignment: .leading, spacing: 2) {
-                Text(country.name).font(.subheadline.weight(.semibold))
+                Text(country.localizedName()).font(.subheadline.weight(.semibold))
                 Text(subtitleText)
                     .font(.caption)
                     .foregroundStyle(subtitleColor)
@@ -242,7 +245,11 @@ private struct CountryFlag: View {
         }
         .font(.title3)
         .frame(width: 24)
-        .accessibilityLabel(country.flag.isEmpty ? "Flag unavailable" : "Flag of \(country.name)")
+        .accessibilityLabel(
+            country.flag.isEmpty
+                ? String(localized: "Flag unavailable")
+                : String(localized: "Flag of \(country.localizedName())")
+        )
     }
 }
 
@@ -300,7 +307,7 @@ private struct EntryPolicySheet: View {
                         HStack(spacing: 12) {
                             if let selectedCountry {
                                 CountryFlag(country: selectedCountry)
-                                Text(selectedCountry.name)
+                                Text(selectedCountry.localizedName())
                                     .foregroundStyle(.primary)
                             } else {
                                 Text("Select a country")
@@ -551,7 +558,7 @@ private struct EntryPolicySheet: View {
 
     private var visaValidationMessage: String? {
         guard hasPersonalVisa, !isPersonalVisaValid else { return nil }
-        return "Please fill in Visa Type, Duration and Expiry Date."
+        return String(localized: "Please fill in Visa Type, Duration and Expiry Date.")
     }
 
     private var canSave: Bool {
@@ -619,7 +626,7 @@ private struct EntryPolicySheet: View {
         }
     }
 
-    private func formLabel(_ text: String) -> some View {
+    private func formLabel(_ text: LocalizedStringResource) -> some View {
         Text(text)
             .font(.caption.weight(.semibold))
             .foregroundStyle(.secondary)

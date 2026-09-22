@@ -5,6 +5,15 @@ enum PanelTab: String, CaseIterable, Hashable {
     case myVisas    = "My Visas"
     case myTravels  = "My Travels"
     case manageData = "Manage Data"
+
+    var localizedTitle: String {
+        switch self {
+        case .overview: String(localized: "Overview")
+        case .myVisas: String(localized: "My Visas")
+        case .myTravels: String(localized: "My Travels")
+        case .manageData: String(localized: "Manage Data")
+        }
+    }
 }
 
 /// Height state shared by the compact-width system sheet (iPhone / narrow iPad
@@ -98,7 +107,8 @@ struct SheetHeader: View {
 
     private var passportLabel: String {
         let c = appState.country(for: appState.data.passportCode)
-        return "\(c?.flag ?? "🛂") \(c?.name ?? appState.data.passportCode) Passport"
+        let countryName = c?.localizedName() ?? appState.data.passportCode
+        return String(localized: "\(c?.flag ?? "🛂") \(countryName) Passport")
     }
 
     private func randomSelectAccessibleCountry() {
