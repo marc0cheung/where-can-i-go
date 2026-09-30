@@ -224,10 +224,11 @@ struct TravelSummaryCard: View {
         )
     }
 
-    private func miniStat(_ value: String, _ label: String) -> some View {
+    private func miniStat(_ value: String, _ label: LocalizedStringResource) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.headline.weight(.bold)).foregroundStyle(.white)
-            Text(label.uppercased())
+            Text(label)
+                .textCase(.uppercase)
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.7))
         }
@@ -343,19 +344,21 @@ struct TravelPassportCard: View {
         )
     }
 
-    private func statBlock(_ value: String, _ label: String) -> some View {
+    private func statBlock(_ value: String, _ label: LocalizedStringResource) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value).font(.title2.weight(.bold)).foregroundStyle(.white)
-            Text(label.uppercased())
+            Text(label)
+                .textCase(.uppercase)
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.7))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func labeledDate(_ label: String, _ date: Date) -> some View {
+    private func labeledDate(_ label: LocalizedStringResource, _ date: Date) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label.uppercased())
+            Text(label)
+                .textCase(.uppercase)
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.7))
             Text(date.formatted(date: .abbreviated, time: .omitted))

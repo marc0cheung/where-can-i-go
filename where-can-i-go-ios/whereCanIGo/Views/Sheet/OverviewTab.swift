@@ -162,9 +162,17 @@ struct OverviewTab: View {
         [.visaFree, .visaOnArrival, .eta, .myVisa]
     }
 
+    private var visitFilterTitle: LocalizedStringKey {
+        switch selectedVisitStatus {
+        case nil: "Visited?"
+        case .visited: "Visited"
+        case .notVisited: "Not Visited"
+        }
+    }
+
     private var filterControls: some View {
         GlassEffectContainer(spacing: 4) {
-            HStack(spacing: hasActiveFilters ? 8 : 12) {
+            HStack(spacing: hasActiveFilters ? 6 : 10) {
                 Menu {
                     Toggle("All Entry Requirements", isOn: allSelectionBinding($selectedCategories))
                     Divider()
@@ -203,7 +211,7 @@ struct OverviewTab: View {
                     }
                     .pickerStyle(.inline)
                 } label: {
-                    filterLabel("Visited", systemImage: "mappin.and.ellipse", count: selectedVisitStatus == nil ? 0 : 1)
+                    filterLabel(visitFilterTitle, systemImage: "mappin.and.ellipse", count: 0)
                 }
                 .accessibilityLabel("Visited Status")
                 .frame(maxWidth: .infinity)
@@ -250,9 +258,8 @@ struct OverviewTab: View {
                 Image(systemName: systemImage)
                     .fixedSize()
                 Text(title)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 if count > 0 {
                     Text(count, format: .number)
                         .monospacedDigit()
@@ -265,7 +272,7 @@ struct OverviewTab: View {
             transaction.animation = nil
         }
         .font(.caption.weight(.semibold))
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 6)
         .frame(maxWidth: .infinity, minHeight: 44)
         .contentShape(Capsule())
         .glassEffect(.clear.interactive(), in: .capsule)
