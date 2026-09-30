@@ -8,6 +8,9 @@ struct OverviewTab: View {
     @State private var isCompactHeight = false
     @State private var countryBeingEdited: Country? = nil
     @State private var confirmReset = false
+    @State private var selectedCategories: Set<VisaCategory> = []
+    @State private var selectedContinents: Set<Continent> = []
+    @State private var selectedVisitStatuses: Set<OverviewVisitStatus> = []
 
     private var counts: (vf: Int, voa: Int, eta: Int, mine: Int, total: Int) {
         let vf = appState.data.defaultVisas.filter { $0.category == .visaFree }.count
@@ -24,11 +27,11 @@ struct OverviewTab: View {
                     if isCompactHeight {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 10) {
-                                StatCard(value: counts.vf,    label: "Visa Free",        color: VisaCategory.visaFree.color)
-                                StatCard(value: counts.voa,   label: "Visa on Arrival",  color: VisaCategory.visaOnArrival.color)
-                                StatCard(value: counts.eta,   label: "ETA",              color: VisaCategory.eta.color)
-                                StatCard(value: counts.mine,  label: "My Visas",         color: VisaCategory.myVisa.color)
-                                StatCard(value: counts.total, label: "Total Accessible", color: .primary)
+                                categoryStat(value: counts.vf, label: "Visa Free", category: .visaFree)
+                                categoryStat(value: counts.voa, label: "Visa on Arrival", category: .visaOnArrival)
+                                categoryStat(value: counts.eta, label: "ETA", category: .eta)
+                                categoryStat(value: counts.mine, label: "My Visas", category: .myVisa)
+                                accessibleStat()
                             }
                             .padding(.horizontal)
                             .padding(.vertical)
@@ -37,13 +40,13 @@ struct OverviewTab: View {
                     } else {
                         VStack(spacing: 10) {
                             HStack(spacing: 10) {
-                                StatCard(value: counts.vf, label: "Visa Free", color: VisaCategory.visaFree.color, width: .flexible)
-                                StatCard(value: counts.voa, label: "Visa on Arrival", color: VisaCategory.visaOnArrival.color, width: .flexible)
-                                StatCard(value: counts.eta, label: "ETA", color: VisaCategory.eta.color, width: .flexible)
+                                categoryStat(value: counts.vf, label: "Visa Free", category: .visaFree, width: .flexible)
+                                categoryStat(value: counts.voa, label: "Visa on Arrival", category: .visaOnArrival, width: .flexible)
+                                categoryStat(value: counts.eta, label: "ETA", category: .eta, width: .flexible)
                             }
                             HStack(spacing: 10) {
-                                StatCard(value: counts.mine, label: "My Visas", color: VisaCategory.myVisa.color, width: .flexible)
-                                StatCard(value: counts.total, label: "Total Accessible", color: .primary, width: .flexible)
+                                categoryStat(value: counts.mine, label: "My Visas", category: .myVisa, width: .flexible)
+                                accessibleStat(width: .flexible)
                             }
                         }
                         .padding(.horizontal)
@@ -66,8 +69,19 @@ struct OverviewTab: View {
                     .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                     .padding(.horizontal)
 
+                    filterControls
+
+                    let countries = filteredCountries
+                    if hasActiveFilters || !search.isEmpty {
+                        Text("Countries: \(countries.count)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
+                    }
+
                     LazyVStack(spacing: 8) {
-                        ForEach(filteredCountries) { country in
+                        ForEach(countries) { country in
                             Button {
                                 countryBeingEdited = country
                             } label: {
@@ -76,7 +90,26 @@ struct OverviewTab: View {
                             .buttonStyle(.plain)
                         }
 
-                        if search.isEmpty {
+                        if countries.isEmpty {
+                            ContentUnavailableView {
+                                Label("No Matching Countries", systemImage: "magnifyingglass")
+                            } actions: {
+                                Button {
+                                    search = ""
+                                    clearFilters()
+                                } label: {
+                                    Label("Clear Search and Filters", systemImage: "arrow.counterclockwise")
+                                        .font(.subheadline.weight(.semibold))
+                                        .multilineTextAlignment(.center)
+                                }
+                                .buttonStyle(.glassProminent)
+                                .tint(.blue)
+                                .controlSize(.regular)
+                                .padding(.top, 12)
+                            }
+                        }
+
+                        if search.isEmpty && !hasActiveFilters {
                             Button {
                                 confirmReset = true
                             } label: {
@@ -121,11 +154,205 @@ struct OverviewTab: View {
         }
     }
 
+    private var hasActiveFilters: Bool {
+        !selectedCategories.isEmpty || !selectedContinents.isEmpty || !selectedVisitStatuses.isEmpty
+    }
+
+    private var accessibleCategories: Set<VisaCategory> {
+        [.visaFree, .visaOnArrival, .eta, .myVisa]
+    }
+
+    private var filterControls: some View {
+        GlassEffectContainer(spacing: 4) {
+            HStack(spacing: hasActiveFilters ? 8 : 12) {
+                Menu {
+                    Toggle("All Entry Requirements", isOn: allSelectionBinding($selectedCategories))
+                    Divider()
+                    ForEach(VisaCategory.allCases, id: \.self) { category in
+                        Toggle(category == .myVisa ? String(localized: "My Visas") : category.localizedDisplayName,
+                               isOn: selectionBinding(category, in: $selectedCategories))
+                    }
+                } label: {
+                    filterLabel("Entry", systemImage: "doc.text", count: selectedCategories.count)
+                }
+                .accessibilityLabel("Entry Requirement")
+                .frame(maxWidth: .infinity)
+                .accessibilityValue(selectedCategories.isEmpty ? String(localized: "All Entry Requirements") : selectedCategories.sorted { $0.rawValue < $1.rawValue }.map(\.localizedDisplayName).joined(separator: ", "))
+                .tint(selectedCategories.isEmpty ? Color.primary : Color.accentColor)
+
+                Menu {
+                    Toggle("All Continents", isOn: allSelectionBinding($selectedContinents))
+                    Divider()
+                    ForEach(Continent.allCases, id: \.self) { continent in
+                        Toggle(continentTitle(continent), isOn: selectionBinding(continent, in: $selectedContinents))
+                    }
+                } label: {
+                    filterLabel("Continent", systemImage: "globe", count: selectedContinents.count)
+                }
+                .frame(maxWidth: .infinity)
+                .accessibilityValue(selectedContinents.isEmpty ? String(localized: "All Continents") : selectedContinents.sorted { $0.rawValue < $1.rawValue }.map(continentTitle).joined(separator: ", "))
+                .tint(selectedContinents.isEmpty ? Color.primary : Color.accentColor)
+
+                Menu {
+                    Toggle("All Visit Statuses", isOn: allSelectionBinding($selectedVisitStatuses))
+                    Divider()
+                    ForEach(OverviewVisitStatus.allCases, id: \.self) { visitStatus in
+                        Toggle(visitStatus.localizedTitle, isOn: selectionBinding(visitStatus, in: $selectedVisitStatuses))
+                    }
+                } label: {
+                    filterLabel("Visited", systemImage: "mappin.and.ellipse", count: selectedVisitStatuses.count)
+                }
+                .accessibilityLabel("Visited Status")
+                .frame(maxWidth: .infinity)
+                .accessibilityValue(selectedVisitStatuses.isEmpty ? String(localized: "All Visit Statuses") : selectedVisitStatuses.sorted { $0.rawValue < $1.rawValue }.map(\.localizedTitle).joined(separator: ", "))
+                .tint(selectedVisitStatuses.isEmpty ? Color.primary : Color.accentColor)
+
+                if hasActiveFilters {
+                    Button(action: clearFilters) {
+                        Image(systemName: "xmark")
+                            .font(.caption.weight(.semibold))
+                            .frame(width: 44, height: 44)
+                            .contentShape(Circle())
+                            .glassEffect(.clear.interactive(), in: .circle)
+                    }
+                    .accessibilityLabel("Clear Filters")
+                    .help("Clear Filters")
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                }
+            }
+            .buttonStyle(.plain)
+            .menuActionDismissBehavior(.disabled)
+            .padding(.horizontal)
+            .padding(.vertical, 4)
+        }
+        .animation(.smooth(duration: 0.2), value: hasActiveFilters)
+    }
+
+    private func filterLabel(_ title: LocalizedStringKey, systemImage: String, count: Int) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 5) {
+                Image(systemName: systemImage)
+                Text(title)
+                if count > 0 {
+                    Text(count, format: .number)
+                        .monospacedDigit()
+                        .transition(.identity)
+                }
+                Image(systemName: "chevron.down")
+                    .font(.caption2)
+            }
+            .fixedSize()
+
+            HStack(spacing: 4) {
+                Image(systemName: systemImage)
+                    .fixedSize()
+                Text(title)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                if count > 0 {
+                    Text(count, format: .number)
+                        .monospacedDigit()
+                        .fixedSize()
+                        .transition(.identity)
+                }
+            }
+        }
+        .transaction { transaction in
+            transaction.animation = nil
+        }
+        .font(.caption.weight(.semibold))
+        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity, minHeight: 44)
+        .contentShape(Capsule())
+        .glassEffect(.clear.interactive(), in: .capsule)
+    }
+
+    private func allSelectionBinding<Value: Hashable>(_ selection: Binding<Set<Value>>) -> Binding<Bool> {
+        Binding {
+            selection.wrappedValue.isEmpty
+        } set: { _ in
+            selection.wrappedValue.removeAll()
+        }
+    }
+
+    private func selectionBinding<Value: Hashable>(_ value: Value, in selection: Binding<Set<Value>>) -> Binding<Bool> {
+        Binding {
+            selection.wrappedValue.contains(value)
+        } set: { isSelected in
+            if isSelected {
+                selection.wrappedValue.insert(value)
+            } else {
+                selection.wrappedValue.remove(value)
+            }
+        }
+    }
+
+    private func categoryStat(value: Int, label: LocalizedStringResource, category: VisaCategory, width: StatCard.WidthMode = .fixed(152)) -> some View {
+        let selection = selectionBinding(category, in: $selectedCategories)
+        return Button {
+            selection.wrappedValue.toggle()
+        } label: {
+            StatCard(value: value, label: label, color: category.color, width: width, isSelected: selection.wrappedValue)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selection.wrappedValue ? .isSelected : [])
+    }
+
+    private func accessibleStat(width: StatCard.WidthMode = .fixed(152)) -> some View {
+        let isSelected = selectedCategories == accessibleCategories
+        return Button {
+            selectedCategories = isSelected ? [] : accessibleCategories
+        } label: {
+            StatCard(value: counts.total, label: "Total Accessible", color: .primary, width: width, isSelected: isSelected)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func clearFilters() {
+        selectedCategories.removeAll()
+        selectedContinents.removeAll()
+        selectedVisitStatuses.removeAll()
+    }
+
+    private func continentTitle(_ continent: Continent) -> String {
+        switch continent {
+        case .africa: String(localized: "Africa")
+        case .asia: String(localized: "Asia")
+        case .europe: String(localized: "Europe")
+        case .northAmerica: String(localized: "North America")
+        case .southAmerica: String(localized: "South America")
+        case .oceania: String(localized: "Oceania")
+        }
+    }
+
     private var filteredCountries: [Country] {
-        if search.isEmpty { return appState.countries }
-        return appState.countries.filter {
-            $0.localizedName().localizedCaseInsensitiveContains(search) ||
-            $0.name.localizedCaseInsensitiveContains(search)
+        let visitedCodes = appState.visitedCountryCodes
+        return appState.countries.filter { country in
+            let matchesSearch = search.isEmpty ||
+                country.localizedName().localizedCaseInsensitiveContains(search) ||
+                country.name.localizedCaseInsensitiveContains(search)
+            let matchesCategory = selectedCategories.isEmpty ||
+                selectedCategories.contains(appState.visaCategory(for: country.code))
+            let continent = Continent.of(country.code) ?? (["HKG", "MAC"].contains(country.code) ? .asia : nil)
+            let matchesContinent = selectedContinents.isEmpty ||
+                continent.map { selectedContinents.contains($0) } == true
+            let visitStatus: OverviewVisitStatus = visitedCodes.contains(country.code) ? .visited : .notVisited
+            let matchesVisitStatus = selectedVisitStatuses.isEmpty || selectedVisitStatuses.contains(visitStatus)
+            return matchesSearch && matchesCategory && matchesContinent && matchesVisitStatus
+        }
+    }
+}
+
+private enum OverviewVisitStatus: String, CaseIterable {
+    case visited
+    case notVisited
+
+    var localizedTitle: String {
+        switch self {
+        case .visited: String(localized: "Visited")
+        case .notVisited: String(localized: "Not Visited")
         }
     }
 }
@@ -140,6 +367,7 @@ private struct StatCard: View {
     let label: LocalizedStringResource
     let color: Color
     var width: WidthMode = .fixed(152)
+    var isSelected = false
 
     var body: some View {
         VStack(spacing: 4) {
@@ -153,10 +381,19 @@ private struct StatCard: View {
         .frame(width: fixedWidth)
         .padding(.vertical, 16)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(isSelected ? color.opacity(0.15) : .clear, in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(color, lineWidth: 1)
+                .stroke(color, lineWidth: isSelected ? 2 : 1)
         )
+        .overlay(alignment: .topTrailing) {
+            if isSelected {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(color)
+                    .padding(6)
+            }
+        }
     }
 
     private var isFlexible: Bool {

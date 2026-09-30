@@ -1,6 +1,120 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Entry" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "入境" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "入境" } }
+      }
+    },
+    "Entry Requirement" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "入境要求" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "入境要求" } }
+      }
+    },
+    "Continent" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "大洲" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "洲別" } }
+      }
+    },
+    "Visited" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已到访" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "已到訪" } }
+      }
+    },
+    "Visited Status" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "到访状态" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "到訪狀態" } }
+      }
+    },
+    "Not Visited" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "未到访" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "未到訪" } }
+      }
+    },
+    "Clear Filters" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "清除筛选" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "清除篩選" } }
+      }
+    },
+    "All Entry Requirements" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "所有入境要求" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "所有入境要求" } }
+      }
+    },
+    "All Continents" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "所有大洲" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "所有洲別" } }
+      }
+    },
+    "All Visit Statuses" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "所有到访状态" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "所有到訪狀態" } }
+      }
+    },
+    "No Matching Countries" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "没有符合条件的国家" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "沒有符合條件的國家" } }
+      }
+    },
+    "Clear Search and Filters" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "清除搜索和筛选" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "清除搜尋和篩選" } }
+      }
+    },
+    "Countries: %lld" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "国家：%lld" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "國家：%lld" } }
+      }
+    },
+    "Africa" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "非洲" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "非洲" } }
+      }
+    },
+    "Asia" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "亚洲" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "亞洲" } }
+      }
+    },
+    "Europe" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "欧洲" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "歐洲" } }
+      }
+    },
+    "North America" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "北美洲" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "北美洲" } }
+      }
+    },
+    "South America" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "南美洲" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "南美洲" } }
+      }
+    },
+    "Oceania" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "大洋洲" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "大洋洲" } }
+      }
+    },
     "" : {
 
     },
