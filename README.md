@@ -65,11 +65,8 @@ Guidelines:
 - (iOS) Only supports iOS 26 or above. Currently iPadOS may experience UI issues. 
 
 ## Feature Backlog
-- Integrate "Manage Data" tab with "Overview" tab
-- Upload photos / scanned copies of visa pages
 - Detect (with GPS permission ON) & save visited countries
 - Shareable cards: Export a country's visa summary / visited countries as an image
-- Filter function on Overview Tab
 - Multiple passport(s) support
 - Multiple languages support
 
