@@ -584,6 +584,22 @@
         }
       }
     },
+    "Clear end date" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除结束日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除結束日期"
+          }
+        }
+      }
+    },
     "Clear Filters" : {
       "localizations" : {
         "zh-Hans" : {
@@ -616,6 +632,22 @@
         }
       }
     },
+    "Clear start date" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除开始日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除開始日期"
+          }
+        }
+      }
+    },
     "Close" : {
       "localizations" : {
         "zh-Hans" : {
@@ -644,6 +676,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "洲別"
+          }
+        }
+      }
+    },
+    "Continents" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大洲"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大洲"
           }
         }
       }
@@ -776,86 +824,6 @@
         }
       }
     },
-    "Continents" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "大洲"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "大洲"
-          }
-        }
-      }
-    },
-    "Days" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "天数"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "天數"
-          }
-        }
-      }
-    },
-    "First trip" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "首次旅程"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "首次旅程"
-          }
-        }
-      }
-    },
-    "Latest trip" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最近旅程"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最近旅程"
-          }
-        }
-      }
-    },
-    "Trips" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "旅程"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "旅程"
-          }
-        }
-      }
-    },
     "DATES" : {
       "localizations" : {
         "zh-Hans" : {
@@ -900,6 +868,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "天"
+          }
+        }
+      }
+    },
+    "Days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天数"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天數"
           }
         }
       }
@@ -1113,6 +1097,7 @@
       }
     },
     "End" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1304,6 +1289,22 @@
         }
       }
     },
+    "First trip" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首次旅程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首次旅程"
+          }
+        }
+      }
+    },
     "Flag of %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1364,6 +1365,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "從 Excel 匯入"
+          }
+        }
+      }
+    },
+    "Latest trip" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近旅程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近旅程"
           }
         }
       }
@@ -1572,18 +1589,18 @@
         }
       }
     },
-    "No dates set" : {
+    "Visit - no dates set" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "未设置日期"
+            "value" : "到访 - 未设置日期"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "未設定日期"
+            "value" : "到訪 - 未設定日期"
           }
         }
       }
@@ -2026,6 +2043,22 @@
         }
       }
     },
+    "Select date" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇日期"
+          }
+        }
+      }
+    },
     "Select your passport country to begin." : {
       "localizations" : {
         "zh-Hans" : {
@@ -2075,6 +2108,7 @@
       }
     },
     "Start" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2262,6 +2296,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "次旅程"
+          }
+        }
+      }
+    },
+    "Trips" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅程"
           }
         }
       }
