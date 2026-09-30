@@ -10,7 +10,7 @@ struct OverviewTab: View {
     @State private var confirmReset = false
     @State private var selectedCategories: Set<VisaCategory> = []
     @State private var selectedContinents: Set<Continent> = []
-    @State private var selectedVisitStatuses: Set<OverviewVisitStatus> = []
+    @State private var selectedVisitStatus: OverviewVisitStatus? = nil
 
     private var counts: (vf: Int, voa: Int, eta: Int, mine: Int, total: Int) {
         let vf = appState.data.defaultVisas.filter { $0.category == .visaFree }.count
@@ -155,7 +155,7 @@ struct OverviewTab: View {
     }
 
     private var hasActiveFilters: Bool {
-        !selectedCategories.isEmpty || !selectedContinents.isEmpty || !selectedVisitStatuses.isEmpty
+        !selectedCategories.isEmpty || !selectedContinents.isEmpty || selectedVisitStatus != nil
     }
 
     private var accessibleCategories: Set<VisaCategory> {
@@ -194,18 +194,21 @@ struct OverviewTab: View {
                 .tint(selectedContinents.isEmpty ? Color.primary : Color.accentColor)
 
                 Menu {
-                    Toggle("All Visit Statuses", isOn: allSelectionBinding($selectedVisitStatuses))
-                    Divider()
-                    ForEach(OverviewVisitStatus.allCases, id: \.self) { visitStatus in
-                        Toggle(visitStatus.localizedTitle, isOn: selectionBinding(visitStatus, in: $selectedVisitStatuses))
+                    Picker("Visited Status", selection: $selectedVisitStatus) {
+                        Text("All Visit Statuses").tag(nil as OverviewVisitStatus?)
+                        Divider()
+                        ForEach(OverviewVisitStatus.allCases, id: \.self) { visitStatus in
+                            Text(visitStatus.localizedTitle).tag(Optional(visitStatus))
+                        }
                     }
+                    .pickerStyle(.inline)
                 } label: {
-                    filterLabel("Visited", systemImage: "mappin.and.ellipse", count: selectedVisitStatuses.count)
+                    filterLabel("Visited", systemImage: "mappin.and.ellipse", count: selectedVisitStatus == nil ? 0 : 1)
                 }
                 .accessibilityLabel("Visited Status")
                 .frame(maxWidth: .infinity)
-                .accessibilityValue(selectedVisitStatuses.isEmpty ? String(localized: "All Visit Statuses") : selectedVisitStatuses.sorted { $0.rawValue < $1.rawValue }.map(\.localizedTitle).joined(separator: ", "))
-                .tint(selectedVisitStatuses.isEmpty ? Color.primary : Color.accentColor)
+                .accessibilityValue(selectedVisitStatus?.localizedTitle ?? String(localized: "All Visit Statuses"))
+                .tint(selectedVisitStatus == nil ? Color.primary : Color.accentColor)
 
                 if hasActiveFilters {
                     Button(action: clearFilters) {
@@ -313,7 +316,7 @@ struct OverviewTab: View {
     private func clearFilters() {
         selectedCategories.removeAll()
         selectedContinents.removeAll()
-        selectedVisitStatuses.removeAll()
+        selectedVisitStatus = nil
     }
 
     private func continentTitle(_ continent: Continent) -> String {
@@ -339,7 +342,7 @@ struct OverviewTab: View {
             let matchesContinent = selectedContinents.isEmpty ||
                 continent.map { selectedContinents.contains($0) } == true
             let visitStatus: OverviewVisitStatus = visitedCodes.contains(country.code) ? .visited : .notVisited
-            let matchesVisitStatus = selectedVisitStatuses.isEmpty || selectedVisitStatuses.contains(visitStatus)
+            let matchesVisitStatus = selectedVisitStatus == nil || selectedVisitStatus == visitStatus
             return matchesSearch && matchesCategory && matchesContinent && matchesVisitStatus
         }
     }
