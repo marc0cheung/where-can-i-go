@@ -16,6 +16,8 @@ struct MyVisasTab: View {
     @State private var showVisaDetailsSheet = false
     @State private var visaBeingEdited: PersonalVisa? = nil
     @State private var editingCountry: Country? = nil
+    @State private var visaPendingDeletion: PersonalVisa? = nil
+    @State private var showDeleteConfirmation = false
 
     // MARK: - Draft attachment state (Add flow)
     @State private var attachmentFileNames: [String] = []
@@ -79,23 +81,37 @@ struct MyVisasTab: View {
                     }
                 }
 
-                Divider().padding(.vertical, 8)
+                if String(localized: "MyVisas.ShowExcelImport").lowercased() == "true" {
+                    Divider().padding(.vertical, 8)
 
-                // MARK: Excel import
-                Text("Import from Excel").font(.headline)
-                Text("Load visa records from the MyVisa sheet of an .xlsx file.\nColumns: Country, Visa Type, Duration, Expire Date (dd-mm-yyyy), Notes.")
-                    .font(.caption).foregroundStyle(.secondary)
-                Button {
-                    // TODO: implement Excel import
-                } label: {
-                    Text("IMPORT EXCEL FILE (Coming Soon)")
-                        .font(.subheadline.bold())
-                        .frame(maxWidth: .infinity).padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    // MARK: Excel import
+                    Text("Import from Excel").font(.headline)
+                    Text("Load visa records from the MyVisa sheet of an .xlsx file.\nColumns: Country, Visa Type, Duration, Expire Date (dd-mm-yyyy), Notes.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Button {
+                        // TODO: implement Excel import
+                    } label: {
+                        Text("IMPORT EXCEL FILE (Coming Soon)")
+                            .font(.subheadline.bold())
+                            .frame(maxWidth: .infinity).padding()
+                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                    .disabled(true)
                 }
-                .disabled(true)
             }
             .padding()
+        }
+        .alert("Delete Personal Visa?", isPresented: $showDeleteConfirmation, presenting: visaPendingDeletion) { visa in
+            Button("Delete", role: .destructive) {
+                appState.removePersonalVisa(visa.id)
+                visaPendingDeletion = nil
+            }
+            Button("Cancel", role: .cancel) {
+                visaPendingDeletion = nil
+            }
+        } message: { visa in
+            let countryName = appState.country(for: visa.countryCode)?.localizedName() ?? visa.countryCode
+            Text("\(countryName) · \(visa.visaType)\n\n\(Text("This saved visa will be permanently deleted. This cannot be undone."))")
         }
         .sheet(isPresented: $showVisaDetailsSheet) {
             VisaDetailsSheet(
@@ -311,10 +327,12 @@ struct MyVisasTab: View {
         .buttonStyle(.plain)
         .overlay(alignment: .trailing) {
             Button(role: .destructive) {
-                appState.removePersonalVisa(v.id)
+                visaPendingDeletion = v
+                showDeleteConfirmation = true
             } label: {
                 Image(systemName: "xmark.circle.fill").foregroundStyle(.gray)
             }
+            .accessibilityLabel("Delete Personal Visa")
             .padding(.trailing)
         }
     }
