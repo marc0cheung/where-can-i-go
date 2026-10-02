@@ -23,6 +23,7 @@
   {"code":"BIH","iso2":"BA","name":"Bosnia and Herzegovina","flag":"🇧🇦"},
   {"code":"BWA","iso2":"BW","name":"Botswana","flag":"🇧🇼"},
   {"code":"BRA","iso2":"BR","name":"Brazil","flag":"🇧🇷"},
+  {"code":"VGB","iso2":"VG","name":"British Virgin Islands","flag":"🇻🇬"},
   {"code":"BRN","iso2":"BN","name":"Brunei","flag":"🇧🇳"},
   {"code":"BGR","iso2":"BG","name":"Bulgaria","flag":"🇧🇬"},
   {"code":"BFA","iso2":"BF","name":"Burkina Faso","flag":"🇧🇫"},
@@ -196,5 +197,9 @@
   {"code":"VNM","iso2":"VN","name":"Vietnam","flag":"🇻🇳"},
   {"code":"YEM","iso2":"YE","name":"Yemen","flag":"🇾🇪"},
   {"code":"ZMB","iso2":"ZM","name":"Zambia","flag":"🇿🇲"},
-  {"code":"ZWE","iso2":"ZW","name":"Zimbabwe","flag":"🇿🇼"}
+  {"code":"ZWE","iso2":"ZW","name":"Zimbabwe","flag":"🇿🇼"},
+  {"code":"COK","iso2":"CK","name":"Cook Islands","flag":"🇨🇰"},
+  {"code":"NIU","iso2":"NU","name":"Niue","flag":"🇳🇺"},
+  {"code":"MNP","iso2":"MP","name":"Northern Mariana Islands","flag":"🇲🇵"},
+  {"code":"TCA","iso2":"TC","name":"Turks and Caicos Islands","flag":"🇹🇨"}
 ]

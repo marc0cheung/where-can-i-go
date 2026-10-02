@@ -8,6 +8,8 @@ struct PassportPickerView: View {
     @State private var search: String = ""
     @State private var selectedCode: String = "HKG"
 
+    private let supportedPassportCodes: Set<String> = ["CHN", "HKG"]
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -37,17 +39,36 @@ struct PassportPickerView: View {
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                 .padding(.horizontal)
 
-                List(filtered, id: \.code) { country in
-                    HStack {
-                        Text(country.flag)
-                        Text(country.localizedName())
-                        Spacer()
-                        if country.code == selectedCode {
-                            Image(systemName: "checkmark.circle.fill").foregroundStyle(.primary)
+                List {
+                    if !supportedPassports.isEmpty {
+                        Section {
+                            Text("Supported Passports")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 16)
+                                .listRowSeparator(.hidden)
+                                .accessibilityAddTraits(.isHeader)
+
+                            ForEach(supportedPassports, id: \.code) { country in
+                                passportRow(country)
+                            }
                         }
                     }
-                    .contentShape(Rectangle())
-                    .onTapGesture { selectedCode = country.code }
+
+                    if !unsupportedPassports.isEmpty {
+                        Section {
+                            Text("More to come…")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 16)
+                                .listRowSeparator(.hidden)
+                                .accessibilityAddTraits(.isHeader)
+
+                            ForEach(unsupportedPassports, id: \.code) { country in
+                                passportRow(country)
+                            }
+                        }
+                    }
                 }
                 .listStyle(.plain)
 
@@ -73,6 +94,27 @@ struct PassportPickerView: View {
             }
         }
         .onAppear { selectedCode = appState.data.passportCode }
+    }
+
+    private func passportRow(_ country: Country) -> some View {
+        HStack {
+            Text(country.flag)
+            Text(country.localizedName())
+            Spacer()
+            if country.code == selectedCode {
+                Image(systemName: "checkmark.circle.fill").foregroundStyle(.primary)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { selectedCode = country.code }
+    }
+
+    private var supportedPassports: [Country] {
+        filtered.filter { supportedPassportCodes.contains($0.code) }
+    }
+
+    private var unsupportedPassports: [Country] {
+        filtered.filter { !supportedPassportCodes.contains($0.code) }
     }
 
     private var filtered: [Country] {
