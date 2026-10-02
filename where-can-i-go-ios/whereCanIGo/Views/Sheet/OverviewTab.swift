@@ -428,13 +428,16 @@ private struct CountryRow: View {
     private var category: VisaCategory { appState.visaCategory(for: country.code) }
 
     private var subtitleText: String {
+        let entry = appState.data.defaultVisas.first { $0.countryCode == country.code }
+        let hasRemark = entry?.remark?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+        let remarkIndicator = hasRemark ? " - \(String(localized: "see remark"))" : ""
         if let p = appState.data.personalVisas.first(where: { $0.countryCode == country.code }) {
             let expiry = String(localized: "Expires \(p.expiryDate.formatted(date: .abbreviated, time: .omitted))")
-            return "\(p.visaType) · \(p.duration) · \(expiry)"
+            return "\(p.visaType) · \(p.duration) · \(expiry)\(remarkIndicator)"
         }
-        if let d = appState.data.defaultVisas.first(where: { $0.countryCode == country.code }) {
-            if let dur = d.duration, !dur.isEmpty { return "\(d.category.localizedDisplayName) – \(dur)" }
-            return d.category.localizedDisplayName
+        if let entry {
+            let duration = entry.duration.flatMap { $0.isEmpty ? nil : " – \($0)" } ?? ""
+            return "\(entry.category.localizedDisplayName)\(duration)\(remarkIndicator)"
         }
         return String(localized: "Visa Required")
     }
@@ -507,6 +510,7 @@ private struct EntryPolicySheet: View {
     @State private var selectedCountry: Country?
     @State private var category: VisaCategory
     @State private var policyDuration: String
+    @State private var policyRemark: String
     @State private var showCountryPicker = false
 
     // Personal visa editing state (used only when a personal visa exists for the selected country)
@@ -531,6 +535,7 @@ private struct EntryPolicySheet: View {
         _selectedCountry = State(initialValue: country)
         _category = State(initialValue: existingEntry?.category ?? .visaFree)
         _policyDuration = State(initialValue: existingEntry?.duration ?? "")
+        _policyRemark = State(initialValue: existingEntry?.remark ?? "")
         _personalVisaID = State(initialValue: existingPersonalVisa?.id)
         _visaType = State(initialValue: existingPersonalVisa?.visaType ?? "")
         _visaDuration = State(initialValue: existingPersonalVisa?.duration ?? "")
@@ -590,6 +595,13 @@ private struct EntryPolicySheet: View {
                     }
                     .padding()
                     .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+
+                    formLabel("REMARK")
+                    TextField("Additional notes\u{2026}", text: $policyRemark, axis: .vertical)
+                        .lineLimit(3...8)
+                        .accessibilityLabel("Remark")
+                        .padding()
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                     if hasExistingPolicy {
                         Button("Remove Policy", role: .destructive) {
@@ -824,7 +836,8 @@ private struct EntryPolicySheet: View {
             DefaultVisaEntry(
                 countryCode: selectedCountry.code,
                 category: category,
-                duration: policyDuration.isEmpty ? nil : policyDuration
+                duration: policyDuration.isEmpty ? nil : policyDuration,
+                remark: policyRemark.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : policyRemark
             )
         )
 
@@ -850,6 +863,7 @@ private struct EntryPolicySheet: View {
         let entry = appState.data.defaultVisas.first { $0.countryCode == country.code }
         category = entry?.category ?? .visaFree
         policyDuration = entry?.duration ?? ""
+        policyRemark = entry?.remark ?? ""
 
         let visa = appState.data.personalVisas.first { $0.countryCode == country.code }
         personalVisaID = visa?.id
