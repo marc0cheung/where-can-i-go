@@ -47,6 +47,14 @@ To modify data, edit the JSON files and rebuild the app.
 
 The repository includes sample and geometric datasets bundled under `whereCanIGo/Resources/`. If you add external data sources, please note their licenses and include attribution in this README.
 
+### Entry Policy Sources
+
+- **Hong Kong (HKG):** [Hong Kong Immigration Department's visa-free access information](https://www.immd.gov.hk/hkt/service/travel_document/visa_free_access.html) for Hong Kong SAR passport holders.
+- **China (CHN):** [Source summary and disclaimer](where-can-i-go-ios/whereCanIGo/Resources/Source/default_visas_CHN.sources.md), including the user-provided Henley screenshots, researched policy tables, and destination-authority references.
+- **Taiwan (TWN):** [Source summary and disclaimer](where-can-i-go-ios/whereCanIGo/Resources/Source/default_visas_TWN.sources.md). The preset assumes an ordinary Taiwan passport with a national ID number (household registration).
+
+Bundled entry policies are manually maintained snapshots, not live immigration advice or guarantees of entry. Duration remarks are abbreviated; consult the source notes and destination authorities for full eligibility, supporting documents, and current conditions before travel. eVisas requiring an application remain classified as `visa_required`.
+
 ## Contributing
 
 Contributions are welcome. Please open issues for feature requests or bugs and submit pull requests with clear descriptions and small, focused changes.
