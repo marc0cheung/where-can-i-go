@@ -52,8 +52,13 @@ The repository includes sample and geometric datasets bundled under `whereCanIGo
 - **Hong Kong (HKG):** [Hong Kong Immigration Department's visa-free access information](https://www.immd.gov.hk/hkt/service/travel_document/visa_free_access.html) for Hong Kong SAR passport holders.
 - **China (CHN):** [Source summary and disclaimer](where-can-i-go-ios/whereCanIGo/Resources/Source/default_visas_CHN.sources.md), including the user-provided Henley screenshots, researched policy tables, and destination-authority references.
 - **Taiwan (TWN):** [Source summary and disclaimer](where-can-i-go-ios/whereCanIGo/Resources/Source/default_visas_TWN.sources.md). The preset assumes an ordinary Taiwan passport with a national ID number (household registration).
+- **Macao (MAC):** [Macao Identification Services Bureau's travel convenience information](https://www.dsi.gov.mo/en/visa) for Macau SAR passport holders.
 
 Bundled entry policies are manually maintained snapshots, not live immigration advice or guarantees of entry. Duration remarks are abbreviated; consult the source notes and destination authorities for full eligibility, supporting documents, and current conditions before travel. eVisas requiring an application remain classified as `visa_required`.
+
+All data presented in this App shall be treated as manually maintained planning aid, **NOT** live immigration advice, or a complete checklist, or a guarantee of entry. 
+
+**!!! Reconfirm current rules with destination authorities and the airline before travel, especially for temporary exemptions and territory-specific arrangements.**
 
 ## Contributing
 

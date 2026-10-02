@@ -8,7 +8,7 @@ struct PassportPickerView: View {
     @State private var search: String = ""
     @State private var selectedCode: String = "HKG"
 
-    private let supportedPassportCodes: Set<String> = ["CHN", "HKG", "TWN"]
+    private let supportedPassportCodes: Set<String> = ["CHN", "HKG", "MAC", "TWN"]
 
     var body: some View {
         NavigationStack {
