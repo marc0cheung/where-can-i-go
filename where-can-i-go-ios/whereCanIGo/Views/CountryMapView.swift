@@ -349,7 +349,12 @@ struct CountryMapView: UIViewRepresentable {
                     return value.uppercased()
                 }
             }
-            return nil
+            switch json["name"] as? String {
+            case "France": return "FRA"
+            case "Norway": return "NOR"
+            case "Kosovo": return "XKX"
+            default: return nil
+            }
         }
 
         func refreshOverlayColors(on map: MKMapView) {
