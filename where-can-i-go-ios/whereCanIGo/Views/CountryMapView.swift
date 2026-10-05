@@ -552,6 +552,7 @@ struct CountryMapView: UIViewRepresentable {
         static func visaSignature(for appState: AppState) -> Int {
             var hasher = Hasher()
             hasher.combine(appState.data.passportCode)
+            hasher.combine(Calendar.current.startOfDay(for: appState.visaReferenceDate))
             for entry in appState.data.defaultVisas {
                 hasher.combine(entry.countryCode)
                 hasher.combine(entry.category)
@@ -564,6 +565,7 @@ struct CountryMapView: UIViewRepresentable {
                 hasher.combine(visa.duration)
                 hasher.combine(visa.expiryDate.timeIntervalSince1970)
                 hasher.combine(visa.notes)
+                hasher.combine(visa.coverage)
             }
             return hasher.finalize()
         }
@@ -578,17 +580,13 @@ struct CountryMapView: UIViewRepresentable {
         }
 
         static func buildCategoryLookup(from appState: AppState) -> [String: VisaCategory] {
-            var result: [String: VisaCategory] = [:]
-
-            for entry in appState.data.defaultVisas {
-                result[entry.countryCode] = entry.category
-            }
-
-            for visa in appState.data.personalVisas {
-                result[visa.countryCode] = .myVisa
-            }
-
-            return result
+            let countryCodes = Set(appState.countries.map(\.code))
+                .union(appState.data.defaultVisas.map(\.countryCode))
+                .union(appState.data.personalVisas.map(\.countryCode))
+                .union(VisaCoverage.schengenCountryCodes)
+            return Dictionary(uniqueKeysWithValues: countryCodes.map {
+                ($0, appState.visaCategory(for: $0))
+            })
         }
 
         // MARK: MKMapViewDelegate

@@ -12,6 +12,7 @@ final class AppState: ObservableObject {
     @Published var pendingAddVisaCountryCode: String? = nil
     @Published var pendingAddVisitCountryCode: String? = nil
     @Published var diceSpinTarget: String? = nil
+    @Published private(set) var visaReferenceDate: Date = Date()
 
     private let store = DataStore()
 
@@ -104,9 +105,20 @@ final class AppState: ObservableObject {
     // MARK: - Helpers
 
     func visaCategory(for code: String) -> VisaCategory {
-        if data.personalVisas.contains(where: { $0.countryCode == code }) { return .myVisa }
-        if let entry = data.defaultVisas.first(where: { $0.countryCode == code }) { return entry.category }
-        return .visaRequired
+        visaEligibility(for: code).category
+    }
+
+    func visaEligibility(for code: String, on date: Date? = nil) -> VisaEligibility {
+        VisaEligibility(
+            countryCode: code,
+            defaultCategory: data.defaultVisas.first(where: { $0.countryCode == code })?.category ?? .visaRequired,
+            personalVisas: data.personalVisas,
+            date: date ?? visaReferenceDate
+        )
+    }
+
+    func refreshVisaValidity() {
+        visaReferenceDate = Date()
     }
 
     func country(for code: String) -> Country? {

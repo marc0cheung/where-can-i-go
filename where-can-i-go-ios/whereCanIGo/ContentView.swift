@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.scenePhase) private var scenePhase
     @State private var sheetPresented: Bool = true
     @State private var selectedTab: PanelTab = .overview
     @State private var panelState: PanelState = .low
@@ -120,6 +121,18 @@ struct ContentView: View {
                         .interactiveDismissDisabled()
                         .presentationBackground(sheetSolidBackground)
                 }
+        }
+        .onAppear {
+            appState.refreshVisaValidity()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { appState.refreshVisaValidity() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+            appState.refreshVisaValidity()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange)) { _ in
+            appState.refreshVisaValidity()
         }
     }
 

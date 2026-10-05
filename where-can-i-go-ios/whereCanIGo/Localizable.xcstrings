@@ -777,6 +777,7 @@
       }
     },
     "Country" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1369,6 +1370,50 @@
         }
       }
     },
+    "Issuing Country" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Issuing Country"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "签发国家"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "簽發國家"
+          }
+        }
+      }
+    },
+    "ISSUING COUNTRY" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISSUING COUNTRY"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "签发国家"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "簽發國家"
+          }
+        }
+      }
+    },
     "Latest trip" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1863,7 +1908,7 @@
         }
       }
     },
-    "REMARK" : {
+    "Remark" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1879,7 +1924,7 @@
         }
       }
     },
-    "Remark" : {
+    "REMARK" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2009,6 +2054,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已儲存的個人簽證"
+          }
+        }
+      }
+    },
+    "Schengen Area" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schengen Area"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "申根区"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "神根區"
+          }
+        }
+      }
+    },
+    "Schengen visa · Issued by %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schengen visa · Issued by %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "申根签证 · %@签发"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "神根簽證 · %@簽發"
           }
         }
       }
@@ -2412,6 +2501,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用此護照"
+          }
+        }
+      }
+    },
+    "Valid throughout the Schengen Area" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valid throughout the Schengen Area"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "适用整个申根区"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "適用整個神根區"
           }
         }
       }

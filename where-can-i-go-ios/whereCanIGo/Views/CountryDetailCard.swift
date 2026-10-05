@@ -10,10 +10,11 @@ struct CountryDetailCard: View {
 
     private var country: Country? { appState.country(for: countryCode) }
 
-    private var category: VisaCategory { appState.visaCategory(for: countryCode) }
+    private var eligibility: VisaEligibility { appState.visaEligibility(for: countryCode) }
+    private var category: VisaCategory { eligibility.category }
 
     private var duration: String? {
-        if let personal = appState.data.personalVisas.first(where: { $0.countryCode == countryCode }) {
+        if let personal = eligibility.sourceVisa {
             return personal.duration
         }
         return appState.data.defaultVisas.first(where: { $0.countryCode == countryCode })?.duration
@@ -31,13 +32,25 @@ struct CountryDetailCard: View {
                     .font(.title3.bold())
                     .foregroundStyle(.white)
 
-                Text(category.localizedDisplayName)
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.8))
+                if let visa = eligibility.sourceVisa, visa.coverage == .schengenArea {
+                    let issuer = appState.country(for: visa.countryCode)?.localizedName() ?? visa.countryCode
+                    Text("Schengen visa · Issued by \(issuer)")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.8))
+                } else {
+                    Text(category.localizedDisplayName)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.8))
+                }
 
                 if let dur = duration, !dur.isEmpty {
                     Text(dur)
                         .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+                if let visa = eligibility.sourceVisa {
+                    Text("Expires \(visa.expiryDate.formatted(date: .abbreviated, time: .omitted))")
+                        .font(.caption)
                         .foregroundStyle(.white.opacity(0.6))
                 }
             }

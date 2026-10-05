@@ -425,15 +425,23 @@ private struct CountryRow: View {
     @EnvironmentObject var appState: AppState
     let country: Country
 
-    private var category: VisaCategory { appState.visaCategory(for: country.code) }
+    private var eligibility: VisaEligibility { appState.visaEligibility(for: country.code) }
+    private var category: VisaCategory { eligibility.category }
 
     private var subtitleText: String {
         let entry = appState.data.defaultVisas.first { $0.countryCode == country.code }
         let hasRemark = entry?.remark?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
         let remarkIndicator = hasRemark ? " - \(String(localized: "see remark"))" : ""
-        if let p = appState.data.personalVisas.first(where: { $0.countryCode == country.code }) {
+        if let p = eligibility.sourceVisa {
             let expiry = String(localized: "Expires \(p.expiryDate.formatted(date: .abbreviated, time: .omitted))")
-            return "\(p.visaType) · \(p.duration) · \(expiry)\(remarkIndicator)"
+            let visaLabel: String
+            if p.coverage == .schengenArea {
+                let issuer = appState.country(for: p.countryCode)?.localizedName() ?? p.countryCode
+                visaLabel = String(localized: "Schengen visa · Issued by \(issuer)")
+            } else {
+                visaLabel = p.visaType
+            }
+            return "\(visaLabel) · \(p.duration) · \(expiry)\(remarkIndicator)"
         }
         if let entry {
             let duration = entry.duration.flatMap { $0.isEmpty ? nil : " – \($0)" } ?? ""
@@ -443,7 +451,7 @@ private struct CountryRow: View {
     }
 
     private var subtitleColor: Color {
-        if let p = appState.data.personalVisas.first(where: { $0.countryCode == country.code }) {
+        if let p = eligibility.sourceVisa {
             return Self.expiryReminderColor(for: p.expiryDate)
         }
         return .secondary
@@ -520,6 +528,7 @@ private struct EntryPolicySheet: View {
     @State private var visaExpiry: Date
     @State private var hasVisaExpiry: Bool
     @State private var visaNotes: String
+    @State private var visaCoverage: VisaCoverage
     @State private var showVisaError: Bool = false
 
     // Attachment state
@@ -545,6 +554,7 @@ private struct EntryPolicySheet: View {
         )
         _hasVisaExpiry = State(initialValue: existingPersonalVisa?.expiryDate != nil)
         _visaNotes = State(initialValue: existingPersonalVisa?.notes ?? "")
+        _visaCoverage = State(initialValue: existingPersonalVisa?.coverage ?? .issuingCountry)
         _attachmentFileNames = State(initialValue: existingPersonalVisa?.attachmentFileNames ?? [])
     }
 
@@ -617,6 +627,15 @@ private struct EntryPolicySheet: View {
                         Divider().padding(.vertical, 8)
 
                         Text("Personal Visa").font(.headline)
+
+                        if VisaCoverage.schengenCountryCodes.contains(selectedCountry?.code ?? "") {
+                            Toggle("Valid throughout the Schengen Area", isOn: Binding(
+                                get: { visaCoverage == .schengenArea },
+                                set: { visaCoverage = $0 ? .schengenArea : .issuingCountry }
+                            ))
+                            .padding()
+                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        }
 
                         formLabel("VISA TYPE")
                         HStack {
@@ -850,7 +869,8 @@ private struct EntryPolicySheet: View {
                     duration: visaDuration,
                     expiryDate: visaExpiry,
                     notes: visaNotes.isEmpty ? nil : visaNotes,
-                    attachmentFileNames: attachmentFileNames
+                    attachmentFileNames: attachmentFileNames,
+                    coverage: visaCoverage
                 )
             )
         }
@@ -872,6 +892,7 @@ private struct EntryPolicySheet: View {
         visaExpiry = visa?.expiryDate ?? Date().addingTimeInterval(60 * 60 * 24 * 365)
         hasVisaExpiry = visa?.expiryDate != nil
         visaNotes = visa?.notes ?? ""
+        visaCoverage = visa?.coverage ?? .issuingCountry
         attachmentFileNames = visa?.attachmentFileNames ?? []
         showVisaError = false
     }

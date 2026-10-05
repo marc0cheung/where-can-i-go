@@ -11,6 +11,7 @@ struct MyVisasTab: View {
     @State private var duration: String = ""
     @State private var expiry: Date? = nil
     @State private var notes: String = ""
+    @State private var coverage: VisaCoverage = .issuingCountry
 
     // MARK: - Sheet presentation
     @State private var showVisaDetailsSheet = false
@@ -121,13 +122,15 @@ struct MyVisasTab: View {
                 visaType: visaType,
                 duration: duration,
                 expiry: expiry,
-                notes: notes
-            ) { newVisaType, newDuration, newExpiry, newNotes, newAttachments in
+                notes: notes,
+                coverage: coverage
+            ) { newVisaType, newDuration, newExpiry, newNotes, newAttachments, newCoverage in
                 visaType = newVisaType
                 duration = newDuration
                 expiry = newExpiry
                 notes = newNotes
                 attachmentFileNames = newAttachments
+                coverage = newCoverage
                 errorMessage = nil
             }
         }
@@ -139,8 +142,9 @@ struct MyVisasTab: View {
                 visaType: visa.visaType,
                 duration: visa.duration,
                 expiry: visa.expiryDate,
-                notes: visa.notes ?? ""
-            ) { newVisaType, newDuration, newExpiry, newNotes, newAttachments in
+                notes: visa.notes ?? "",
+                coverage: visa.coverage
+            ) { newVisaType, newDuration, newExpiry, newNotes, newAttachments, newCoverage in
                 guard let updatedCountry = editingCountry, let newExpiry else { return }
                 let removed = visa.attachmentFileNames.filter { !newAttachments.contains($0) }
                 removed.forEach { VisaAttachmentStore.delete(fileName: $0, for: visa.id) }
@@ -152,13 +156,17 @@ struct MyVisasTab: View {
                         duration: newDuration,
                         expiryDate: newExpiry,
                         notes: newNotes.isEmpty ? nil : newNotes,
-                        attachmentFileNames: newAttachments
+                        attachmentFileNames: newAttachments,
+                        coverage: newCoverage
                     )
                 )
             }
         }
-        .onChange(of: country) { _, _ in
+        .onChange(of: country) { _, newCountry in
             errorMessage = nil
+            if !VisaCoverage.schengenCountryCodes.contains(newCountry?.code ?? "") {
+                coverage = .issuingCountry
+            }
         }
         .onChange(of: appState.pendingAddVisaCountryCode) { _, newCode in
             if let code = newCode {
@@ -200,7 +208,7 @@ struct MyVisasTab: View {
                     .stroke(Color.gray.opacity(0.4), lineWidth: 1)
             )
         } else {
-            ButtonCard(label: "Country", remark: "Tap to edit", color: .gray)
+            ButtonCard(label: "Issuing Country", remark: "Tap to edit", color: .gray)
         }
     }
 
@@ -266,7 +274,8 @@ struct MyVisasTab: View {
             duration: duration,
             expiryDate: expiryDate,
             notes: notes.isEmpty ? nil : notes,
-            attachmentFileNames: attachmentFileNames
+            attachmentFileNames: attachmentFileNames,
+            coverage: coverage
         )
         appState.addPersonalVisa(visa)
         resetDraft()
@@ -278,6 +287,7 @@ struct MyVisasTab: View {
         duration = ""
         expiry = nil
         notes = ""
+        coverage = .issuingCountry
         attachmentFileNames = []
         draftVisaID = UUID()
         errorMessage = nil
@@ -311,6 +321,11 @@ struct MyVisasTab: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(c?.flag ?? "")  \(c?.localizedName() ?? v.countryCode)")
                         .font(.subheadline.bold())
+                    if v.coverage == .schengenArea {
+                        Text("Schengen Area")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                     Text("\(v.visaType) · \(v.duration)").font(.caption)
                     Text("Expires \(v.expiryDate.formatted(date: .abbreviated, time: .omitted))")
                         .font(.caption2)
@@ -343,8 +358,8 @@ struct MyVisasTab: View {
 private struct VisaDetailsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
-    // Country binding — committed immediately on selection
     @Binding var country: Country?
+    @State private var draftCountry: Country?
     @State private var showCountryPicker = false
 
     // Local draft — only committed to parent on "Done"
@@ -353,6 +368,7 @@ private struct VisaDetailsSheet: View {
     @State private var draftExpiry: Date
     @State private var draftHasExpiry: Bool
     @State private var draftNotes: String
+    @State private var draftCoverage: VisaCoverage
 
     // Attachment draft
     @State private var draftAttachmentFileNames: [String]
@@ -364,7 +380,7 @@ private struct VisaDetailsSheet: View {
     @State private var previewingAttachment: AttachmentPreviewItem? = nil
 
     let visaID: UUID
-    let onDone: (String, String, Date?, String, [String]) -> Void
+    let onDone: (String, String, Date?, String, [String], VisaCoverage) -> Void
 
     init(country: Binding<Country?>,
          visaID: UUID,
@@ -373,8 +389,10 @@ private struct VisaDetailsSheet: View {
          duration: String,
          expiry: Date?,
          notes: String,
-         onDone: @escaping (String, String, Date?, String, [String]) -> Void) {
+         coverage: VisaCoverage,
+         onDone: @escaping (String, String, Date?, String, [String], VisaCoverage) -> Void) {
         _country = country
+        _draftCountry = State(initialValue: country.wrappedValue)
         self.visaID = visaID
         _draftAttachmentFileNames = State(initialValue: attachmentFileNames)
         _draftVisaType = State(initialValue: visaType)
@@ -382,6 +400,7 @@ private struct VisaDetailsSheet: View {
         _draftExpiry   = State(initialValue: expiry ?? Date().addingTimeInterval(60 * 60 * 24 * 365))
         _draftHasExpiry = State(initialValue: expiry != nil)
         _draftNotes    = State(initialValue: notes)
+        _draftCoverage = State(initialValue: coverage)
         self.onDone = onDone
     }
 
@@ -389,12 +408,12 @@ private struct VisaDetailsSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    formLabel("COUNTRY")
+                    formLabel("ISSUING COUNTRY")
                     Button {
                         showCountryPicker = true
                     } label: {
                         HStack {
-                            if let country {
+                            if let country = draftCountry {
                                 Text(country.flag)
                                     .font(.title2)
                                 Text(country.localizedName())
@@ -410,13 +429,22 @@ private struct VisaDetailsSheet: View {
                     }
                     .buttonStyle(.plain)
                     .overlay(alignment: .trailing) {
-                        if country != nil {
-                            Button { country = nil } label: {
+                        if draftCountry != nil {
+                            Button { draftCountry = nil } label: {
                                 Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
                             }
                             .buttonStyle(.plain)
                             .padding(.trailing, 16)
                         }
+                    }
+
+                    if VisaCoverage.schengenCountryCodes.contains(draftCountry?.code ?? "") {
+                        Toggle("Valid throughout the Schengen Area", isOn: Binding(
+                            get: { draftCoverage == .schengenArea },
+                            set: { draftCoverage = $0 ? .schengenArea : .issuingCountry }
+                        ))
+                        .padding()
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                     }
 
                     formLabel("VISA TYPE")
@@ -534,12 +562,14 @@ private struct VisaDetailsSheet: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
+                        country = draftCountry
                         onDone(
                             draftVisaType,
                             draftDuration,
                             draftHasExpiry ? draftExpiry : nil,
                             draftNotes,
-                            draftAttachmentFileNames
+                            draftAttachmentFileNames,
+                            draftCoverage
                         )
                         dismiss()
                     }
@@ -550,8 +580,13 @@ private struct VisaDetailsSheet: View {
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .onChange(of: draftCountry) { _, newCountry in
+            if !VisaCoverage.schengenCountryCodes.contains(newCountry?.code ?? "") {
+                draftCoverage = .issuingCountry
+            }
+        }
         .sheet(isPresented: $showCountryPicker) {
-            CountryPickerSheet(selected: $country)
+            CountryPickerSheet(selected: $draftCountry)
         }
         .sheet(item: $previewingAttachment) { item in
             VisaAttachmentPreviewSheet(fileName: item.id, visaID: visaID)
@@ -591,7 +626,7 @@ private struct VisaDetailsSheet: View {
     // MARK: - Validation
 
     private var canDone: Bool {
-        country != nil && !draftVisaType.isEmpty && !draftDuration.isEmpty && draftHasExpiry
+        draftCountry != nil && !draftVisaType.isEmpty && !draftDuration.isEmpty && draftHasExpiry
     }
 
     // MARK: - Save helper
