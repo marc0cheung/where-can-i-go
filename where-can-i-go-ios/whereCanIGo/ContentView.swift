@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var sheetPresented: Bool = true
     @State private var selectedTab: PanelTab = .overview
     @State private var panelState: PanelState = .low
+    @State private var isMapLoading = true
     /// Live drag delta while the user is dragging the iPad panel handle.
     /// Positive = drag down (panel shrinks). Reset to 0 on release.
     @State private var dragOffset: CGFloat = 0
@@ -88,8 +89,17 @@ struct ContentView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            CountryMapView()
+            CountryMapView(onGeometryLoaded: { isMapLoading = false })
                 .ignoresSafeArea()
+                .overlay(alignment: .top) {
+                    if isMapLoading {
+                        ProgressView("Loading…")
+                            .padding(12)
+                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+                            .padding(.top, 16)
+                            .allowsHitTesting(false)
+                    }
+                }
                 .overlay(alignment: .bottomLeading) {
                     if isRegularWidth {
                         regularWidthOverlay(availableHeight: proxy.size.height)

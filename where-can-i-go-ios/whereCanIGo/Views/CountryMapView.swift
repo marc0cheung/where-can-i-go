@@ -5,8 +5,11 @@ import MapKit
 /// color of the matching `VisaCategory` for the currently-selected passport.
 struct CountryMapView: UIViewRepresentable {
     @EnvironmentObject var appState: AppState
+    var onGeometryLoaded: () -> Void = {}
 
-    func makeCoordinator() -> Coordinator { Coordinator(appState: appState) }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(appState: appState, onGeometryLoaded: onGeometryLoaded)
+    }
 
     func makeUIView(context: Context) -> MKMapView {
         let map = MKMapView()
@@ -50,14 +53,23 @@ struct CountryMapView: UIViewRepresentable {
 
     func updateUIView(_ uiView: MKMapView, context: Context) {
         context.coordinator.appState = appState
+        context.coordinator.onGeometryLoaded = onGeometryLoaded
         context.coordinator.refreshOverlayColors(on: uiView)
         context.coordinator.handleDiceSpinTargetIfNeeded(appState.diceSpinTarget, in: uiView)
+    }
+
+    static func dismantleUIView(_ uiView: MKMapView, coordinator: Coordinator) {
+        coordinator.stop()
+        uiView.delegate = nil
     }
 
     // MARK: - Coordinator
 
     final class Coordinator: NSObject, MKMapViewDelegate {
         var appState: AppState
+        var onGeometryLoaded: () -> Void
+        private var geometryTask: Task<Void, Never>?
+        private var isLoadingGeometry = true
 
         private enum OverlayDetail {
             case low
@@ -123,7 +135,15 @@ struct CountryMapView: UIViewRepresentable {
         /// so the country appears above the CountryDetailCard rather than behind it.
         private let spinCameraLatOffset: Double = -18.0
 
-        init(appState: AppState) { self.appState = appState }
+        init(appState: AppState, onGeometryLoaded: @escaping () -> Void) {
+            self.appState = appState
+            self.onGeometryLoaded = onGeometryLoaded
+        }
+
+        func stop() {
+            geometryTask?.cancel()
+            spinTimer?.invalidate()
+        }
 
         // MARK: - Dice spin animation
 
@@ -167,6 +187,7 @@ struct CountryMapView: UIViewRepresentable {
 
         /// Called from `updateUIView` whenever `appState.diceSpinTarget` may have changed.
         func handleDiceSpinTargetIfNeeded(_ target: String?, in mapView: MKMapView) {
+            guard !isLoadingGeometry else { return }
             if let target {
                 guard target != lastDiceSpinTarget else { return }
                 lastDiceSpinTarget = target
@@ -292,56 +313,40 @@ struct CountryMapView: UIViewRepresentable {
         }
 
         func loadGeoJSON(into map: MKMapView) {
-            // Accept either filename, since some downloads omit a dot in the extension.
-            let url = Bundle.main.url(forResource: "world-countries", withExtension: "geojson")
-                   ?? Bundle.main.url(forResource: "world-countries", withExtension: "geo.json")
-
-            guard let url else {
-                print("[WhereCanIGo] world-countries.geojson not in bundle. See Resources/GEOJSON_INSTRUCTIONS.txt")
-                return
-            }
-
-            do {
-                let data = try Data(contentsOf: url)
-                let features = try MKGeoJSONDecoder().decode(data)
-                var highOverlays: [MKOverlay] = []
-                var lowOverlays: [MKOverlay] = []
-
-                for f in features {
-                    guard let feature = f as? MKGeoJSONFeature else { continue }
-                    let iso = Self.extractISO3(from: feature.properties)
-                    for geometry in feature.geometry {
-                        if let polygon = geometry as? MKPolygon {
-                            polygon.title = iso
-                            highOverlays.append(polygon)
-
-                            let simplified = Self.simplified(polygon: polygon, tolerance: lowDetailTolerance)
-                            simplified.title = iso
-                            lowOverlays.append(simplified)
-                        } else if let multi = geometry as? MKMultiPolygon {
-                            multi.title = iso
-                            highOverlays.append(multi)
-
-                            let simplified = Self.simplified(multiPolygon: multi, tolerance: lowDetailTolerance)
-                            simplified.title = iso
-                            lowOverlays.append(simplified)
-                        }
+            let tolerance = lowDetailTolerance
+            geometryTask = Task { @MainActor [weak self, weak map] in
+                do {
+                    guard let url = Bundle.main.url(forResource: "world-countries", withExtension: "geojson")
+                            ?? Bundle.main.url(forResource: "world-countries", withExtension: "geo.json") else {
+                        throw CocoaError(.fileNoSuchFile)
                     }
+                    let prepared = try await CountryOverlayStore.shared.load(from: url, tolerance: tolerance)
+                    guard !Task.isCancelled, let self, let map else { return }
+
+                    highDetailOverlays = prepared.highDetail
+                    lowDetailOverlays = prepared.lowDetail
+                    currentDetail = map.region.span.latitudeDelta > highToLowLatitudeDelta ? .low : .high
+                    categoryByISO3 = Self.buildCategoryLookup(from: appState)
+                    lastVisaSignature = Self.visaSignature(for: appState)
+                    lastVisitSignature = nil
+                    isLoadingGeometry = false
+
+                    map.addOverlays(currentDetail == .low ? lowDetailOverlays : highDetailOverlays)
+                    refreshOverlayColors(on: map)
+                    handleDiceSpinTargetIfNeeded(appState.diceSpinTarget, in: map)
+                    onGeometryLoaded()
+                } catch {
+                    guard !Task.isCancelled, let self, let map else { return }
+                    isLoadingGeometry = false
+                    print("[WhereCanIGo] GeoJSON load error: \(error)")
+                    handleDiceSpinTargetIfNeeded(appState.diceSpinTarget, in: map)
+                    onGeometryLoaded()
                 }
-
-                highDetailOverlays = highOverlays
-                lowDetailOverlays = lowOverlays
-                currentDetail = map.region.span.latitudeDelta > highToLowLatitudeDelta ? .low : .high
-
-                map.addOverlays(currentDetail == .low ? lowDetailOverlays : highDetailOverlays)
-                refreshOverlayColors(on: map)
-            } catch {
-                print("[WhereCanIGo] GeoJSON parse error: \(error)")
             }
         }
 
         /// Walks common property keys to find an ISO 3166-1 alpha-3 country code.
-        static func extractISO3(from propertiesData: Data?) -> String? {
+        nonisolated static func extractISO3(from propertiesData: Data?) -> String? {
             guard let data = propertiesData,
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
             for key in ["ISO_A3", "ISO3166-1-Alpha-3", "iso_a3", "ADM0_A3", "id", "ISO3"] {
@@ -371,18 +376,14 @@ struct CountryMapView: UIViewRepresentable {
 
             guard visaChanged || visitDataChanged || selectionChanged else { return }
 
-            // Recoloring every overlay is comparatively expensive on the realistic-elevation
-            // globe, so only do it when something that affects fill color actually changed
-            // (passport, default visas, or personal visas) — not on every visit log/removal.
+            var codesToRedraw = selectionChanged
+                ? Set([lastSelectedCode, newSelected].compactMap { $0 })
+                : Set<String>()
             if visaChanged {
                 lastVisaSignature = visaSignature
-                categoryByISO3 = Self.buildCategoryLookup(from: appState)
-                for overlay in map.overlays {
-                    let key = ObjectIdentifier(overlay)
-                    guard let renderer = rendererCache[key] else { continue }
-                    apply(renderer: renderer, for: overlay)
-                    renderer.setNeedsDisplay()
-                }
+                let nextCategories = Self.buildCategoryLookup(from: appState)
+                codesToRedraw.formUnion(Self.changedCountryCodes(from: categoryByISO3, to: nextCategories))
+                categoryByISO3 = nextCategories
             }
 
             if visitDataChanged {
@@ -393,9 +394,7 @@ struct CountryMapView: UIViewRepresentable {
                 if visitedChanged { refreshVisitedAnnotations(on: map) }
             }
 
-            if !visaChanged && !visitDataChanged {
-                // Selection-only change: only redraw previously-selected and newly-selected overlays.
-                let codesToRedraw = Set([lastSelectedCode, newSelected].compactMap { $0 })
+            if !codesToRedraw.isEmpty {
                 for overlay in map.overlays {
                     guard let iso = (overlay as? MKShape)?.title,
                           codesToRedraw.contains(iso) else { continue }
@@ -407,6 +406,13 @@ struct CountryMapView: UIViewRepresentable {
             }
 
             lastSelectedCode = newSelected
+        }
+
+        static func changedCountryCodes(from previous: [String: VisaCategory],
+                                        to next: [String: VisaCategory]) -> Set<String> {
+            Set(previous.keys).union(next.keys).filter {
+                (previous[$0] ?? .visaRequired) != (next[$0] ?? .visaRequired)
+            }
         }
 
         private func apply(renderer: MKOverlayPathRenderer, for overlay: MKOverlay) {
@@ -459,12 +465,12 @@ struct CountryMapView: UIViewRepresentable {
             lastVisaSignature = nil  // force full re-apply after swap
         }
 
-        static func simplified(multiPolygon: MKMultiPolygon, tolerance: CLLocationDegrees) -> MKMultiPolygon {
+        nonisolated static func simplified(multiPolygon: MKMultiPolygon, tolerance: CLLocationDegrees) -> MKMultiPolygon {
             let polygons = multiPolygon.polygons.map { simplified(polygon: $0, tolerance: tolerance) }
             return MKMultiPolygon(polygons)
         }
 
-        static func simplified(polygon: MKPolygon, tolerance: CLLocationDegrees) -> MKPolygon {
+        nonisolated static func simplified(polygon: MKPolygon, tolerance: CLLocationDegrees) -> MKPolygon {
             let outer = simplifiedRing(coordinates(of: polygon), tolerance: tolerance)
             let simplifiedInteriorPolygons = (polygon.interiorPolygons ?? []).map {
                 simplified(polygon: $0, tolerance: tolerance)
@@ -474,7 +480,7 @@ struct CountryMapView: UIViewRepresentable {
             return MKPolygon(coordinates: outer, count: outer.count, interiorPolygons: simplifiedInteriorPolygons)
         }
 
-        static func coordinates(of polygon: MKPolygon) -> [CLLocationCoordinate2D] {
+        nonisolated static func coordinates(of polygon: MKPolygon) -> [CLLocationCoordinate2D] {
             var coordinates = [CLLocationCoordinate2D](
                 repeating: CLLocationCoordinate2D(latitude: 0, longitude: 0),
                 count: polygon.pointCount
@@ -483,7 +489,7 @@ struct CountryMapView: UIViewRepresentable {
             return coordinates
         }
 
-        static func simplifiedRing(_ coordinates: [CLLocationCoordinate2D], tolerance: CLLocationDegrees) -> [CLLocationCoordinate2D] {
+        nonisolated static func simplifiedRing(_ coordinates: [CLLocationCoordinate2D], tolerance: CLLocationDegrees) -> [CLLocationCoordinate2D] {
             guard coordinates.count > 4 else { return coordinates }
 
             let isClosed = {
@@ -504,11 +510,11 @@ struct CountryMapView: UIViewRepresentable {
             return simplified.count >= 4 ? simplified : coordinates
         }
 
-        static func coordinatesEqual(_ lhs: CLLocationCoordinate2D, _ rhs: CLLocationCoordinate2D) -> Bool {
+        nonisolated static func coordinatesEqual(_ lhs: CLLocationCoordinate2D, _ rhs: CLLocationCoordinate2D) -> Bool {
             lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
         }
 
-        static func ramerDouglasPeucker(points: [CLLocationCoordinate2D], epsilon: CLLocationDegrees) -> [CLLocationCoordinate2D] {
+        nonisolated static func ramerDouglasPeucker(points: [CLLocationCoordinate2D], epsilon: CLLocationDegrees) -> [CLLocationCoordinate2D] {
             guard points.count > 2 else { return points }
 
             let start = points[0]
@@ -533,7 +539,7 @@ struct CountryMapView: UIViewRepresentable {
             return [start, end]
         }
 
-        static func perpendicularDistance(_ point: CLLocationCoordinate2D,
+        nonisolated static func perpendicularDistance(_ point: CLLocationCoordinate2D,
                                           from start: CLLocationCoordinate2D,
                                           to end: CLLocationCoordinate2D) -> CLLocationDegrees {
             let dx = end.longitude - start.longitude
@@ -556,15 +562,11 @@ struct CountryMapView: UIViewRepresentable {
             for entry in appState.data.defaultVisas {
                 hasher.combine(entry.countryCode)
                 hasher.combine(entry.category)
-                hasher.combine(entry.duration)
             }
             for visa in appState.data.personalVisas {
                 hasher.combine(visa.id)
                 hasher.combine(visa.countryCode)
-                hasher.combine(visa.visaType)
-                hasher.combine(visa.duration)
                 hasher.combine(visa.expiryDate.timeIntervalSince1970)
-                hasher.combine(visa.notes)
                 hasher.combine(visa.coverage)
             }
             return hasher.finalize()
@@ -629,6 +631,50 @@ struct CountryMapView: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
             updateOverlayDetailIfNeeded(on: mapView)
         }
+    }
+}
+
+private nonisolated struct PreparedCountryOverlays: @unchecked Sendable {
+    let highDetail: [MKOverlay]
+    let lowDetail: [MKOverlay]
+}
+
+private actor CountryOverlayStore {
+    static let shared = CountryOverlayStore()
+    private var cached: PreparedCountryOverlays?
+
+    func load(from url: URL, tolerance: CLLocationDegrees) throws -> PreparedCountryOverlays {
+        if let cached { return cached }
+
+        let data = try Data(contentsOf: url)
+        let features = try MKGeoJSONDecoder().decode(data)
+        var highDetail: [MKOverlay] = []
+        var lowDetail: [MKOverlay] = []
+
+        for object in features {
+            guard let feature = object as? MKGeoJSONFeature else { continue }
+            let iso = CountryMapView.Coordinator.extractISO3(from: feature.properties)
+            for geometry in feature.geometry {
+                let simplified: MKShape
+                if let polygon = geometry as? MKPolygon {
+                    polygon.title = iso
+                    simplified = CountryMapView.Coordinator.simplified(polygon: polygon, tolerance: tolerance)
+                    highDetail.append(polygon)
+                } else if let multi = geometry as? MKMultiPolygon {
+                    multi.title = iso
+                    simplified = CountryMapView.Coordinator.simplified(multiPolygon: multi, tolerance: tolerance)
+                    highDetail.append(multi)
+                } else {
+                    continue
+                }
+                simplified.title = iso
+                if let overlay = simplified as? MKOverlay { lowDetail.append(overlay) }
+            }
+        }
+
+        let prepared = PreparedCountryOverlays(highDetail: highDetail, lowDetail: lowDetail)
+        cached = prepared
+        return prepared
     }
 }
 
