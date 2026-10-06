@@ -16,7 +16,6 @@ struct MyVisasTab: View {
     // MARK: - Sheet presentation
     @State private var showVisaDetailsSheet = false
     @State private var visaBeingEdited: PersonalVisa? = nil
-    @State private var editingCountry: Country? = nil
     @State private var visaPendingDeletion: PersonalVisa? = nil
     @State private var showDeleteConfirmation = false
 
@@ -116,7 +115,7 @@ struct MyVisasTab: View {
         }
         .sheet(isPresented: $showVisaDetailsSheet) {
             VisaDetailsSheet(
-                country: $country,
+                country: country,
                 visaID: draftVisaID,
                 attachmentFileNames: attachmentFileNames,
                 visaType: visaType,
@@ -124,7 +123,8 @@ struct MyVisasTab: View {
                 expiry: expiry,
                 notes: notes,
                 coverage: coverage
-            ) { newVisaType, newDuration, newExpiry, newNotes, newAttachments, newCoverage in
+            ) { newCountry, newVisaType, newDuration, newExpiry, newNotes, newAttachments, newCoverage in
+                country = newCountry
                 visaType = newVisaType
                 duration = newDuration
                 expiry = newExpiry
@@ -136,7 +136,7 @@ struct MyVisasTab: View {
         }
         .sheet(item: $visaBeingEdited) { visa in
             VisaDetailsSheet(
-                country: $editingCountry,
+                country: appState.country(for: visa.countryCode),
                 visaID: visa.id,
                 attachmentFileNames: visa.attachmentFileNames,
                 visaType: visa.visaType,
@@ -144,8 +144,8 @@ struct MyVisasTab: View {
                 expiry: visa.expiryDate,
                 notes: visa.notes ?? "",
                 coverage: visa.coverage
-            ) { newVisaType, newDuration, newExpiry, newNotes, newAttachments, newCoverage in
-                guard let updatedCountry = editingCountry, let newExpiry else { return }
+            ) { newCountry, newVisaType, newDuration, newExpiry, newNotes, newAttachments, newCoverage in
+                guard let updatedCountry = newCountry, let newExpiry else { return }
                 let removed = visa.attachmentFileNames.filter { !newAttachments.contains($0) }
                 removed.forEach { VisaAttachmentStore.delete(fileName: $0, for: visa.id) }
                 appState.updatePersonalVisa(
@@ -314,7 +314,6 @@ struct MyVisasTab: View {
     private func personalVisaRow(_ v: PersonalVisa) -> some View {
         let c = appState.country(for: v.countryCode)
         Button {
-            editingCountry = c
             visaBeingEdited = v
         } label: {
             HStack {
@@ -358,7 +357,6 @@ struct MyVisasTab: View {
 private struct VisaDetailsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
-    @Binding var country: Country?
     @State private var draftCountry: Country?
     @State private var showCountryPicker = false
 
@@ -380,9 +378,9 @@ private struct VisaDetailsSheet: View {
     @State private var previewingAttachment: AttachmentPreviewItem? = nil
 
     let visaID: UUID
-    let onDone: (String, String, Date?, String, [String], VisaCoverage) -> Void
+    let onDone: (Country?, String, String, Date?, String, [String], VisaCoverage) -> Void
 
-    init(country: Binding<Country?>,
+    init(country: Country?,
          visaID: UUID,
          attachmentFileNames: [String] = [],
          visaType: String,
@@ -390,9 +388,8 @@ private struct VisaDetailsSheet: View {
          expiry: Date?,
          notes: String,
          coverage: VisaCoverage,
-         onDone: @escaping (String, String, Date?, String, [String], VisaCoverage) -> Void) {
-        _country = country
-        _draftCountry = State(initialValue: country.wrappedValue)
+         onDone: @escaping (Country?, String, String, Date?, String, [String], VisaCoverage) -> Void) {
+        _draftCountry = State(initialValue: country)
         self.visaID = visaID
         _draftAttachmentFileNames = State(initialValue: attachmentFileNames)
         _draftVisaType = State(initialValue: visaType)
@@ -562,8 +559,8 @@ private struct VisaDetailsSheet: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
-                        country = draftCountry
                         onDone(
+                            draftCountry,
                             draftVisaType,
                             draftDuration,
                             draftHasExpiry ? draftExpiry : nil,
