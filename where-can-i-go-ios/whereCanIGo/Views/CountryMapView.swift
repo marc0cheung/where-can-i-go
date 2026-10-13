@@ -363,6 +363,8 @@ struct CountryMapView: UIViewRepresentable {
         }
 
         func refreshOverlayColors(on map: MKMapView) {
+            guard !isLoadingGeometry else { return }
+
             updateOverlayDetailIfNeeded(on: map)
 
             let newSelected = appState.selectedCountryCode
