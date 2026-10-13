@@ -15,9 +15,8 @@ struct VisaEligibility {
             return
         }
 
-        let today = calendar.startOfDay(for: date)
         sourceVisa = personalVisas
-            .filter { $0.covers(countryCode) && calendar.startOfDay(for: $0.expiryDate) >= today }
+            .filter { $0.covers(countryCode) && $0.isValid(on: date, calendar: calendar) }
             .sorted { first, second in
                 let firstIsDirect = first.countryCode == countryCode
                 let secondIsDirect = second.countryCode == countryCode

@@ -584,6 +584,28 @@
         }
       }
     },
+    "Clear effective date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear effective date"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除生效日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除生效日期"
+          }
+        }
+      }
+    },
     "Clear end date" : {
       "localizations" : {
         "zh-Hans" : {
@@ -596,6 +618,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "清除結束日期"
+          }
+        }
+      }
+    },
+    "Clear expiry date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear expiry date"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除到期日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除到期日期"
           }
         }
       }
@@ -1097,6 +1141,50 @@
         }
       }
     },
+    "Effective date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effective date"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生效日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生效日期"
+          }
+        }
+      }
+    },
+    "Effective date must be on or before expiry date." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effective date must be on or before expiry date."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生效日期不得晚于到期日期。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生效日期不得晚於到期日期。"
+          }
+        }
+      }
+    },
     "End" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1258,7 +1346,30 @@
         }
       }
     },
+    "Expiry date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expiry date"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "到期日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "到期日期"
+          }
+        }
+      }
+    },
     "EXPIRY DATE" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1334,6 +1445,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "旗幟無法使用"
+          }
+        }
+      }
+    },
+    "Has effective date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has effective date"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设有生效日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設有生效日期"
           }
         }
       }
@@ -1844,6 +1977,28 @@
         }
       }
     },
+    "Please fill in Visa Type, Duration and all enabled dates." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please fill in Visa Type, Duration and all enabled dates."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请填写签证类型、停留时长及所有已启用的日期。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請填寫簽證類型、停留天數及所有已啟用的日期。"
+          }
+        }
+      }
+    },
     "Please fill in Visa Type, Duration and Expiry Date." : {
       "localizations" : {
         "zh-Hans" : {
@@ -2215,6 +2370,7 @@
       }
     },
     "Set expiry date" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2505,6 +2661,28 @@
         }
       }
     },
+    "Valid from %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valid from %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自 %@ 起生效"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自 %@ 起生效"
+          }
+        }
+      }
+    },
     "Valid throughout the Schengen Area" : {
       "localizations" : {
         "en" : {
@@ -2523,6 +2701,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "適用整個神根區"
+          }
+        }
+      }
+    },
+    "VALIDITY DATES" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VALIDITY DATES"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有效日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有效日期"
           }
         }
       }

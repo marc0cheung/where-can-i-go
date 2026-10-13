@@ -10,6 +10,7 @@ struct MyVisasTab: View {
     @State private var visaType: String = ""
     @State private var duration: String = ""
     @State private var expiry: Date? = nil
+    @State private var effectiveDate: Date? = nil
     @State private var notes: String = ""
     @State private var coverage: VisaCoverage = .issuingCountry
 
@@ -121,13 +122,15 @@ struct MyVisasTab: View {
                 visaType: visaType,
                 duration: duration,
                 expiry: expiry,
+                effectiveDate: effectiveDate,
                 notes: notes,
                 coverage: coverage
-            ) { newCountry, newVisaType, newDuration, newExpiry, newNotes, newAttachments, newCoverage in
+            ) { newCountry, newVisaType, newDuration, newExpiry, newEffectiveDate, newNotes, newAttachments, newCoverage in
                 country = newCountry
                 visaType = newVisaType
                 duration = newDuration
                 expiry = newExpiry
+                effectiveDate = newEffectiveDate
                 notes = newNotes
                 attachmentFileNames = newAttachments
                 coverage = newCoverage
@@ -142,9 +145,10 @@ struct MyVisasTab: View {
                 visaType: visa.visaType,
                 duration: visa.duration,
                 expiry: visa.expiryDate,
+                effectiveDate: visa.effectiveDate,
                 notes: visa.notes ?? "",
                 coverage: visa.coverage
-            ) { newCountry, newVisaType, newDuration, newExpiry, newNotes, newAttachments, newCoverage in
+            ) { newCountry, newVisaType, newDuration, newExpiry, newEffectiveDate, newNotes, newAttachments, newCoverage in
                 guard let updatedCountry = newCountry, let newExpiry else { return }
                 let removed = visa.attachmentFileNames.filter { !newAttachments.contains($0) }
                 removed.forEach { VisaAttachmentStore.delete(fileName: $0, for: visa.id) }
@@ -155,6 +159,7 @@ struct MyVisasTab: View {
                         visaType: newVisaType,
                         duration: newDuration,
                         expiryDate: newExpiry,
+                        effectiveDate: newEffectiveDate,
                         notes: newNotes.isEmpty ? nil : newNotes,
                         attachmentFileNames: newAttachments,
                         coverage: newCoverage
@@ -248,7 +253,10 @@ struct MyVisasTab: View {
     // MARK: - Logic
 
     private var canAdd: Bool {
-        country != nil && !visaType.isEmpty && !duration.isEmpty && expiry != nil
+        country != nil && !visaType.isEmpty && !duration.isEmpty &&
+        DateInputPolicy.isValidVisaPeriod(
+            expiryDate: expiry, effectiveDate: effectiveDate, requiresEffectiveDate: effectiveDate != nil
+        )
     }
 
     private func addVisa() {
@@ -264,6 +272,12 @@ struct MyVisasTab: View {
             return
         }
         guard let expiryDate = expiry else { return }
+        guard DateInputPolicy.isValidVisaPeriod(
+            expiryDate: expiryDate, effectiveDate: effectiveDate, requiresEffectiveDate: effectiveDate != nil
+        ) else {
+            withAnimation { errorMessage = String(localized: "Effective date must be on or before expiry date.") }
+            return
+        }
 
         withAnimation { errorMessage = nil }
 
@@ -273,6 +287,7 @@ struct MyVisasTab: View {
             visaType: visaType,
             duration: duration,
             expiryDate: expiryDate,
+            effectiveDate: effectiveDate,
             notes: notes.isEmpty ? nil : notes,
             attachmentFileNames: attachmentFileNames,
             coverage: coverage
@@ -286,6 +301,7 @@ struct MyVisasTab: View {
         visaType = ""
         duration = ""
         expiry = nil
+        effectiveDate = nil
         notes = ""
         coverage = .issuingCountry
         attachmentFileNames = []
@@ -326,6 +342,14 @@ struct MyVisasTab: View {
                             .foregroundStyle(.secondary)
                     }
                     Text("\(v.visaType) · \(v.duration)").font(.caption)
+                    if let effectiveDate = v.effectiveDate {
+                        Text("Valid from \(effectiveDate.formatted(date: .abbreviated, time: .omitted))")
+                            .font(.caption2)
+                            .foregroundStyle(
+                                Calendar.current.startOfDay(for: effectiveDate) >
+                                Calendar.current.startOfDay(for: appState.visaReferenceDate) ? Color.orange : Color.secondary
+                            )
+                    }
                     Text("Expires \(v.expiryDate.formatted(date: .abbreviated, time: .omitted))")
                         .font(.caption2)
                         .foregroundStyle(expiryReminderColor(for: v.expiryDate))
@@ -363,8 +387,9 @@ private struct VisaDetailsSheet: View {
     // Local draft — only committed to parent on "Done"
     @State private var draftVisaType: String
     @State private var draftDuration: String
-    @State private var draftExpiry: Date
-    @State private var draftHasExpiry: Bool
+    @State private var draftExpiry: Date?
+    @State private var draftEffectiveDate: Date?
+    @State private var draftHasEffectiveDate: Bool
     @State private var draftNotes: String
     @State private var draftCoverage: VisaCoverage
 
@@ -378,7 +403,7 @@ private struct VisaDetailsSheet: View {
     @State private var previewingAttachment: AttachmentPreviewItem? = nil
 
     let visaID: UUID
-    let onDone: (Country?, String, String, Date?, String, [String], VisaCoverage) -> Void
+    let onDone: (Country?, String, String, Date?, Date?, String, [String], VisaCoverage) -> Void
 
     init(country: Country?,
          visaID: UUID,
@@ -386,16 +411,18 @@ private struct VisaDetailsSheet: View {
          visaType: String,
          duration: String,
          expiry: Date?,
+         effectiveDate: Date?,
          notes: String,
          coverage: VisaCoverage,
-         onDone: @escaping (Country?, String, String, Date?, String, [String], VisaCoverage) -> Void) {
+         onDone: @escaping (Country?, String, String, Date?, Date?, String, [String], VisaCoverage) -> Void) {
         _draftCountry = State(initialValue: country)
         self.visaID = visaID
         _draftAttachmentFileNames = State(initialValue: attachmentFileNames)
         _draftVisaType = State(initialValue: visaType)
         _draftDuration = State(initialValue: duration)
-        _draftExpiry   = State(initialValue: expiry ?? Date().addingTimeInterval(60 * 60 * 24 * 365))
-        _draftHasExpiry = State(initialValue: expiry != nil)
+        _draftExpiry = State(initialValue: expiry)
+        _draftEffectiveDate = State(initialValue: effectiveDate)
+        _draftHasEffectiveDate = State(initialValue: effectiveDate != nil)
         _draftNotes    = State(initialValue: notes)
         _draftCoverage = State(initialValue: coverage)
         self.onDone = onDone
@@ -470,38 +497,13 @@ private struct VisaDetailsSheet: View {
                     .padding()
                     .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
-                    formLabel("EXPIRY DATE")
-                    if draftHasExpiry {
-                        HStack {
-                            DatePicker("", selection: $draftExpiry, displayedComponents: .date)
-                                .labelsHidden()
-                                .datePickerStyle(.graphical)
-                            Spacer()
-                            Button {
-                                withAnimation { draftHasExpiry = false }
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    } else {
-                        Button {
-                            withAnimation { draftHasExpiry = true }
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "calendar.badge.plus")
-                                Text("Set expiry date")
-                                Spacer()
-                            }
-                            .padding()
-                            .foregroundStyle(.primary)
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                        }
-                        .buttonStyle(.plain)
-                    }
+                    formLabel("VALIDITY DATES")
+                    VisaValidityFields(
+                        hasEffectiveDate: $draftHasEffectiveDate,
+                        effectiveDate: $draftEffectiveDate,
+                        expiryDate: $draftExpiry
+                    )
+                    .padding(.vertical, 4)
 
                     formLabel("NOTES (OPTIONAL)")
                     TextField("Additional notes…", text: $draftNotes, axis: .vertical)
@@ -563,7 +565,8 @@ private struct VisaDetailsSheet: View {
                             draftCountry,
                             draftVisaType,
                             draftDuration,
-                            draftHasExpiry ? draftExpiry : nil,
+                            draftExpiry,
+                            draftHasEffectiveDate ? draftEffectiveDate : nil,
                             draftNotes,
                             draftAttachmentFileNames,
                             draftCoverage
@@ -623,7 +626,11 @@ private struct VisaDetailsSheet: View {
     // MARK: - Validation
 
     private var canDone: Bool {
-        draftCountry != nil && !draftVisaType.isEmpty && !draftDuration.isEmpty && draftHasExpiry
+        draftCountry != nil && !draftVisaType.isEmpty && !draftDuration.isEmpty &&
+        DateInputPolicy.isValidVisaPeriod(
+            expiryDate: draftExpiry, effectiveDate: draftEffectiveDate,
+            requiresEffectiveDate: draftHasEffectiveDate
+        )
     }
 
     // MARK: - Save helper

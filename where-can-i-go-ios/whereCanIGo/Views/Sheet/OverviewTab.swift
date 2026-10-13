@@ -525,8 +525,9 @@ private struct EntryPolicySheet: View {
     @State private var personalVisaID: UUID?
     @State private var visaType: String
     @State private var visaDuration: String
-    @State private var visaExpiry: Date
-    @State private var hasVisaExpiry: Bool
+    @State private var visaExpiry: Date?
+    @State private var visaEffectiveDate: Date?
+    @State private var hasVisaEffectiveDate: Bool
     @State private var visaNotes: String
     @State private var visaCoverage: VisaCoverage
     @State private var showVisaError: Bool = false
@@ -548,11 +549,9 @@ private struct EntryPolicySheet: View {
         _personalVisaID = State(initialValue: existingPersonalVisa?.id)
         _visaType = State(initialValue: existingPersonalVisa?.visaType ?? "")
         _visaDuration = State(initialValue: existingPersonalVisa?.duration ?? "")
-        _visaExpiry = State(
-            initialValue: existingPersonalVisa?.expiryDate
-                ?? Date().addingTimeInterval(60 * 60 * 24 * 365)
-        )
-        _hasVisaExpiry = State(initialValue: existingPersonalVisa?.expiryDate != nil)
+        _visaExpiry = State(initialValue: existingPersonalVisa?.expiryDate)
+        _visaEffectiveDate = State(initialValue: existingPersonalVisa?.effectiveDate)
+        _hasVisaEffectiveDate = State(initialValue: existingPersonalVisa?.effectiveDate != nil)
         _visaNotes = State(initialValue: existingPersonalVisa?.notes ?? "")
         _visaCoverage = State(initialValue: existingPersonalVisa?.coverage ?? .issuingCountry)
         _attachmentFileNames = State(initialValue: existingPersonalVisa?.attachmentFileNames ?? [])
@@ -663,38 +662,13 @@ private struct EntryPolicySheet: View {
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
-                        formLabel("EXPIRY DATE")
-                        if hasVisaExpiry {
-                            HStack {
-                                DatePicker("", selection: $visaExpiry, displayedComponents: .date)
-                                    .labelsHidden()
-                                    .datePickerStyle(.graphical)
-                                Spacer()
-                                Button {
-                                    withAnimation { hasVisaExpiry = false }
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundStyle(.secondary)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            .padding()
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                        } else {
-                            Button {
-                                withAnimation { hasVisaExpiry = true }
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "calendar.badge.plus")
-                                    Text("Set expiry date")
-                                    Spacer()
-                                }
-                                .padding()
-                                .foregroundStyle(.primary)
-                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                            }
-                            .buttonStyle(.plain)
-                        }
+                        formLabel("VALIDITY DATES")
+                        VisaValidityFields(
+                            hasEffectiveDate: $hasVisaEffectiveDate,
+                            effectiveDate: $visaEffectiveDate,
+                            expiryDate: $visaExpiry
+                        )
+                        .padding(.vertical, 4)
 
                         formLabel("NOTES (OPTIONAL)")
                         TextField("Additional notes\u{2026}", text: $visaNotes, axis: .vertical)
@@ -818,7 +792,9 @@ private struct EntryPolicySheet: View {
         }
         .onChange(of: visaType) { _, _ in refreshVisaErrorVisibility() }
         .onChange(of: visaDuration) { _, _ in refreshVisaErrorVisibility() }
-        .onChange(of: hasVisaExpiry) { _, _ in refreshVisaErrorVisibility() }
+        .onChange(of: visaExpiry) { _, _ in refreshVisaErrorVisibility() }
+        .onChange(of: visaEffectiveDate) { _, _ in refreshVisaErrorVisibility() }
+        .onChange(of: hasVisaEffectiveDate) { _, _ in refreshVisaErrorVisibility() }
     }
 
     private var hasExistingPolicy: Bool {
@@ -831,12 +807,15 @@ private struct EntryPolicySheet: View {
     private var isPersonalVisaValid: Bool {
         !visaType.trimmingCharacters(in: .whitespaces).isEmpty &&
         !visaDuration.trimmingCharacters(in: .whitespaces).isEmpty &&
-        hasVisaExpiry
+        DateInputPolicy.isValidVisaPeriod(
+            expiryDate: visaExpiry, effectiveDate: visaEffectiveDate,
+            requiresEffectiveDate: hasVisaEffectiveDate
+        )
     }
 
     private var visaValidationMessage: String? {
         guard hasPersonalVisa, !isPersonalVisaValid else { return nil }
-        return String(localized: "Please fill in Visa Type, Duration and Expiry Date.")
+        return String(localized: "Please fill in Visa Type, Duration and all enabled dates.")
     }
 
     private var canSave: Bool {
@@ -860,7 +839,7 @@ private struct EntryPolicySheet: View {
             )
         )
 
-        if let personalVisaID {
+        if let personalVisaID, let visaExpiry {
             appState.updatePersonalVisa(
                 PersonalVisa(
                     id: personalVisaID,
@@ -868,6 +847,7 @@ private struct EntryPolicySheet: View {
                     visaType: visaType,
                     duration: visaDuration,
                     expiryDate: visaExpiry,
+                    effectiveDate: hasVisaEffectiveDate ? visaEffectiveDate : nil,
                     notes: visaNotes.isEmpty ? nil : visaNotes,
                     attachmentFileNames: attachmentFileNames,
                     coverage: visaCoverage
@@ -889,8 +869,9 @@ private struct EntryPolicySheet: View {
         personalVisaID = visa?.id
         visaType = visa?.visaType ?? ""
         visaDuration = visa?.duration ?? ""
-        visaExpiry = visa?.expiryDate ?? Date().addingTimeInterval(60 * 60 * 24 * 365)
-        hasVisaExpiry = visa?.expiryDate != nil
+        visaExpiry = visa?.expiryDate
+        visaEffectiveDate = visa?.effectiveDate
+        hasVisaEffectiveDate = visa?.effectiveDate != nil
         visaNotes = visa?.notes ?? ""
         visaCoverage = visa?.coverage ?? .issuingCountry
         attachmentFileNames = visa?.attachmentFileNames ?? []

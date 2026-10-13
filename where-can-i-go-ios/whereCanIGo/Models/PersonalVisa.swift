@@ -17,6 +17,7 @@ struct PersonalVisa: Codable, Identifiable, Hashable {
     let visaType: String
     let duration: String
     let expiryDate: Date
+    let effectiveDate: Date?
     let notes: String?
     let attachmentFileNames: [String]
     let coverage: VisaCoverage
@@ -26,6 +27,7 @@ struct PersonalVisa: Codable, Identifiable, Hashable {
          visaType: String,
          duration: String,
          expiryDate: Date,
+         effectiveDate: Date? = nil,
          notes: String? = nil,
          attachmentFileNames: [String] = [],
          coverage: VisaCoverage = .issuingCountry) {
@@ -34,13 +36,14 @@ struct PersonalVisa: Codable, Identifiable, Hashable {
         self.visaType = visaType
         self.duration = duration
         self.expiryDate = expiryDate
+        self.effectiveDate = effectiveDate
         self.notes = notes
         self.attachmentFileNames = attachmentFileNames
         self.coverage = VisaCoverage.schengenCountryCodes.contains(countryCode) ? coverage : .issuingCountry
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, countryCode, visaType, duration, expiryDate, notes, attachmentFileNames, coverage
+        case id, countryCode, visaType, duration, expiryDate, effectiveDate, notes, attachmentFileNames, coverage
     }
 
     init(from decoder: Decoder) throws {
@@ -51,6 +54,7 @@ struct PersonalVisa: Codable, Identifiable, Hashable {
             visaType: try container.decode(String.self, forKey: .visaType),
             duration: try container.decode(String.self, forKey: .duration),
             expiryDate: try container.decode(Date.self, forKey: .expiryDate),
+            effectiveDate: try container.decodeIfPresent(Date.self, forKey: .effectiveDate),
             notes: try container.decodeIfPresent(String.self, forKey: .notes),
             attachmentFileNames: try container.decodeIfPresent([String].self, forKey: .attachmentFileNames) ?? [],
             coverage: try container.decodeIfPresent(VisaCoverage.self, forKey: .coverage) ?? .issuingCountry
@@ -59,5 +63,11 @@ struct PersonalVisa: Codable, Identifiable, Hashable {
 
     func covers(_ code: String) -> Bool {
         countryCode == code || (coverage == .schengenArea && VisaCoverage.schengenCountryCodes.contains(code))
+    }
+
+    func isValid(on date: Date, calendar: Calendar = .current) -> Bool {
+        let day = calendar.startOfDay(for: date)
+        return calendar.startOfDay(for: expiryDate) >= day &&
+            (effectiveDate.map { calendar.startOfDay(for: $0) <= day } ?? true)
     }
 }

@@ -569,6 +569,7 @@ struct CountryMapView: UIViewRepresentable {
                 hasher.combine(visa.id)
                 hasher.combine(visa.countryCode)
                 hasher.combine(visa.expiryDate.timeIntervalSince1970)
+                hasher.combine(visa.effectiveDate?.timeIntervalSince1970)
                 hasher.combine(visa.coverage)
             }
             return hasher.finalize()

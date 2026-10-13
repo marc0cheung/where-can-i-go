@@ -600,18 +600,19 @@ struct TripEditorSheet: View {
 
                     label("DATES")
                     VStack(spacing: 0) {
-                        OptionalVisitDateRow(
+                        DateInputRow(
                             title: "Start date",
                             clearLabel: "Clear start date",
                             date: $startDate,
                             range: Date.distantPast...(endDate ?? Date.distantFuture)
                         )
                         Divider().padding(.vertical, 6)
-                        OptionalVisitDateRow(
+                        DateInputRow(
                             title: "End date",
                             clearLabel: "Clear end date",
                             date: $endDate,
-                            range: (startDate ?? Date.distantPast)...Date.distantFuture
+                            range: (startDate ?? Date.distantPast)...Date.distantFuture,
+                            preferredDate: startDate
                         )
                     }
                     .padding(.vertical, 4)
@@ -689,88 +690,6 @@ struct TripEditorSheet: View {
             appState.updateVisit(visit)
         }
         dismiss()
-    }
-}
-
-private struct OptionalVisitDateRow: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    let title: LocalizedStringResource
-    let clearLabel: LocalizedStringResource
-    @Binding var date: Date?
-    let range: ClosedRange<Date>
-
-    @State private var showPicker = false
-    @State private var selectedDate = Date()
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Text(title)
-            Spacer(minLength: 8)
-            Button {
-                selectedDate = min(max(date ?? Date(), range.lowerBound), range.upperBound)
-                showPicker = true
-            } label: {
-                Group {
-                    if let date {
-                        Text(date, format: .dateTime.year().month(.abbreviated).day())
-                    } else {
-                        Text("Select date")
-                    }
-                }
-                .font(.subheadline)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .frame(minHeight: 44)
-                .contentShape(Capsule())
-                .glassEffect(.regular.interactive(), in: .capsule)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(Text(title))
-
-            if date != nil {
-                Button {
-                    date = nil
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
-                        .frame(width: 44, height: 44)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Text(clearLabel))
-                .help(Text(clearLabel))
-                .transition(
-                    .opacity.combined(with: .scale(scale: 0.85, anchor: .trailing))
-                )
-            }
-        }
-        .frame(maxWidth: .infinity, minHeight: 44)
-        .animation(reduceMotion ? nil : .smooth(duration: 0.22), value: date != nil)
-        .popover(
-            isPresented: $showPicker,
-            attachmentAnchor: .rect(.bounds),
-            arrowEdge: .top
-        ) {
-            DatePicker(
-                selection: Binding(
-                    get: { selectedDate },
-                    set: { newDate in
-                        selectedDate = newDate
-                        date = Calendar.current.startOfDay(for: newDate)
-                    }
-                ),
-                in: range,
-                displayedComponents: .date
-            ) {
-                Text(title)
-            }
-            .datePickerStyle(.graphical)
-            .frame(width: 320)
-            .padding(16)
-            .presentationCompactAdaptation(.popover)
-        }
     }
 }
 
