@@ -179,14 +179,32 @@ struct TravelSummaryCard: View {
                     Text("ALL-TIME TRAVELS")
                         .font(.caption2.weight(.bold))
                         .foregroundStyle(.white.opacity(0.7))
-                    Text("\(stats.countryCount)")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundStyle(.white)
-                    Text(stats.countryCount == 1 ? "country visited" : "countries visited")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.8))
+                    HStack(alignment: .top, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(stats.countryCount)")
+                                .font(.system(size: 40, weight: .bold))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
+                            Text(stats.countryCount == 1 ? "country visited" : "countries visited")
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.8))
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(stats.tripCount)")
+                                .font(.system(size: 40, weight: .bold))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
+                            Text(stats.tripCount == 1 ? "trip" : "trips")
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.8))
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
-                Spacer()
                 Image(systemName: "chevron.right")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.white.opacity(0.6))
@@ -301,12 +319,31 @@ struct TravelPassportCard: View {
                 Text("WHERE I'VE BEEN")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.white.opacity(0.7))
-                Text("\(stats.countryCount)")
-                    .font(.system(size: 52, weight: .bold))
-                    .foregroundStyle(.white)
-                Text(stats.countryCount == 1 ? "country" : "countries")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.85))
+                HStack(alignment: .top, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(stats.countryCount)")
+                            .font(.system(size: 52, weight: .bold))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                        Text(stats.countryCount == 1 ? "country" : "countries")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(stats.tripCount)")
+                            .font(.system(size: 52, weight: .bold))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                        Text(stats.tripCount == 1 ? "trip" : "trips")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
 
             if !stats.flags.isEmpty {
@@ -320,7 +357,7 @@ struct TravelPassportCard: View {
             }
 
             if let first = stats.firstTrip {
-                HStack(spacing: 16) {
+                HStack(alignment: .top, spacing: 32) {
                     labeledDate("First trip", first)
                     if let last = stats.lastTrip {
                         labeledDate("Latest trip", last)
@@ -365,6 +402,7 @@ struct TravelPassportCard: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.white)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
