@@ -520,6 +520,8 @@ private struct EntryPolicySheet: View {
     @State private var policyDuration: String
     @State private var policyRemark: String
     @State private var showCountryPicker = false
+    @State private var originalEntry: DefaultVisaEntry?
+    @State private var originalPersonalVisa: PersonalVisa?
 
     // Personal visa editing state (used only when a personal visa exists for the selected country)
     @State private var personalVisaID: UUID?
@@ -543,9 +545,11 @@ private struct EntryPolicySheet: View {
 
     init(country: Country, existingEntry: DefaultVisaEntry?, existingPersonalVisa: PersonalVisa?) {
         _selectedCountry = State(initialValue: country)
-        _category = State(initialValue: existingEntry?.category ?? .visaFree)
+        _category = State(initialValue: existingEntry?.category ?? .visaRequired)
         _policyDuration = State(initialValue: existingEntry?.duration ?? "")
         _policyRemark = State(initialValue: existingEntry?.remark ?? "")
+        _originalEntry = State(initialValue: existingEntry)
+        _originalPersonalVisa = State(initialValue: existingPersonalVisa)
         _personalVisaID = State(initialValue: existingPersonalVisa?.id)
         _visaType = State(initialValue: existingPersonalVisa?.visaType ?? "")
         _visaDuration = State(initialValue: existingPersonalVisa?.duration ?? "")
@@ -586,6 +590,7 @@ private struct EntryPolicySheet: View {
 
                     formLabel("ENTRY POLICY TYPE")
                     Picker("Entry policy type", selection: $category) {
+                        Text("Visa Required").tag(VisaCategory.visaRequired)
                         Text("Visa Free").tag(VisaCategory.visaFree)
                         Text("Visa on Arrival").tag(VisaCategory.visaOnArrival)
                         Text("ETA").tag(VisaCategory.eta)
@@ -804,6 +809,23 @@ private struct EntryPolicySheet: View {
 
     private var hasPersonalVisa: Bool { personalVisaID != nil }
 
+    private var hasPolicyChanges: Bool {
+        category != (originalEntry?.category ?? .visaRequired) ||
+        policyDuration != (originalEntry?.duration ?? "") ||
+        policyRemark != (originalEntry?.remark ?? "")
+    }
+
+    private var hasPersonalVisaChanges: Bool {
+        guard let originalPersonalVisa else { return false }
+        return visaType != originalPersonalVisa.visaType ||
+            visaDuration != originalPersonalVisa.duration ||
+            visaExpiry != originalPersonalVisa.expiryDate ||
+            (hasVisaEffectiveDate ? visaEffectiveDate : nil) != originalPersonalVisa.effectiveDate ||
+            visaNotes != (originalPersonalVisa.notes ?? "") ||
+            visaCoverage != originalPersonalVisa.coverage ||
+            attachmentFileNames != originalPersonalVisa.attachmentFileNames
+    }
+
     private var isPersonalVisaValid: Bool {
         !visaType.trimmingCharacters(in: .whitespaces).isEmpty &&
         !visaDuration.trimmingCharacters(in: .whitespaces).isEmpty &&
@@ -820,26 +842,34 @@ private struct EntryPolicySheet: View {
 
     private var canSave: Bool {
         guard selectedCountry != nil else { return false }
-        return hasPersonalVisa ? isPersonalVisaValid : true
+        return !hasPersonalVisaChanges || isPersonalVisaValid
     }
 
     private func commitChanges() {
         guard let selectedCountry else { return }
-        if hasPersonalVisa, !isPersonalVisaValid {
+        if hasPersonalVisaChanges, !isPersonalVisaValid {
             withAnimation { showVisaError = true }
             return
         }
 
-        appState.addDefaultVisa(
-            DefaultVisaEntry(
-                countryCode: selectedCountry.code,
-                category: category,
-                duration: policyDuration.isEmpty ? nil : policyDuration,
-                remark: policyRemark.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : policyRemark
-            )
-        )
+        if hasPolicyChanges {
+            if category == .visaRequired {
+                if originalEntry != nil {
+                    appState.removeDefaultVisa(selectedCountry.code)
+                }
+            } else {
+                appState.addDefaultVisa(
+                    DefaultVisaEntry(
+                        countryCode: selectedCountry.code,
+                        category: category,
+                        duration: policyDuration.isEmpty ? nil : policyDuration,
+                        remark: policyRemark.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : policyRemark
+                    )
+                )
+            }
+        }
 
-        if let personalVisaID, let visaExpiry {
+        if hasPersonalVisaChanges, let personalVisaID, let visaExpiry {
             appState.updatePersonalVisa(
                 PersonalVisa(
                     id: personalVisaID,
@@ -861,11 +891,13 @@ private struct EntryPolicySheet: View {
     private func loadDataForCountry(_ country: Country?) {
         guard let country else { return }
         let entry = appState.data.defaultVisas.first { $0.countryCode == country.code }
-        category = entry?.category ?? .visaFree
+        originalEntry = entry
+        category = entry?.category ?? .visaRequired
         policyDuration = entry?.duration ?? ""
         policyRemark = entry?.remark ?? ""
 
         let visa = appState.data.personalVisas.first { $0.countryCode == country.code }
+        originalPersonalVisa = visa
         personalVisaID = visa?.id
         visaType = visa?.visaType ?? ""
         visaDuration = visa?.duration ?? ""
