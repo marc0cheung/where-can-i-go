@@ -7,6 +7,8 @@ struct ContentView: View {
     @State private var sheetPresented: Bool = true
     @State private var selectedTab: PanelTab = .overview
     @State private var panelState: PanelState = .low
+    @State private var selectedDiceContinents: Set<Continent> = []
+    @State private var diceIncludesAllEntryRequirements = false
     @State private var isMapLoading = true
     /// Live drag delta while the user is dragging the iPad panel handle.
     /// Positive = drag down (panel shrinks). Reset to 0 on release.
@@ -33,7 +35,11 @@ struct ContentView: View {
     @ViewBuilder
     private var panelContent: some View {
         VStack(spacing: 0) {
-            SheetHeader(panelState: $panelState)
+            SheetHeader(
+                panelState: $panelState,
+                selectedDiceContinents: $selectedDiceContinents,
+                diceIncludesAllEntryRequirements: $diceIncludesAllEntryRequirements
+            )
 
             TabView(selection: $selectedTab) {
                 Tab(PanelTab.overview.localizedTitle,
