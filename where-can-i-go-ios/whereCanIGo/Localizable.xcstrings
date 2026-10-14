@@ -1298,6 +1298,29 @@
         }
       }
     },
+    "EntryPolicy.VisaOnArrival" : {
+      "comment" : "Short label used only in the entry policy type segmented picker.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VoA"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "落地签"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "落地簽"
+          }
+        }
+      }
+    },
     "ETA" : {
       "localizations" : {
         "zh-Hans" : {

@@ -592,8 +592,8 @@ private struct EntryPolicySheet: View {
                     Picker("Entry policy type", selection: $category) {
                         Text("Visa Required").tag(VisaCategory.visaRequired)
                         Text("Visa Free").tag(VisaCategory.visaFree)
-                        Text("Visa on Arrival").tag(VisaCategory.visaOnArrival)
-                        Text("ETA").tag(VisaCategory.eta)
+                        Text("EntryPolicy.VisaOnArrival").tag(VisaCategory.visaOnArrival)
+                        Text(verbatim: "eTA").tag(VisaCategory.eta)
                     }
                     .pickerStyle(.segmented)
 
