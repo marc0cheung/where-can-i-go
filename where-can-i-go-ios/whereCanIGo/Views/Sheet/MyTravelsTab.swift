@@ -496,8 +496,13 @@ struct CountryTripsSheet: View {
                     .foregroundStyle(visit.purpose.color)
                     .frame(width: 26)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(TravelFormat.dateRange(visit))
+                    Text(visit.location ?? TravelFormat.dateRange(visit))
                         .font(.subheadline.weight(.semibold))
+                    if visit.location != nil {
+                        Text(TravelFormat.dateRange(visit))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     HStack(spacing: 6) {
                         Text(visit.purpose.localizedDisplayName)
                             .font(.caption2.weight(.semibold))
@@ -550,6 +555,7 @@ struct TripEditorSheet: View {
 
     @State private var country: Country?
     @State private var showCountryPicker = false
+    @State private var location: String
     @State private var startDate: Date?
     @State private var endDate: Date?
     @State private var purpose: VisitPurpose
@@ -558,6 +564,7 @@ struct TripEditorSheet: View {
     init(existingVisit: Visit?, initialCountry: Country?) {
         self.existingVisit = existingVisit
         _country = State(initialValue: initialCountry)
+        _location = State(initialValue: existingVisit?.location ?? "")
         _startDate = State(initialValue: existingVisit?.startDate)
         _endDate = State(initialValue: existingVisit?.endDate)
         _purpose = State(initialValue: existingVisit?.purpose ?? .leisure)
@@ -587,6 +594,11 @@ struct TripEditorSheet: View {
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                     }
                     .buttonStyle(.plain)
+
+                    label("LOCATION (OPTIONAL)")
+                    TextField("States / Province / City / Place", text: $location)
+                        .padding()
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                     label("PURPOSE")
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -682,6 +694,7 @@ struct TripEditorSheet: View {
             startDate: startDate.map { Calendar.current.startOfDay(for: $0) },
             endDate: endDate.map { Calendar.current.startOfDay(for: $0) },
             purpose: purpose,
+            location: location,
             notes: notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes
         )
         if existingVisit == nil {

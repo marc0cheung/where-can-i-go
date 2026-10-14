@@ -7,6 +7,7 @@ struct Visit: Codable, Identifiable, Hashable {
     var startDate: Date?
     var endDate: Date?
     var purpose: VisitPurpose
+    var location: String?
     var notes: String?
 
     init(id: UUID = UUID(),
@@ -14,12 +15,15 @@ struct Visit: Codable, Identifiable, Hashable {
          startDate: Date? = nil,
          endDate: Date? = nil,
          purpose: VisitPurpose = .leisure,
+         location: String? = nil,
          notes: String? = nil) {
         self.id = id
         self.countryCode = countryCode
         self.startDate = startDate
         self.endDate = endDate
         self.purpose = purpose
+        let trimmedLocation = location?.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.location = trimmedLocation?.isEmpty == false ? trimmedLocation : nil
         self.notes = notes
     }
 

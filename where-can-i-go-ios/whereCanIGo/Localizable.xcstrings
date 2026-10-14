@@ -1611,6 +1611,22 @@
         }
       }
     },
+    "LOCATION (OPTIONAL)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地点（可选）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地點（選填）"
+          }
+        }
+      }
+    },
     "Log a Visit" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2027,6 +2043,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "請選擇國家或地區。"
+          }
+        }
+      }
+    },
+    "States / Province / City / Place" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "州 / 省 / 市 / 地点"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "州 / 省 / 市 / 地點"
           }
         }
       }
