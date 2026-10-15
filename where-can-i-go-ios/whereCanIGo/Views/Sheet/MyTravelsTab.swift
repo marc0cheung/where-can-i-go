@@ -199,6 +199,11 @@ struct TravelStats {
 
 // MARK: - Compact Summary Card
 
+private enum TravelCardPalette {
+    static let colors = [Color(red: 0.30, green: 0.18, blue: 0.55),
+                         Color(red: 0.08, green: 0.25, blue: 0.42)]
+}
+
 struct TravelSummaryCard: View {
     let stats: TravelStats
 
@@ -211,8 +216,7 @@ struct TravelSummaryCard: View {
             tripLabel: stats.tripCount == 1 ? "trip" : "trips",
             flags: stats.flags, continentCount: stats.continentCount,
             days: stats.totalDays.formatted(), daysLabel: "Days", showsChevron: true,
-            colors: [Color(red: 0.18, green: 0.14, blue: 0.45),
-                     Color(red: 0.10, green: 0.16, blue: 0.42)]
+            colors: TravelCardPalette.colors
         )
     }
 }
@@ -416,7 +420,6 @@ struct TravelPassportCard: View {
             }
 
             HStack(spacing: 12) {
-                statBlock("\(stats.tripCount)", "Trips")
                 statBlock("\(stats.continentCount)", "Continents")
                 statBlock("\(stats.totalDays)", "Days")
             }
@@ -438,8 +441,7 @@ struct TravelPassportCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             LinearGradient(
-                colors: [Color(red: 0.20, green: 0.15, blue: 0.50),
-                         Color(red: 0.08, green: 0.13, blue: 0.38)],
+                colors: TravelCardPalette.colors,
                 startPoint: .topLeading, endPoint: .bottomTrailing
             ),
             in: RoundedRectangle(cornerRadius: 24, style: .continuous)
