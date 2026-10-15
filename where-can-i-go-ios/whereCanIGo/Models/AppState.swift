@@ -14,7 +14,11 @@ final class AppState: ObservableObject {
     @Published var diceSpinTarget: String? = nil
     @Published private(set) var visaReferenceDate: Date = Date()
 
-    private let store = DataStore()
+    private let store: DataStore
+
+    init(store: DataStore? = nil) {
+        self.store = store ?? DataStore()
+    }
 
     // MARK: - Lifecycle
 
@@ -100,6 +104,45 @@ final class AppState: ObservableObject {
     /// Set of ISO3 codes with at least one logged visit.
     var visitedCountryCodes: Set<String> {
         Set(data.visits.map { $0.countryCode })
+    }
+
+    func plannedTrips(for code: String) -> [PlannedTrip] {
+        data.plannedTrips.filter { $0.countryCode == code }.sorted {
+            if $0.createdAt == $1.createdAt { return $0.id.uuidString < $1.id.uuidString }
+            return $0.createdAt > $1.createdAt
+        }
+    }
+
+    func addPlannedTrip(_ trip: PlannedTrip) throws {
+        var updated = data
+        updated.plannedTrips.append(trip)
+        try store.saveAppData(updated)
+        data = updated
+    }
+
+    func updatePlannedTrip(_ trip: PlannedTrip) throws {
+        var updated = data
+        guard let index = updated.plannedTrips.firstIndex(where: { $0.id == trip.id }) else {
+            throw PlannedTripError.notFound
+        }
+        updated.plannedTrips[index] = trip
+        try store.saveAppData(updated)
+        data = updated
+    }
+
+    func removePlannedTrip(_ id: UUID) throws {
+        var updated = data
+        guard updated.plannedTrips.contains(where: { $0.id == id }) else { throw PlannedTripError.notFound }
+        updated.plannedTrips.removeAll { $0.id == id }
+        try store.saveAppData(updated)
+        data = updated
+    }
+
+    func completePlannedTrip(_ id: UUID, with visit: Visit) throws {
+        var updated = data
+        try updated.completePlannedTrip(id, with: visit)
+        try store.saveAppData(updated)
+        data = updated
     }
 
     // MARK: - Helpers

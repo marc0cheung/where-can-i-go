@@ -9,6 +9,7 @@ struct MyTravelsTab: View {
     @State private var showAddTrip = false
     @State private var addTripInitialCountry: Country? = nil
     @State private var countryDetail: Country? = nil
+    @State private var showingWishlist = false
 
     /// Visited countries grouped with their visits, most-recent country first.
     private var visitedGroups: [(country: Country, visits: [Visit])] {
@@ -27,40 +28,35 @@ struct MyTravelsTab: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Where I've Been").font(.headline)
-
-                Button { showSummary = true } label: {
-                    TravelSummaryCard(stats: TravelStats(appState: appState))
+                Picker("Travel view", selection: $showingWishlist) {
+                    Text("Been").tag(false)
+                    Text("Wishlist").tag(true)
                 }
-                .buttonStyle(.plain)
+                .pickerStyle(.segmented)
 
-                Button {
-                    addTripInitialCountry = nil
-                    showAddTrip = true
-                } label: {
-                    Label("Log a Visit", systemImage: "plus.circle.fill")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
+                Text(showingWishlist ? "Where I Want to Go" : "Where I've Been")
+                    .font(.headline)
 
-                if visitedGroups.isEmpty {
-                    emptyState
-                } else {
-                    Text("Countries")
-                        .font(.subheadline.bold())
-                        .foregroundStyle(.secondary)
-
-                    LazyVStack(spacing: 8) {
-                        ForEach(visitedGroups, id: \.country.id) { group in
-                            Button { countryDetail = group.country } label: {
-                                countryRow(group.country, visits: group.visits)
-                            }
-                            .buttonStyle(.plain)
-                        }
+                ZStack {
+                    Button { showSummary = true } label: {
+                        TravelSummaryCard(stats: TravelStats(appState: appState))
                     }
+                    .buttonStyle(.plain)
+                    .opacity(showingWishlist ? 0 : 1)
+                    .allowsHitTesting(!showingWishlist)
+                    .accessibilityHidden(showingWishlist)
+
+                    WishlistSummaryCard(stats: WishlistStats(trips: appState.data.plannedTrips,
+                                                           countries: appState.countries))
+                        .opacity(showingWishlist ? 1 : 0)
+                        .allowsHitTesting(showingWishlist)
+                        .accessibilityHidden(!showingWishlist)
+                }
+
+                if showingWishlist {
+                    WishlistSection()
+                } else {
+                    visitedContent
                 }
             }
             .padding()
@@ -78,9 +74,43 @@ struct MyTravelsTab: View {
         .onAppear { handlePendingVisit(appState.pendingAddVisitCountryCode) }
     }
 
+    private var visitedContent: some View {
+        Group {
+            Button {
+                addTripInitialCountry = nil
+                showAddTrip = true
+            } label: {
+                Label("Log a Visit", systemImage: "plus.circle.fill")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+
+            if visitedGroups.isEmpty {
+                emptyState
+            } else {
+                Text("Countries")
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.secondary)
+
+                LazyVStack(spacing: 8) {
+                    ForEach(visitedGroups, id: \.country.id) { group in
+                        Button { countryDetail = group.country } label: {
+                            countryRow(group.country, visits: group.visits)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
     private func handlePendingVisit(_ code: String?) {
         guard let code, let country = appState.country(for: code) else { return }
         appState.pendingAddVisitCountryCode = nil
+        showingWishlist = false
         addTripInitialCountry = country
         showAddTrip = true
     }
@@ -173,78 +203,113 @@ struct TravelSummaryCard: View {
     let stats: TravelStats
 
     var body: some View {
+        TravelCompactCard(
+            title: "ALL-TIME TRAVELS",
+            countryCount: stats.countryCount,
+            countryLabel: stats.countryCount == 1 ? "country visited" : "countries visited",
+            tripCount: stats.tripCount,
+            tripLabel: stats.tripCount == 1 ? "trip" : "trips",
+            flags: stats.flags, continentCount: stats.continentCount,
+            days: stats.totalDays.formatted(), daysLabel: "Days", showsChevron: true,
+            colors: [Color(red: 0.18, green: 0.14, blue: 0.45),
+                     Color(red: 0.10, green: 0.16, blue: 0.42)]
+        )
+    }
+}
+
+struct TravelCompactCard: View {
+    let title: LocalizedStringResource
+    let countryCount: Int
+    let countryLabel: LocalizedStringResource
+    let tripCount: Int
+    let tripLabel: LocalizedStringResource
+    let flags: [String]
+    let continentCount: Int
+    let days: String
+    let daysLabel: LocalizedStringResource
+    var showsChevron = false
+    var durationNotice: LocalizedStringResource? = nil
+    let colors: [Color]
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("ALL-TIME TRAVELS")
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(title)
+                        .textCase(.uppercase)
                         .font(.caption2.weight(.bold))
                         .foregroundStyle(.white.opacity(0.7))
-                    HStack(alignment: .top, spacing: 16) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("\(stats.countryCount)")
-                                .font(.system(size: 40, weight: .bold))
-                                .foregroundStyle(.white)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.5)
-                            Text(stats.countryCount == 1 ? "country visited" : "countries visited")
-                                .font(.caption)
-                                .foregroundStyle(.white.opacity(0.8))
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("\(stats.tripCount)")
-                                .font(.system(size: 40, weight: .bold))
-                                .foregroundStyle(.white)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.5)
-                            Text(stats.tripCount == 1 ? "trip" : "trips")
-                                .font(.caption)
-                                .foregroundStyle(.white.opacity(0.8))
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    Spacer(minLength: 8)
+                    Image(systemName: "chevron.right")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white.opacity(showsChevron ? 0.6 : 0))
+                        .accessibilityHidden(true)
                 }
-                Image(systemName: "chevron.right")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.6))
-            }
-
-            if !stats.flags.isEmpty {
-                HStack(spacing: 2) {
-                    ForEach(Array(stats.flags.prefix(12)), id: \.self) { flag in
-                        Text(flag).font(.body)
-                    }
-                    if stats.flags.count > 12 {
-                        Text("+\(stats.flags.count - 12)")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(.white.opacity(0.8))
-                    }
+                HStack(alignment: .top, spacing: 16) {
+                    countBlock(countryCount, label: countryLabel)
+                    countBlock(tripCount, label: tripLabel)
                 }
             }
+
+            if !flags.isEmpty {
+                ViewThatFits(in: .horizontal) {
+                    ForEach([12, 8, 4, 1], id: \.self) { limit in
+                        HStack(spacing: 2) {
+                            ForEach(Array(flags.prefix(limit).enumerated()), id: \.offset) { _, flag in
+                                Text(flag).font(.body)
+                            }
+                            if flags.count > limit {
+                                Text("+\(flags.count - limit)")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(.white.opacity(0.8))
+                            }
+                        }
+                        .fixedSize()
+                    }
+                }
+                .accessibilityHidden(true)
+            }
+
+            Spacer(minLength: 0)
 
             HStack(spacing: 0) {
-                miniStat("\(stats.tripCount)", "Trips")
+                miniStat(continentCount.formatted(), "Continents")
                 Divider().frame(height: 28).overlay(.white.opacity(0.25))
-                miniStat("\(stats.continentCount)", "Continents")
-                Divider().frame(height: 28).overlay(.white.opacity(0.25))
-                miniStat("\(stats.totalDays)", "Days")
+                miniStat(days, daysLabel)
+            }
+
+            if let durationNotice {
+                Text(durationNotice)
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.8))
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(18)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(
-            LinearGradient(
-                colors: [Color(red: 0.18, green: 0.14, blue: 0.45),
-                         Color(red: 0.10, green: 0.16, blue: 0.42)],
-                startPoint: .topLeading, endPoint: .bottomTrailing
-            ),
+            LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing),
             in: RoundedRectangle(cornerRadius: 20, style: .continuous)
         )
+    }
+
+    private func countBlock(_ value: Int, label: LocalizedStringResource) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(value.formatted())
+                .font(.system(size: 40, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+            Text(label).font(.caption).foregroundStyle(.white.opacity(0.8))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
     }
 
     private func miniStat(_ value: String, _ label: LocalizedStringResource) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.headline.weight(.bold)).foregroundStyle(.white)
+                .lineLimit(1).minimumScaleFactor(0.5)
             Text(label)
                 .textCase(.uppercase)
                 .font(.caption2.weight(.semibold))
@@ -552,6 +617,7 @@ struct TripEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let existingVisit: Visit?
+    let completingTrip: PlannedTrip?
 
     @State private var country: Country?
     @State private var showCountryPicker = false
@@ -560,15 +626,20 @@ struct TripEditorSheet: View {
     @State private var endDate: Date?
     @State private var purpose: VisitPurpose
     @State private var notes: String
+    @State private var isSaving = false
+    @State private var showSaveError = false
+    @State private var saveErrorMessage = ""
 
-    init(existingVisit: Visit?, initialCountry: Country?) {
+    init(existingVisit: Visit?, initialCountry: Country?, completingTrip: PlannedTrip? = nil) {
         self.existingVisit = existingVisit
+        self.completingTrip = completingTrip
+        let draft = existingVisit ?? completingTrip?.visitDraft
         _country = State(initialValue: initialCountry)
-        _location = State(initialValue: existingVisit?.location ?? "")
-        _startDate = State(initialValue: existingVisit?.startDate)
-        _endDate = State(initialValue: existingVisit?.endDate)
-        _purpose = State(initialValue: existingVisit?.purpose ?? .leisure)
-        _notes = State(initialValue: existingVisit?.notes ?? "")
+        _location = State(initialValue: draft?.location ?? "")
+        _startDate = State(initialValue: draft?.startDate)
+        _endDate = State(initialValue: draft?.endDate)
+        _purpose = State(initialValue: draft?.purpose ?? .leisure)
+        _notes = State(initialValue: draft?.notes ?? "")
     }
 
     private var canSave: Bool { country != nil }
@@ -601,14 +672,7 @@ struct TripEditorSheet: View {
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                     label("PURPOSE")
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(VisitPurpose.allCases) { p in
-                                purposeChip(p)
-                            }
-                        }
-                        .padding(.vertical, 2)
-                    }
+                    VisitPurposePicker(selection: $purpose)
 
                     label("DATES")
                     VStack(spacing: 0) {
@@ -646,38 +710,26 @@ struct TripEditorSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle(existingVisit == nil ? "Log a Visit" : "Edit Visit")
+            .navigationTitle(existingVisit != nil ? "Edit Visit" : completingTrip != nil ? "Complete Trip" : "Log a Visit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Save") { save() }.disabled(!canSave)
+                    Button(completingTrip == nil ? "Save" : "Complete") { save() }
+                        .disabled(!canSave || isSaving)
                 }
             }
             .sheet(isPresented: $showCountryPicker) {
                 CountryPickerSheet(selected: $country)
             }
+            .alert("Couldn't Save", isPresented: $showSaveError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(saveErrorMessage)
+            }
         }
-    }
-
-    private func purposeChip(_ p: VisitPurpose) -> some View {
-        let selected = purpose == p
-        return Button { purpose = p } label: {
-            Label(p.localizedDisplayName, systemImage: p.systemImage)
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .foregroundStyle(selected ? p.color : .secondary)
-                .background(
-                    Capsule().fill(selected ? p.color.opacity(0.18) : Color(.systemGray6))
-                )
-                .overlay(
-                    Capsule().stroke(selected ? p.color : .clear, lineWidth: 1.5)
-                )
-        }
-        .buttonStyle(.plain)
     }
 
     private func label(_ text: LocalizedStringResource) -> some View {
@@ -687,9 +739,11 @@ struct TripEditorSheet: View {
     }
 
     private func save() {
-        guard let country else { return }
+        guard let country, !isSaving else { return }
+        isSaving = true
+        defer { isSaving = false }
         let visit = Visit(
-            id: existingVisit?.id ?? UUID(),
+            id: existingVisit?.id ?? completingTrip?.id ?? UUID(),
             countryCode: country.code,
             startDate: startDate.map { Calendar.current.startOfDay(for: $0) },
             endDate: endDate.map { Calendar.current.startOfDay(for: $0) },
@@ -697,12 +751,54 @@ struct TripEditorSheet: View {
             location: location,
             notes: notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes
         )
-        if existingVisit == nil {
+        if let completingTrip {
+            do {
+                try appState.completePlannedTrip(completingTrip.id, with: visit)
+            } catch {
+                saveErrorMessage = error is PlannedTripError
+                    ? String(localized: "This planned trip is no longer available.")
+                    : String(localized: "Your changes weren't saved. Please try again.")
+                showSaveError = true
+                return
+            }
+        } else if existingVisit == nil {
             appState.addVisit(visit)
         } else {
             appState.updateVisit(visit)
         }
         dismiss()
+    }
+}
+
+struct VisitPurposePicker: View {
+    @Binding var selection: VisitPurpose
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(VisitPurpose.allCases) { option in
+                    Button { selection = option } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: option.systemImage).imageScale(.small)
+                            Text(option.localizedDisplayName)
+                        }
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .foregroundStyle(selection == option ? option.color : .secondary)
+                        .background(
+                            Capsule().fill(selection == option ? option.color.opacity(0.18) : Color(.systemGray6))
+                        )
+                        .overlay(
+                            Capsule().stroke(selection == option ? option.color : .clear, lineWidth: 1.5)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selection == option ? .isSelected : [])
+                }
+            }
+            .padding(.vertical, 2)
+        }
     }
 }
 

@@ -4,118 +4,6 @@
     "" : {
 
     },
-    "%@, %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@，%2$@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@，%2$@"
-          }
-        }
-      }
-    },
-    "Accessible Countries Only" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "仅限可前往的国家"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "僅限可前往的國家"
-          }
-        }
-      }
-    },
-    "Dice Options" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "骰子选项"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "骰子選項"
-          }
-        }
-      }
-    },
-    "Include All Entry Requirements" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不限入境要求"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不限入境要求"
-          }
-        }
-      }
-    },
-    "No countries match your current passport and dice options." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "没有符合当前护照和骰子选项的国家。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "沒有符合目前護照和骰子選項的國家。"
-          }
-        }
-      }
-    },
-    "OK" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "确定"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "確定"
-          }
-        }
-      }
-    },
-    "Touch and hold to change dice options." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "长按以更改骰子选项。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "長按以更改骰子選項。"
-          }
-        }
-      }
-    },
     "· %lld %@" : {
       "localizations" : {
         "en" : {
@@ -230,6 +118,22 @@
         }
       }
     },
+    "%@, %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@，%2$@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@，%2$@"
+          }
+        }
+      }
+    },
     "%@%@" : {
       "localizations" : {
         "en" : {
@@ -312,6 +216,177 @@
         }
       }
     },
+    "%lld countries added" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld country added"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld countries added"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已加入 %lld 个国家"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已加入 %lld 個國家"
+          }
+        }
+      }
+    },
+    "%lld days planned" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld day planned"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld days planned"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "计划 %lld 天"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計劃 %lld 天"
+          }
+        }
+      }
+    },
+    "%lld estimated days" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld estimated day"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld estimated days"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预估 %lld 天"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預估 %lld 天"
+          }
+        }
+      }
+    },
+    "%lld trips planned" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld trip planned"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld trips planned"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个计划行程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 個計劃行程"
+          }
+        }
+      }
+    },
+    "%lld trips without duration" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld trip without duration"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld trips without duration"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有 %lld 个行程未设置时长"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有 %lld 個行程未設定時長"
+          }
+        }
+      }
+    },
     "+%lld" : {
       "localizations" : {
         "zh-Hans" : {
@@ -324,6 +399,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+%lld"
+          }
+        }
+      }
+    },
+    "Accessible Countries Only" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅限可前往的国家"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "僅限可前往的國家"
           }
         }
       }
@@ -404,6 +495,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新增個人簽證"
+          }
+        }
+      }
+    },
+    "Add Planned Trip" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加计划行程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增計劃行程"
+          }
+        }
+      }
+    },
+    "Add to Wishlist" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加入心愿清单"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加入願望清單"
           }
         }
       }
@@ -580,6 +703,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "附件（可選）"
+          }
+        }
+      }
+    },
+    "Been" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "足迹"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "足跡"
           }
         }
       }
@@ -820,6 +959,38 @@
         }
       }
     },
+    "Complete" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
+          }
+        }
+      }
+    },
+    "Complete Trip" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成行程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成行程"
+          }
+        }
+      }
+    },
     "Continent" : {
       "localizations" : {
         "zh-Hans" : {
@@ -852,6 +1023,22 @@
         }
       }
     },
+    "Couldn't Save" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法保存"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法儲存"
+          }
+        }
+      }
+    },
     "countries" : {
       "localizations" : {
         "zh-Hans" : {
@@ -880,6 +1067,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "國家或地區"
+          }
+        }
+      }
+    },
+    "countries added" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个已加入国家"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個已加入國家"
           }
         }
       }
@@ -965,6 +1168,22 @@
         }
       }
     },
+    "country added" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个已加入国家"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個已加入國家"
+          }
+        }
+      }
+    },
     "country visited" : {
       "localizations" : {
         "zh-Hans" : {
@@ -977,6 +1196,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "個已到訪國家或地區"
+          }
+        }
+      }
+    },
+    "Dates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期"
           }
         }
       }
@@ -1045,6 +1280,38 @@
         }
       }
     },
+    "Days Planned" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "计划天数"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計劃天數"
+          }
+        }
+      }
+    },
+    "Decrease estimated days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "减少预估天数"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "減少預估天數"
+          }
+        }
+      }
+    },
     "Delete" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1093,6 +1360,22 @@
         }
       }
     },
+    "Delete Planned Trip" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除计划行程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刪除計劃行程"
+          }
+        }
+      }
+    },
     "Delete Visit" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1109,6 +1392,22 @@
         }
       }
     },
+    "Dice Options" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "骰子选项"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "骰子選項"
+          }
+        }
+      }
+    },
     "Done" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1121,6 +1420,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "完成"
+          }
+        }
+      }
+    },
+    "Duration" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时长"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時長"
           }
         }
       }
@@ -1237,6 +1552,22 @@
         }
       }
     },
+    "Edit Planned Trip" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑计划行程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編輯計劃行程"
+          }
+        }
+      }
+    },
     "Edit Visit" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1326,6 +1657,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "結束日期"
+          }
+        }
+      }
+    },
+    "Enter a positive whole number of days." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入大于零的整数天数。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請輸入大於零的整數天數。"
           }
         }
       }
@@ -1429,6 +1776,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "落地簽"
+          }
+        }
+      }
+    },
+    "Estimate" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预估"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預估"
+          }
+        }
+      }
+    },
+    "Estimated days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预估天数"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預估天數"
           }
         }
       }
@@ -1638,6 +2017,38 @@
         }
       }
     },
+    "Include All Entry Requirements" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不限入境要求"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不限入境要求"
+          }
+        }
+      }
+    },
+    "Increase estimated days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "增加预估天数"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "增加預估天數"
+          }
+        }
+      }
+    },
     "Issuing Country" : {
       "localizations" : {
         "en" : {
@@ -1826,6 +2237,22 @@
         }
       }
     },
+    "Mark Completed" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "标记为已完成"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "標記為已完成"
+          }
+        }
+      }
+    },
     "More to come…" : {
       "comment" : "A section title for passports that are not yet supported.",
       "isCommentAutoGenerated" : true,
@@ -1920,6 +2347,22 @@
         }
       }
     },
+    "No countries match your current passport and dice options." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有符合当前护照和骰子选项的国家。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有符合目前護照和骰子選項的國家。"
+          }
+        }
+      }
+    },
     "No dates" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1932,6 +2375,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無日期"
+          }
+        }
+      }
+    },
+    "No duration set" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未设置时长"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未設定時長"
           }
         }
       }
@@ -1980,6 +2439,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "北美洲"
+          }
+        }
+      }
+    },
+    "Not set" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未设置"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未設定"
           }
         }
       }
@@ -2044,6 +2519,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "大洋洲"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "確定"
           }
         }
       }
@@ -2182,18 +2673,19 @@
         }
       }
     },
-    "States / Province / City / Place" : {
+    "Purpose" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "州 / 省 / 市 / 地点"
+            "value" : "目的"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "州 / 省 / 市 / 地點"
+            "value" : "目的"
           }
         }
       }
@@ -2602,6 +3094,22 @@
         }
       }
     },
+    "States / Province / City / Place" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "州 / 省 / 市 / 地点"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "州 / 省 / 市 / 地點"
+          }
+        }
+      }
+    },
     "Study" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2684,6 +3192,22 @@
         }
       }
     },
+    "This planned trip is no longer available." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此计划行程已不存在。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此計劃行程已不存在。"
+          }
+        }
+      }
+    },
     "This saved visa will be permanently deleted. This cannot be undone." : {
       "localizations" : {
         "zh-Hans" : {
@@ -2712,6 +3236,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可入境總數"
+          }
+        }
+      }
+    },
+    "Touch and hold to change dice options." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "长按以更改骰子选项。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按以更改骰子選項。"
           }
         }
       }
@@ -2748,6 +3288,22 @@
         }
       }
     },
+    "Travel view" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行视图"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行檢視"
+          }
+        }
+      }
+    },
     "trip" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2760,6 +3316,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "次旅程"
+          }
+        }
+      }
+    },
+    "Trip actions" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程操作"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程操作"
+          }
+        }
+      }
+    },
+    "trip planned" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个计划行程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個計劃行程"
           }
         }
       }
@@ -2792,6 +3380,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "旅程"
+          }
+        }
+      }
+    },
+    "trips planned" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个计划行程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個計劃行程"
           }
         }
       }
@@ -3022,6 +3626,22 @@
         }
       }
     },
+    "Visited before" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曾经到访"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曾經到訪"
+          }
+        }
+      }
+    },
     "Visited Status" : {
       "localizations" : {
         "zh-Hans" : {
@@ -3086,6 +3706,22 @@
         }
       }
     },
+    "Where I Want to Go" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我想去的地方"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我想去的地方"
+          }
+        }
+      }
+    },
     "Where I've Been" : {
       "localizations" : {
         "zh-Hans" : {
@@ -3114,6 +3750,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "我去過的地方"
+          }
+        }
+      }
+    },
+    "Wishlist" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "心愿清单"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "願望清單"
+          }
+        }
+      }
+    },
+    "Your changes weren't saved. Please try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更改未保存，请重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "變更尚未儲存，請重試。"
+          }
+        }
+      }
+    },
+    "Your wishlist is empty" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "心愿清单还是空的"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "願望清單目前是空的"
           }
         }
       }
