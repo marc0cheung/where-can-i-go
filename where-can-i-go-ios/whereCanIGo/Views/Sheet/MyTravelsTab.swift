@@ -132,35 +132,50 @@ struct MyTravelsTab: View {
     }
 
     private func countryRow(_ country: Country, visits: [Visit]) -> some View {
-        let tripNoun = visits.count == 1 ? String(localized: "trip") : String(localized: "trips")
-        return HStack(spacing: 12) {
-            Text(country.flag).font(.title2).frame(width: 30)
+        TravelCountryRow(country: country, tripCount: visits.count)
+    }
+}
+
+struct TravelCountryRow: View {
+    let country: Country
+    let tripCount: Int
+    var showsVisitedBefore = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(country.flag)
+                .font(.title2)
+                .frame(width: 30)
+                .accessibilityHidden(true)
+
             VStack(alignment: .leading, spacing: 2) {
-                Text(country.localizedName()).font(.subheadline.weight(.semibold))
-                Text(rowSubtitle(for: visits))
+                Text(country.localizedName())
+                    .font(.subheadline.weight(.semibold))
+                Text("\(tripCount) trips")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
             }
-            Spacer()
-            Text("\(visits.count) \(tripNoun)")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(.thinMaterial, in: Capsule())
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            if showsVisitedBefore {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .accessibilityLabel(Text("Visited before"))
+                    .help(Text("Visited before"))
+            }
+
             Image(systemName: "chevron.right")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 12)
+        .frame(minHeight: 44)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-    }
-
-    private func rowSubtitle(for visits: [Visit]) -> String {
-        guard let latest = visits.first else { return String(localized: "No dates") }
-        return TravelFormat.dateRange(latest)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -232,7 +247,6 @@ struct TravelCompactCard: View {
     let days: String
     let daysLabel: LocalizedStringResource
     var showsChevron = false
-    var durationNotice: LocalizedStringResource? = nil
     let colors: [Color]
 
     var body: some View {
@@ -280,13 +294,6 @@ struct TravelCompactCard: View {
                 miniStat(continentCount.formatted(), "Continents")
                 Divider().frame(height: 28).overlay(.white.opacity(0.25))
                 miniStat(days, daysLabel)
-            }
-
-            if let durationNotice {
-                Text(durationNotice)
-                    .font(.caption2)
-                    .foregroundStyle(.white.opacity(0.8))
-                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(18)

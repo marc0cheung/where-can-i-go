@@ -5,7 +5,7 @@ struct WishlistStats {
     let tripCount: Int
     let continentCount: Int
     let totalDays: Int
-    let unknownDurationCount: Int
+    let datedTripCount: Int
     let flags: [String]
 
     init(trips: [PlannedTrip], countries: [Country]) {
@@ -15,12 +15,12 @@ struct WishlistStats {
         continentCount = Set(codes.compactMap { code in
             Continent.of(code) ?? (["HKG", "MAC"].contains(code) ? .asia : nil)
         }).count
-        let durations = trips.compactMap(\.plannedDayCount)
+        let durations = trips.filter { $0.durationMode == .dates }.compactMap(\.plannedDayCount)
         totalDays = durations.reduce(0) { total, days in
             let result = total.addingReportingOverflow(days)
             return result.overflow ? Int.max : result.partialValue
         }
-        unknownDurationCount = trips.count - durations.count
+        datedTripCount = durations.count
         flags = countries.filter { codes.contains($0.code) }.map(\.flag).sorted()
     }
 }
@@ -78,31 +78,11 @@ struct WishlistSection: View {
 
     private func countryRow(_ country: Country) -> some View {
         let plans = appState.plannedTrips(for: country.code)
-        let places = plans.compactMap(\.location).prefix(2)
-        return HStack(spacing: 12) {
-            Text(country.flag).font(.title2).frame(width: 30)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(country.localizedName()).font(.subheadline.weight(.semibold))
-                Text("\(plans.count) trips planned")
-                    .font(.caption).foregroundStyle(.secondary)
-                if !places.isEmpty {
-                    Text(Array(places).formatted(.list(type: .and)))
-                        .font(.caption).foregroundStyle(.secondary).lineLimit(2)
-                }
-            }
-            Spacer(minLength: 8)
-            if appState.visitedCountryCodes.contains(country.code) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-                    .accessibilityLabel(Text("Visited before"))
-                    .help(Text("Visited before"))
-            }
-            Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.secondary)
-        }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 12)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-        .accessibilityElement(children: .combine)
+        return TravelCountryRow(
+            country: country,
+            tripCount: plans.count,
+            showsVisitedBefore: appState.visitedCountryCodes.contains(country.code)
+        )
     }
 }
 
@@ -116,11 +96,9 @@ struct WishlistSummaryCard: View {
             tripCount: stats.tripCount,
             tripLabel: stats.tripCount == 1 ? "trip planned" : "trips planned",
             flags: stats.flags, continentCount: stats.continentCount,
-            days: stats.tripCount > 0 && stats.unknownDurationCount == stats.tripCount
+            days: stats.tripCount > 0 && stats.datedTripCount == 0
                 ? "-" : stats.totalDays.formatted(),
             daysLabel: "Days Planned",
-            durationNotice: stats.unknownDurationCount > 0
-                ? "\(stats.unknownDurationCount) trips without duration" : nil,
             colors: [Color(red: 0.08, green: 0.34, blue: 0.30),
                      Color(red: 0.08, green: 0.25, blue: 0.34)]
         )
