@@ -78,10 +78,14 @@ Guidelines:
 - (iOS) Only supports iOS 26 or above. Currently iPadOS may experience UI issues. 
 
 ## Feature Backlog
+- Add Swipe gesture to items of all tabs
+- Refine the country border lines display & enhance performance
+- Export App Record with JSON file
+- Friends Function via AirDrop
+- Redirect to Google Search of the country after lucky draw
+- Travel Journal
 - Detect (with GPS permission ON) & save visited countries
-- Shareable cards: Export a country's visa summary / visited countries as an image
 - Multiple passport(s) support
-- Multiple languages support
 
 ## License
 
