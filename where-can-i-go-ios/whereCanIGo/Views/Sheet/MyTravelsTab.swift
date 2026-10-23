@@ -10,6 +10,7 @@ struct MyTravelsTab: View {
     @State private var addTripInitialCountry: Country? = nil
     @State private var countryDetail: Country? = nil
     @State private var showingWishlist = false
+    @State private var addWishlistCountry: Country?
 
     /// Visited countries grouped with their visits, most-recent country first.
     private var visitedGroups: [(country: Country, visits: [Visit])] {
@@ -68,10 +69,19 @@ struct MyTravelsTab: View {
         .sheet(item: $countryDetail) { country in
             CountryTripsSheet(country: country)
         }
+        .sheet(item: $addWishlistCountry) { country in
+            PlannedTripEditorSheet(existingTrip: nil, initialCountry: country)
+        }
         .onChange(of: appState.pendingAddVisitCountryCode) { _, newCode in
             handlePendingVisit(newCode)
         }
-        .onAppear { handlePendingVisit(appState.pendingAddVisitCountryCode) }
+        .onChange(of: appState.pendingAddWishlistCountryCode) { _, newCode in
+            handlePendingWishlist(newCode)
+        }
+        .onAppear {
+            handlePendingVisit(appState.pendingAddVisitCountryCode)
+            handlePendingWishlist(appState.pendingAddWishlistCountryCode)
+        }
     }
 
     private var visitedContent: some View {
@@ -113,6 +123,14 @@ struct MyTravelsTab: View {
         showingWishlist = false
         addTripInitialCountry = country
         showAddTrip = true
+    }
+
+    private func handlePendingWishlist(_ code: String?) {
+        guard let code else { return }
+        appState.pendingAddWishlistCountryCode = nil
+        guard let country = appState.country(for: code) else { return }
+        showingWishlist = true
+        addWishlistCountry = country
     }
 
     private var emptyState: some View {

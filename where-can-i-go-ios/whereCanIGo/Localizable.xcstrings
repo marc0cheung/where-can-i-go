@@ -1239,6 +1239,22 @@
         }
       }
     },
+    "Country actions" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "国家操作"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "國家操作"
+          }
+        }
+      }
+    },
     "country added" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2293,6 +2309,7 @@
       }
     },
     "Mark as visited" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {

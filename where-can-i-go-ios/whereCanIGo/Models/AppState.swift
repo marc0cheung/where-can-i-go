@@ -11,6 +11,7 @@ final class AppState: ObservableObject {
     @Published var selectedCountryCode: String? = nil
     @Published var pendingAddVisaCountryCode: String? = nil
     @Published var pendingAddVisitCountryCode: String? = nil
+    @Published var pendingAddWishlistCountryCode: String? = nil
     @Published var diceSpinTarget: String? = nil
     @Published private(set) var visaReferenceDate: Date = Date()
 

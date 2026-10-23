@@ -54,41 +54,52 @@ struct CountryDetailCard: View {
                         .foregroundStyle(.white.opacity(0.6))
                 }
             }
+            .fixedSize(horizontal: false, vertical: true)
 
-            Spacer()
+            Spacer(minLength: 0)
 
-            HStack(spacing: 8) {
-                if category == .visaRequired {
+            HStack(spacing: 0) {
+                Menu {
                     Button {
-                        appState.pendingAddVisaCountryCode = countryCode
-                        selectedTab = .myVisas
+                        appState.pendingAddWishlistCountryCode = countryCode
+                        selectedTab = .myTravels
                         withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
                         appState.selectCountry(code: nil)
                     } label: {
-                        Image(systemName: "doc.badge.plus")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 28, height: 28)
-                            .background(.white.opacity(0.18), in: Circle())
+                        Label("Add to Wishlist", systemImage: "heart")
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Add Visa")
-                }
 
-                Button {
-                    appState.pendingAddVisitCountryCode = countryCode
-                    selectedTab = .myTravels
-                    withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
-                    appState.selectCountry(code: nil)
+                    Button {
+                        appState.pendingAddVisitCountryCode = countryCode
+                        selectedTab = .myTravels
+                        withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
+                        appState.selectCountry(code: nil)
+                    } label: {
+                        Label("Log a Visit", systemImage: "mappin.and.ellipse")
+                    }
+
+                    if category == .visaRequired {
+                        Button {
+                            appState.pendingAddVisaCountryCode = countryCode
+                            selectedTab = .myVisas
+                            withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
+                            appState.selectCountry(code: nil)
+                        } label: {
+                            Label("Add Visa", systemImage: "doc.badge.plus")
+                        }
+                    }
                 } label: {
-                    Image(systemName: "mappin.and.ellipse")
+                    Image(systemName: "ellipsis")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 28, height: 28)
                         .background(.white.opacity(0.18), in: Circle())
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Mark as visited")
+                .accessibilityLabel(Text("Country actions"))
+                .help(Text("Country actions"))
 
                 Button {
                     appState.selectCountry(code: nil)
@@ -98,9 +109,14 @@ struct CountryDetailCard: View {
                         .foregroundStyle(.white.opacity(0.6))
                         .frame(width: 28, height: 28)
                         .background(.white.opacity(0.15), in: Circle())
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(Text("Close"))
+                .help(Text("Close"))
             }
+            .fixedSize()
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
