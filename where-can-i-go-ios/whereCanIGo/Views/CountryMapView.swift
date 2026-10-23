@@ -196,6 +196,7 @@ struct CountryMapView: UIViewRepresentable {
                 } else {
                     // No GeoJSON data for this code — fall back to instant select.
                     appState.selectCountry(code: target)
+                    refreshOverlayColors(on: mapView)
                     appState.diceSpinTarget = nil
                     lastDiceSpinTarget = nil
                 }
@@ -262,7 +263,9 @@ struct CountryMapView: UIViewRepresentable {
             spinTimer?.invalidate()
             spinTimer = nil
             appState.selectCountry(code: spinTargetCode)
+            refreshOverlayColors(on: mapView)
             appState.diceSpinTarget = nil
+            lastDiceSpinTarget = nil
         }
 
         // MARK: - Tap handling
@@ -280,6 +283,7 @@ struct CountryMapView: UIViewRepresentable {
                 } else {
                     appState.selectCountry(code: tappedISO)
                 }
+                refreshOverlayColors(on: mapView)
             }
         }
 

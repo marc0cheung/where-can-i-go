@@ -17,8 +17,7 @@ struct MyVisasTab: View {
     // MARK: - Sheet presentation
     @State private var showVisaDetailsSheet = false
     @State private var visaBeingEdited: PersonalVisa? = nil
-    @State private var visaPendingDeletion: PersonalVisa? = nil
-    @State private var showDeleteConfirmation = false
+    @State private var visaPendingDeletion: RecordDeletion?
 
     // MARK: - Draft attachment state (Add flow)
     @State private var attachmentFileNames: [String] = []
@@ -28,7 +27,7 @@ struct MyVisasTab: View {
     @State private var errorMessage: String? = nil
 
     var body: some View {
-        ScrollView {
+        List {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Add Personal Visa").font(.headline)
 
@@ -65,30 +64,39 @@ struct MyVisasTab: View {
                     Text("ADD VISA")
                         .font(.headline).foregroundStyle(.white)
                         .frame(maxWidth: .infinity).padding()
-                        .background(canAdd ? Color.black : Color.gray.opacity(0.6),
-                                    in: RoundedRectangle(cornerRadius: 10))
+                        .background(
+                            canAdd ? Color.black : Color.gray.opacity(0.6),
+                            in: RoundedRectangle(cornerRadius: 10))
                 }
+                .buttonStyle(.plain)
 
                 Divider().padding(.vertical, 8)
 
-                // MARK: Saved list (unchanged)
                 Text("Saved Personal Visas").font(.headline)
-                if appState.data.personalVisas.isEmpty {
-                    Text("No personal visas yet.")
-                        .font(.caption).foregroundStyle(.secondary)
-                } else {
-                    ForEach(appState.data.personalVisas) { visa in
-                        personalVisaRow(visa)
-                    }
-                }
+            }
+            .padding(.vertical, 8)
+            .cardListRow()
 
-                if String(localized: "MyVisas.ShowExcelImport").lowercased() == "true" {
+            if appState.data.personalVisas.isEmpty {
+                Text("No personal visas yet.")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .cardListRow()
+            } else {
+                ForEach(appState.data.personalVisas) { visa in
+                    personalVisaRow(visa)
+                }
+            }
+
+            if String(localized: "MyVisas.ShowExcelImport").lowercased() == "true" {
+                VStack(alignment: .leading, spacing: 16) {
                     Divider().padding(.vertical, 8)
 
                     // MARK: Excel import
                     Text("Import from Excel").font(.headline)
-                    Text("Load visa records from the MyVisa sheet of an .xlsx file.\nColumns: Country, Visa Type, Duration, Expire Date (dd-mm-yyyy), Notes.")
-                        .font(.caption).foregroundStyle(.secondary)
+                    Text(
+                        "Load visa records from the MyVisa sheet of an .xlsx file.\nColumns: Country, Visa Type, Duration, Expire Date (dd-mm-yyyy), Notes."
+                    )
+                    .font(.caption).foregroundStyle(.secondary)
                     Button {
                         // TODO: implement Excel import
                     } label: {
@@ -99,21 +107,11 @@ struct MyVisasTab: View {
                     }
                     .disabled(true)
                 }
+                .cardListRow()
             }
-            .padding()
         }
-        .alert("Delete Personal Visa?", isPresented: $showDeleteConfirmation, presenting: visaPendingDeletion) { visa in
-            Button("Delete", role: .destructive) {
-                appState.removePersonalVisa(visa.id)
-                visaPendingDeletion = nil
-            }
-            Button("Cancel", role: .cancel) {
-                visaPendingDeletion = nil
-            }
-        } message: { visa in
-            let countryName = appState.country(for: visa.countryCode)?.localizedName() ?? visa.countryCode
-            Text("\(countryName) · \(visa.visaType)\n\n\(Text("This saved visa will be permanently deleted. This cannot be undone."))")
-        }
+        .cardListStyle()
+        .recordDeletionConfirmation($visaPendingDeletion)
         .sheet(isPresented: $showVisaDetailsSheet) {
             VisaDetailsSheet(
                 country: country,
@@ -346,8 +344,9 @@ struct MyVisasTab: View {
                         Text("Valid from \(effectiveDate.formatted(date: .abbreviated, time: .omitted))")
                             .font(.caption2)
                             .foregroundStyle(
-                                Calendar.current.startOfDay(for: effectiveDate) >
-                                Calendar.current.startOfDay(for: appState.visaReferenceDate) ? Color.orange : Color.secondary
+                                Calendar.current.startOfDay(for: effectiveDate)
+                                    > Calendar.current.startOfDay(for: appState.visaReferenceDate)
+                                    ? Color.orange : Color.secondary
                             )
                     }
                     Text("Expires \(v.expiryDate.formatted(date: .abbreviated, time: .omitted))")
@@ -361,17 +360,28 @@ struct MyVisasTab: View {
             }
             .padding()
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
         }
         .buttonStyle(.plain)
-        .overlay(alignment: .trailing) {
-            Button(role: .destructive) {
-                visaPendingDeletion = v
-                showDeleteConfirmation = true
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button {
+                visaPendingDeletion = deletionRequest(for: v)
             } label: {
-                Image(systemName: "xmark.circle.fill").foregroundStyle(.gray)
+                Image(systemName: "trash")
             }
-            .accessibilityLabel("Delete Personal Visa")
-            .padding(.trailing)
+            .accessibilityLabel(Text("Delete"))
+            .tint(.red)
+        }
+        .cardListRow()
+    }
+
+    private func deletionRequest(for visa: PersonalVisa) -> RecordDeletion {
+        .visa(
+            country: appState.country(for: visa.countryCode)?.localizedName() ?? visa.countryCode,
+            type: visa.visaType
+        ) {
+            appState.removePersonalVisa(visa.id)
         }
     }
 }

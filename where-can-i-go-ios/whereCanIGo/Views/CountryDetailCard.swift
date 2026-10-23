@@ -7,8 +7,12 @@ struct CountryDetailCard: View {
     let countryCode: String
     @Binding var selectedTab: PanelTab
     @Binding var panelState: PanelState
+    let onReviewWishlist: () -> Void
 
     private var country: Country? { appState.country(for: countryCode) }
+    private var hasPlans: Bool {
+        appState.data.plannedTrips.contains { $0.countryCode == countryCode }
+    }
 
     private var eligibility: VisaEligibility { appState.visaEligibility(for: countryCode) }
     private var category: VisaCategory { eligibility.category }
@@ -60,13 +64,19 @@ struct CountryDetailCard: View {
 
             HStack(spacing: 0) {
                 Menu {
-                    Button {
-                        appState.pendingAddWishlistCountryCode = countryCode
-                        selectedTab = .myTravels
-                        withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
-                        appState.selectCountry(code: nil)
-                    } label: {
-                        Label("Add to Wishlist", systemImage: "heart")
+                    if hasPlans {
+                        Button(action: onReviewWishlist) {
+                            Label("Review Wishlist", systemImage: "heart.fill")
+                        }
+                    } else {
+                        Button {
+                            appState.pendingAddWishlistCountryCode = countryCode
+                            selectedTab = .myTravels
+                            withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
+                            appState.selectCountry(code: nil)
+                        } label: {
+                            Label("Add to Wishlist", systemImage: "heart")
+                        }
                     }
 
                     Button {

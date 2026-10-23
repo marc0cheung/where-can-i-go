@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var selectedDiceContinents: Set<Continent> = []
     @State private var diceIncludesAllEntryRequirements = false
     @State private var isMapLoading = true
+    @State private var wishlistCountry: Country?
     /// Live drag delta while the user is dragging the iPad panel handle.
     /// Positive = drag down (panel shrinks). Reset to 0 on release.
     @State private var dragOffset: CGFloat = 0
@@ -45,7 +46,11 @@ struct ContentView: View {
                 Tab(PanelTab.overview.localizedTitle,
                     systemImage: "globe.asia.australia.fill",
                     value: PanelTab.overview) {
-                    OverviewTab()
+                    OverviewTab { code in
+                        appState.selectCountry(code: code)
+                        appState.diceSpinTarget = code
+                        withAnimation(.smooth(duration: 0.25)) { panelState = .low }
+                    }
                 }
 
                 Tab(PanelTab.myVisas.localizedTitle,
@@ -72,6 +77,9 @@ struct ContentView: View {
             .toolbarBackground(.visible, for: .tabBar)
         }
         .background(sheetSolidBackground)
+        .sheet(item: $wishlistCountry) { country in
+            CountryPlansSheet(country: country)
+        }
     }
 
     /// The system sheet is only presented in compact width. When the window
@@ -114,8 +122,11 @@ struct ContentView: View {
                 .overlay(alignment: .bottom) {
                     if !isRegularWidth,
                        let code = appState.selectedCountryCode,
-                       appState.country(for: code) != nil {
-                        CountryDetailCard(countryCode: code, selectedTab: $selectedTab, panelState: $panelState)
+                       let country = appState.country(for: code) {
+                        CountryDetailCard(
+                            countryCode: code, selectedTab: $selectedTab, panelState: $panelState,
+                            onReviewWishlist: { wishlistCountry = country }
+                        )
                             .padding(.bottom, 310)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -163,8 +174,11 @@ struct ContentView: View {
 
         VStack(spacing: 12) {
             if let code = appState.selectedCountryCode,
-               appState.country(for: code) != nil {
-                CountryDetailCard(countryCode: code, selectedTab: $selectedTab, panelState: $panelState)
+               let country = appState.country(for: code) {
+                CountryDetailCard(
+                    countryCode: code, selectedTab: $selectedTab, panelState: $panelState,
+                    onReviewWishlist: { wishlistCountry = country }
+                )
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
 

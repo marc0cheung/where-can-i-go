@@ -11,6 +11,7 @@ struct MyTravelsTab: View {
     @State private var countryDetail: Country? = nil
     @State private var showingWishlist = false
     @State private var addWishlistCountry: Country?
+    @State private var pendingDeletion: RecordDeletion?
 
     /// Visited countries grouped with their visits, most-recent country first.
     private var visitedGroups: [(country: Country, visits: [Visit])] {
@@ -27,7 +28,7 @@ struct MyTravelsTab: View {
     }
 
     var body: some View {
-        ScrollView {
+        List {
             VStack(alignment: .leading, spacing: 16) {
                 Picker("Travel view", selection: $showingWishlist) {
                     Text("Been").tag(false)
@@ -39,7 +40,9 @@ struct MyTravelsTab: View {
                     .font(.headline)
 
                 ZStack {
-                    Button { showSummary = true } label: {
+                    Button {
+                        showSummary = true
+                    } label: {
                         TravelSummaryCard(stats: TravelStats(appState: appState))
                     }
                     .buttonStyle(.plain)
@@ -47,21 +50,29 @@ struct MyTravelsTab: View {
                     .allowsHitTesting(!showingWishlist)
                     .accessibilityHidden(showingWishlist)
 
-                    WishlistSummaryCard(stats: WishlistStats(trips: appState.data.plannedTrips,
-                                                           countries: appState.countries))
-                        .opacity(showingWishlist ? 1 : 0)
-                        .allowsHitTesting(showingWishlist)
-                        .accessibilityHidden(!showingWishlist)
+                    WishlistSummaryCard(
+                        stats: WishlistStats(
+                            trips: appState.data.plannedTrips,
+                            countries: appState.countries)
+                    )
+                    .opacity(showingWishlist ? 1 : 0)
+                    .allowsHitTesting(showingWishlist)
+                    .accessibilityHidden(!showingWishlist)
                 }
 
-                if showingWishlist {
-                    WishlistSection()
-                } else {
-                    visitedContent
-                }
             }
-            .padding()
+            .padding(.vertical, 8)
+            .cardListRow()
+
+            if showingWishlist {
+                WishlistSection(pendingDeletion: $pendingDeletion)
+            } else {
+                visitedContent
+            }
         }
+        .cardListStyle()
+        .id(showingWishlist)
+        .recordDeletionConfirmation($pendingDeletion)
         .sheet(isPresented: $showSummary) { TravelSummaryView() }
         .sheet(isPresented: $showAddTrip) {
             TripEditorSheet(existingVisit: nil, initialCountry: addTripInitialCountry)
@@ -92,26 +103,47 @@ struct MyTravelsTab: View {
             } label: {
                 Label("Log a Visit", systemImage: "plus.circle.fill")
                     .font(.headline)
+                    .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
+            .cardListRow()
 
             if visitedGroups.isEmpty {
                 emptyState
+                    .cardListRow()
             } else {
                 Text("Countries")
                     .font(.subheadline.bold())
                     .foregroundStyle(.secondary)
+                    .cardListRow()
 
-                LazyVStack(spacing: 8) {
-                    ForEach(visitedGroups, id: \.country.id) { group in
-                        Button { countryDetail = group.country } label: {
-                            countryRow(group.country, visits: group.visits)
-                        }
-                        .buttonStyle(.plain)
+                ForEach(visitedGroups, id: \.country.id) { group in
+                    Button {
+                        countryDetail = group.country
+                    } label: {
+                        countryRow(group.country, visits: group.visits)
                     }
+                    .buttonStyle(.plain)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button {
+                            pendingDeletion = .visits(
+                                country: group.country.localizedName(),
+                                count: group.visits.count
+                            ) {
+                                for visit in group.visits {
+                                    appState.removeVisit(visit.id)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        .accessibilityLabel(Text("Delete All"))
+                        .tint(.red)
+                    }
+                    .cardListRow()
                 }
             }
         }
@@ -528,25 +560,41 @@ struct CountryTripsSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            List {
                 VStack(alignment: .leading, spacing: 16) {
                     header
 
-                    Button { showAddTrip = true } label: {
+                    Button {
+                        showAddTrip = true
+                    } label: {
                         Label("Add Another Visit", systemImage: "plus.circle.fill")
                             .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
                     }
                     .buttonStyle(.plain)
 
-                    ForEach(visits) { visit in
-                        visitRow(visit)
-                    }
                 }
-                .padding()
+                .padding(.vertical, 8)
+                .cardListRow()
+
+                ForEach(visits) { visit in
+                    visitRow(visit)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button {
+                                appState.removeVisit(visit.id)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .accessibilityLabel(Text("Delete"))
+                            .tint(.red)
+                        }
+                        .cardListRow()
+                }
             }
+            .cardListStyle()
             .navigationTitle(country.localizedName())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -554,16 +602,20 @@ struct CountryTripsSheet: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .sheet(isPresented: $showAddTrip) {
+            .sheet(isPresented: $showAddTrip, onDismiss: dismissIfEmpty) {
                 TripEditorSheet(existingVisit: nil, initialCountry: country)
             }
-            .sheet(item: $editingVisit) { visit in
+            .sheet(item: $editingVisit, onDismiss: dismissIfEmpty) { visit in
                 TripEditorSheet(existingVisit: visit, initialCountry: country)
             }
             .onChange(of: appState.data.visits) { _, _ in
-                if visits.isEmpty { dismiss() }
+                if editingVisit == nil && !showAddTrip { dismissIfEmpty() }
             }
         }
+    }
+
+    private func dismissIfEmpty() {
+        if visits.isEmpty { dismiss() }
     }
 
     private var header: some View {
@@ -582,7 +634,9 @@ struct CountryTripsSheet: View {
     }
 
     private func visitRow(_ visit: Visit) -> some View {
-        Button { editingVisit = visit } label: {
+        Button {
+            editingVisit = visit
+        } label: {
             HStack(spacing: 12) {
                 Image(systemName: visit.purpose.systemImage)
                     .foregroundStyle(visit.purpose.color)
@@ -613,25 +667,11 @@ struct CountryTripsSheet: View {
                     }
                 }
                 Spacer()
-                Menu {
-                    Button { editingVisit = visit } label: {
-                        Label("Edit", systemImage: "pencil")
-                    }
-                    Button(role: .destructive) {
-                        appState.removeVisit(visit.id)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .frame(width: 30, height: 30)
-                        .contentShape(Rectangle())
-                }
             }
             .padding()
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
         }
         .buttonStyle(.plain)
     }

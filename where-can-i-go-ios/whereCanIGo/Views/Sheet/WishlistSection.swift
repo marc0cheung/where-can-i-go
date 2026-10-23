@@ -27,6 +27,7 @@ struct WishlistStats {
 
 struct WishlistSection: View {
     @EnvironmentObject var appState: AppState
+    @Binding var pendingDeletion: RecordDeletion?
     @State private var showAddTrip = false
     @State private var selectedCountry: Country?
 
@@ -38,14 +39,18 @@ struct WishlistSection: View {
     }
 
     var body: some View {
-        Button { showAddTrip = true } label: {
+        Button {
+            showAddTrip = true
+        } label: {
             Label("Add to Wishlist", systemImage: "plus.circle.fill")
                 .font(.headline)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
+        .cardListRow()
         .sheet(isPresented: $showAddTrip) {
             PlannedTripEditorSheet(existingTrip: nil, initialCountry: nil)
         }
@@ -63,15 +68,35 @@ struct WishlistSection: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 32)
+            .cardListRow()
         } else {
             Text("Countries").font(.subheadline.bold()).foregroundStyle(.secondary)
-            LazyVStack(spacing: 8) {
-                ForEach(countries) { country in
-                    Button { selectedCountry = country } label: {
-                        countryRow(country)
-                    }
-                    .buttonStyle(.plain)
+                .cardListRow()
+            ForEach(countries) { country in
+                Button {
+                    selectedCountry = country
+                } label: {
+                    countryRow(country)
                 }
+                .buttonStyle(.plain)
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button {
+                        let plans = appState.plannedTrips(for: country.code)
+                        pendingDeletion = .plannedTrips(
+                            country: country.localizedName(),
+                            count: plans.count
+                        ) {
+                            for plan in plans {
+                                try appState.removePlannedTrip(plan.id)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .accessibilityLabel(Text("Delete All"))
+                    .tint(.red)
+                }
+                .cardListRow()
             }
         }
     }
@@ -111,20 +136,15 @@ struct CountryPlansSheet: View {
     let country: Country
 
     @State private var showAddTrip = false
-    @State private var selection: PlanSelection?
+    @State private var editingTrip: PlannedTrip?
     @State private var showSaveError = false
-
-    private struct PlanSelection: Identifiable {
-        let trip: PlannedTrip
-        let completing: Bool
-        var id: UUID { trip.id }
-    }
+    @State private var pendingDeletion: RecordDeletion?
 
     private var plans: [PlannedTrip] { appState.plannedTrips(for: country.code) }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            List {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(spacing: 14) {
                         Text(country.flag).font(.system(size: 44))
@@ -134,17 +154,50 @@ struct CountryPlansSheet: View {
                         }
                         Spacer()
                     }
-                    Button { showAddTrip = true } label: {
+                    Button {
+                        showAddTrip = true
+                    } label: {
                         Label("Add Planned Trip", systemImage: "plus.circle.fill")
                             .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
                             .frame(maxWidth: .infinity).padding()
                             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
                     }
                     .buttonStyle(.plain)
-                    ForEach(plans) { plan in planRow(plan) }
                 }
-                .padding()
+                .padding(.vertical, 8)
+                .cardListRow()
+                ForEach(plans) { plan in
+                    planRow(plan)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button {
+                                delete(plan)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .accessibilityLabel(Text("Delete"))
+                            .tint(.red)
+                        }
+                        .cardListRow()
+                }
+
+                if !plans.isEmpty {
+                    Button("Delete All Planned Trips", role: .destructive) {
+                        let records = plans
+                        pendingDeletion = .plannedTrips(country: country.localizedName(), count: records.count) {
+                            for plan in records {
+                                try appState.removePlannedTrip(plan.id)
+                            }
+                            dismissIfEmpty()
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .cardListRow()
+                }
             }
+            .cardListStyle()
             .navigationTitle(country.localizedName())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -153,14 +206,10 @@ struct CountryPlansSheet: View {
             .sheet(isPresented: $showAddTrip, onDismiss: dismissIfEmpty) {
                 PlannedTripEditorSheet(existingTrip: nil, initialCountry: country)
             }
-            .sheet(item: $selection, onDismiss: dismissIfEmpty) { selected in
-                if selected.completing {
-                    TripEditorSheet(existingVisit: nil, initialCountry: appState.country(for: selected.trip.countryCode),
-                                    completingTrip: selected.trip)
-                } else {
-                    PlannedTripEditorSheet(existingTrip: selected.trip,
-                                           initialCountry: appState.country(for: selected.trip.countryCode))
-                }
+            .sheet(item: $editingTrip, onDismiss: dismissIfEmpty) { trip in
+                PlannedTripEditorSheet(
+                    existingTrip: trip,
+                    initialCountry: appState.country(for: trip.countryCode))
             }
             .alert("Couldn't Save", isPresented: $showSaveError) {
                 Button("OK", role: .cancel) {}
@@ -168,47 +217,34 @@ struct CountryPlansSheet: View {
                 Text("Your changes weren't saved. Please try again.")
             }
         }
+        .recordDeletionConfirmation($pendingDeletion)
     }
 
     private func planRow(_ plan: PlannedTrip) -> some View {
-        HStack(spacing: 12) {
-            Button { selection = PlanSelection(trip: plan, completing: false) } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: plan.purpose.systemImage)
-                        .foregroundStyle(plan.purpose.color).frame(width: 26)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(plan.location ?? country.localizedName()).font(.subheadline.weight(.semibold))
-                        Text(WishlistFormat.duration(plan)).font(.caption).foregroundStyle(.secondary)
-                        Text(plan.purpose.localizedDisplayName)
-                            .font(.caption2.weight(.semibold)).foregroundStyle(plan.purpose.color)
-                        if let notes = plan.notes {
-                            Text(notes).font(.caption2).foregroundStyle(.secondary).lineLimit(2)
-                        }
+        Button {
+            editingTrip = plan
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: plan.purpose.systemImage)
+                    .foregroundStyle(plan.purpose.color).frame(width: 26)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(plan.location ?? country.localizedName()).font(.subheadline.weight(.semibold))
+                    Text(WishlistFormat.duration(plan)).font(.caption).foregroundStyle(.secondary)
+                    Text(plan.purpose.localizedDisplayName)
+                        .font(.caption2.weight(.semibold)).foregroundStyle(plan.purpose.color)
+                    if let notes = plan.notes {
+                        Text(notes).font(.caption2).foregroundStyle(.secondary).lineLimit(2)
                     }
-                    Spacer(minLength: 0)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
+                Spacer(minLength: 0)
             }
-            .buttonStyle(.plain)
-            Menu {
-                Button { selection = PlanSelection(trip: plan, completing: false) } label: {
-                    Label("Edit", systemImage: "pencil")
-                }
-                Button { selection = PlanSelection(trip: plan, completing: true) } label: {
-                    Label("Mark Completed", systemImage: "checkmark.circle")
-                }
-                Button(role: .destructive) { delete(plan) } label: {
-                    Label("Delete", systemImage: "trash")
-                }
-            } label: {
-                Image(systemName: "ellipsis").foregroundStyle(.secondary).frame(width: 44, height: 44)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(Text("Trip actions"))
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .buttonStyle(.plain)
     }
 
     private func delete(_ plan: PlannedTrip) {

@@ -16,7 +16,7 @@ An interactive visa-availability tracker for visualizing global travel accessibi
 ## Features
 
 - **Interactive Map:** Pan and zoom the world map to discover travel accessibility. Tap the countries on the map to see accessibility info.
-- **Overview Tab:** Quick summary and visa requirements for selected countries.
+- **Overview Tab:** Quick summary and visa requirements for selected countries, with swipe shortcuts to locate a country on the globe or open its wishlist plans. A filled heart indicates existing plans.
 - **Passport & Visa Presets:** Select your passport to filter accessible destinations.
 - **Random Place To Go:** Hit the dice button and the app will select an accessible country for you to be your next travel destination.
 - **Add Visa:** Add your personal visa(s) in the app and manage them.
@@ -78,7 +78,6 @@ Guidelines:
 - (iOS) Only supports iOS 26 or above. Currently iPadOS may experience UI issues. 
 
 ## Feature Backlog
-- Add Swipe gesture to items of all tabs
 - Refine the country border lines display & enhance performance
 - Export App Record with JSON file
 - Friends Function via AirDrop

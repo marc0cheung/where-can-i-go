@@ -4,9 +4,12 @@ import UniformTypeIdentifiers
 
 struct OverviewTab: View {
     @EnvironmentObject var appState: AppState
+    var onLocate: (String) -> Void
     @State private var search: String = ""
     @State private var isCompactHeight = false
-    @State private var countryBeingEdited: Country? = nil
+    @State private var countryBeingEdited: Country?
+    @State private var wishlistCountry: Country?
+    @State private var plansCountry: Country?
     @State private var confirmReset = false
     @State private var selectedCategories: Set<VisaCategory> = []
     @State private var selectedContinents: Set<Continent> = []
@@ -22,7 +25,7 @@ struct OverviewTab: View {
 
     var body: some View {
         GeometryReader { proxy in
-            ScrollView {
+            List {
                 VStack(spacing: 16) {
                     if isCompactHeight {
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -40,8 +43,11 @@ struct OverviewTab: View {
                     } else {
                         VStack(spacing: 10) {
                             HStack(spacing: 10) {
-                                categoryStat(value: counts.vf, label: "Visa Free", category: .visaFree, width: .flexible)
-                                categoryStat(value: counts.voa, label: "Visa on Arrival", category: .visaOnArrival, width: .flexible)
+                                categoryStat(
+                                    value: counts.vf, label: "Visa Free", category: .visaFree, width: .flexible)
+                                categoryStat(
+                                    value: counts.voa, label: "Visa on Arrival", category: .visaOnArrival,
+                                    width: .flexible)
                                 categoryStat(value: counts.eta, label: "ETA", category: .eta, width: .flexible)
                             }
                             HStack(spacing: 10) {
@@ -58,7 +64,9 @@ struct OverviewTab: View {
                         TextField("Search countries…", text: $search)
                             .autocorrectionDisabled()
                         if !search.isEmpty {
-                            Button { search = "" } label: {
+                            Button {
+                                search = ""
+                            } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundStyle(.secondary)
                             }
@@ -80,62 +88,88 @@ struct OverviewTab: View {
                             .padding(.horizontal)
                     }
 
-                    LazyVStack(spacing: 8) {
-                        ForEach(countries) { country in
-                            Button {
-                                countryBeingEdited = country
-                            } label: {
-                                CountryRow(country: country)
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                        if countries.isEmpty {
-                            ContentUnavailableView {
-                                Label("No Matching Countries", systemImage: "magnifyingglass")
-                            } actions: {
-                                Button {
-                                    search = ""
-                                    clearFilters()
-                                } label: {
-                                    Label("Clear Search and Filters", systemImage: "arrow.counterclockwise")
-                                        .font(.subheadline.weight(.semibold))
-                                        .multilineTextAlignment(.center)
-                                }
-                                .buttonStyle(.glassProminent)
-                                .tint(.blue)
-                                .controlSize(.regular)
-                                .padding(.top, 12)
-                            }
-                        }
-
-                        if search.isEmpty && !hasActiveFilters {
-                            Button {
-                                confirmReset = true
-                            } label: {
-                                Text("RESET TO DEFAULT DATA")
-                                    .font(.subheadline.bold())
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .foregroundStyle(.primary)
-                                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                            }
-                            .padding(.top, 8)
-                            .confirmationDialog(
-                                "Reset to bundled defaults? Your custom edits will be lost.",
-                                isPresented: $confirmReset,
-                                titleVisibility: .visible
-                            ) {
-                                Button("Reset", role: .destructive) { appState.resetDefaultsToBundled() }
-                                Button("Cancel", role: .cancel) {}
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 24)
                 }
-                .padding(.top, 12)
+                .padding(.vertical, 4)
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+
+                let countries = filteredCountries
+                ForEach(countries) { country in
+                    Button {
+                        countryBeingEdited = country
+                    } label: {
+                        CountryRow(country: country)
+                    }
+                    .buttonStyle(.plain)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button {
+                            onLocate(country.code)
+                        } label: {
+                            Image(systemName: "location")
+                        }
+                        .accessibilityLabel(Text("Locate"))
+                        .tint(.blue)
+
+                        Button {
+                            openWishlist(for: country)
+                        } label: {
+                            Image(systemName: hasPlans(for: country) ? "heart.fill" : "heart")
+                                .environment(\.symbolVariants, .none)
+                        }
+                        .accessibilityLabel(
+                            hasPlans(for: country) ? Text("View Plans") : Text("Add to Wishlist")
+                        )
+                        .tint(.teal)
+                    }
+                    .cardListRow()
+                }
+
+                if countries.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Matching Countries", systemImage: "magnifyingglass")
+                    } actions: {
+                        Button {
+                            search = ""
+                            clearFilters()
+                        } label: {
+                            Label("Clear Search and Filters", systemImage: "arrow.counterclockwise")
+                                .font(.subheadline.weight(.semibold))
+                                .multilineTextAlignment(.center)
+                        }
+                        .cardListRow()
+                        .buttonStyle(.glassProminent)
+                        .tint(.blue)
+                        .controlSize(.regular)
+                        .padding(.top, 12)
+                    }
+                }
+
+                if search.isEmpty && !hasActiveFilters {
+                    Button {
+                        confirmReset = true
+                    } label: {
+                        Text("RESET TO DEFAULT DATA")
+                            .font(.subheadline.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .foregroundStyle(.primary)
+                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                    .padding(.top, 8)
+                    .confirmationDialog(
+                        "Reset to bundled defaults? Your custom edits will be lost.",
+                        isPresented: $confirmReset,
+                        titleVisibility: .visible
+                    ) {
+                        Button("Reset", role: .destructive) { appState.resetDefaultsToBundled() }
+                        Button("Cancel", role: .cancel) {}
+                    }
+                    .buttonStyle(.plain)
+                    .cardListRow()
+                }
             }
+            .cardListStyle()
             .onAppear {
                 isCompactHeight = proxy.size.height < 430
             }
@@ -151,6 +185,24 @@ struct OverviewTab: View {
                     existingPersonalVisa: appState.data.personalVisas.first { $0.countryCode == country.code }
                 )
             }
+            .sheet(item: $wishlistCountry) { country in
+                PlannedTripEditorSheet(existingTrip: nil, initialCountry: country)
+            }
+            .sheet(item: $plansCountry) { country in
+                CountryPlansSheet(country: country)
+            }
+        }
+    }
+
+    private func hasPlans(for country: Country) -> Bool {
+        appState.data.plannedTrips.contains { $0.countryCode == country.code }
+    }
+
+    private func openWishlist(for country: Country) {
+        if hasPlans(for: country) {
+            plansCountry = country
+        } else {
+            wishlistCountry = country
         }
     }
 
@@ -470,10 +522,13 @@ private struct CountryRow: View {
             }
             Spacer()
             Circle().fill(category.color).frame(width: 10, height: 10)
+                .accessibilityHidden(true)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 10)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
     }
 
     private static func expiryReminderColor(for expiryDate: Date) -> Color {
@@ -482,7 +537,8 @@ private struct CountryRow: View {
         let expiryDay = calendar.startOfDay(for: expiryDate)
         if today > expiryDay { return .red }
         if let warningStart = calendar.date(byAdding: .day, value: -31, to: expiryDay),
-           today >= warningStart {
+            today >= warningStart
+        {
             return .orange
         }
         return .secondary
