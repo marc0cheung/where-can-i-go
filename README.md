@@ -18,7 +18,7 @@ An interactive visa-availability tracker for visualizing global travel accessibi
 - **Interactive Map:** Pan and zoom the world map to discover travel accessibility. Tap the countries on the map to see accessibility info.
 - **Overview Tab:** Quick summary and visa requirements for selected countries, with swipe shortcuts to locate a country on the globe or open its wishlist plans. A filled heart indicates existing plans.
 - **Passport & Visa Presets:** Select your passport to filter accessible destinations.
-- **Random Place To Go:** Hit the dice button and the app will select an accessible country for you to be your next travel destination.
+- **Random Place To Go:** Tap the dice to pick an accessible country. Long-press for continent and airline submenus (both support multiple selections), plus **Accessible Countries Only** and **Include All Entry Requirements** choices. Filters combine: a destination must match a selected continent, be served by any selected airline, and meet the entry filter. The passport country remains excluded. **All Continents** removes the continent restriction. No selected airlines means no airline restriction; **All Airlines** selects every bundled airline and restricts results to their combined destinations. Turn it off or choose **No Airline Restriction** to clear the airline restriction. Explicit default choices keep a checkmark present in each menu so selecting options does not shift the menu's contents sideways.
 - **Add Visa:** Add your personal visa(s) in the app and manage them.
 - **Offline-capable Data:** Uses bundled resources in the app bundle for fast lookup.
 - **Manage Default Data:** In case the JSON files are not up-to-date, you may edit visa-free/ETA/Visa-On-Arrival based on the latest policy related to your passport.
@@ -38,6 +38,7 @@ git clone https://github.com/marc0cheung/where-can-i-go.git
 4. Data files are located in `whereCanIGo/Resources/`:
 
 - `countries.json` — country metadata used by the UI.
+- `airline_destinations.json` — manually maintained airline destination-country snapshots, initially using the supplied Cathay Pacific (CX) and HK Express (UO) lists. Each record has a stable `id`, a `name`, a `logoAssetName` matching an image set, and ISO3 `destinationCountryCodes` matching `countries.json`. Add a record and its logo asset to support another airline; the menu and **All Airlines** option update automatically. Add name translations to `Localizable.xcstrings` as needed. Selection lasts for the current app session, like the other dice options.
 - `default_visas_HKG.json` — example visa defaults for Hong Kong passport.
 - `world-countries.geojson` — geometry for map rendering.
 

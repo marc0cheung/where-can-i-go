@@ -1,28 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Review Wishlist" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review Wishlist"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "查看心愿清单"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "查看願望清單"
-          }
-        }
-      }
-    },
     "" : {
 
     },
@@ -131,6 +109,7 @@
       }
     },
     "%@, %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -678,6 +657,54 @@
         }
       }
     },
+    "Airline Data Unavailable" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "航空公司资料不可用"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "航空公司資料無法使用"
+          }
+        }
+      }
+    },
+    "Airlines" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "航空公司"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "航空公司"
+          }
+        }
+      }
+    },
+    "All Airlines" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有航空公司"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有航空公司"
+          }
+        }
+      }
+    },
     "All Continents" : {
       "localizations" : {
         "zh-Hans" : {
@@ -850,6 +877,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法預覽"
+          }
+        }
+      }
+    },
+    "Cathay Pacific" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "国泰航空"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "國泰航空"
           }
         }
       }
@@ -2288,6 +2332,23 @@
         }
       }
     },
+    "HK Express" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "香港快运"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "香港快運"
+          }
+        }
+      }
+    },
     "IMPORT EXCEL FILE (Coming Soon)" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2657,6 +2718,22 @@
         }
       }
     },
+    "No Airline Restriction" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不限航空公司"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不限航空公司"
+          }
+        }
+      }
+    },
     "No countries logged yet" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2767,6 +2844,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "尚未新增個人簽證。"
+          }
+        }
+      }
+    },
+    "No selection means no airline restriction." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未选择时不限航空公司。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未選擇時不限航空公司。"
           }
         }
       }
@@ -3098,6 +3192,22 @@
         }
       }
     },
+    "Remove Airline Restriction" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除航空公司限制"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除航空公司限制"
+          }
+        }
+      }
+    },
     "Remove Policy" : {
       "localizations" : {
         "zh-Hans" : {
@@ -3180,6 +3290,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "調整面板大小"
+          }
+        }
+      }
+    },
+    "Review Wishlist" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Wishlist"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看心愿清单"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看願望清單"
           }
         }
       }
@@ -3786,6 +3918,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "個計劃行程"
+          }
+        }
+      }
+    },
+    "Unable to load airline destinations. Please restart the app or report this issue." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法载入航空公司目的地。请重新启动应用或报告此问题。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法載入航空公司目的地。請重新啟動應用程式或回報此問題。"
           }
         }
       }

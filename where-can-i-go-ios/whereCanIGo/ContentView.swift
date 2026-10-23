@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var selectedTab: PanelTab = .overview
     @State private var panelState: PanelState = .low
     @State private var selectedDiceContinents: Set<Continent> = []
+    @State private var selectedDiceAirlines: Set<String> = []
     @State private var diceIncludesAllEntryRequirements = false
     @State private var isMapLoading = true
     @State private var wishlistCountry: Country?
@@ -39,6 +40,7 @@ struct ContentView: View {
             SheetHeader(
                 panelState: $panelState,
                 selectedDiceContinents: $selectedDiceContinents,
+                selectedDiceAirlines: $selectedDiceAirlines,
                 diceIncludesAllEntryRequirements: $diceIncludesAllEntryRequirements
             )
 
