@@ -57,9 +57,11 @@ struct SheetHeader: View {
     @EnvironmentObject var appState: AppState
     @Binding var panelState: PanelState
     @Binding var selectedDiceContinents: Set<Continent>
+    @Binding var selectedDiceAirlines: Set<String>
     @Binding var diceIncludesAllEntryRequirements: Bool
     @State private var showPassportPicker = false
     @State private var showNoMatchingCountries = false
+    @State private var showAirlineDataError = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -100,21 +102,59 @@ struct SheetHeader: View {
                 Button("All Continents") {
                     selectedDiceContinents.removeAll()
                 }
+                if !selectedDiceAirlines.isEmpty {
+                    Button("Remove Airline Restriction") {
+                        selectedDiceAirlines.removeAll()
+                    }
+                }
             }
             Button("OK", role: .cancel) { }
         } message: {
             Text("No countries match your current passport and dice options.")
         }
+        .alert("Airline Data Unavailable", isPresented: $showAirlineDataError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Unable to load airline destinations. Please restart the app or report this issue.")
+        }
     }
 
     private var diceMenu: some View {
         Menu {
-            Toggle("All Continents", isOn: allDiceContinentsBinding)
-            Divider()
-            ForEach(Continent.allCases, id: \.self) { continent in
-                Toggle(continentTitle(continent), isOn: diceContinentBinding(continent))
+            Menu {
+                Toggle("All Continents", isOn: allDiceContinentsBinding)
+                Divider()
+                ForEach(Continent.allCases, id: \.self) { continent in
+                    Toggle(continentTitle(continent), isOn: diceContinentBinding(continent))
+                }
+            } label: {
+                Label("Continent", systemImage: "globe")
+            }
+            Menu {
+                if case .success = AirlineRepository.catalog {
+                    Toggle("No Airline Restriction", isOn: noDiceAirlineRestrictionBinding)
+                    Toggle("All Airlines", isOn: allDiceAirlinesBinding)
+                    Divider()
+                    ForEach(diceAirlines) { airline in
+                        Toggle(isOn: diceAirlineBinding(airline.id)) {
+                            Label {
+                                Text(airline.localizedName)
+                            } icon: {
+                                Image(airline.logoAssetName)
+                                    .renderingMode(.original)
+                            }
+                        }
+                    }
+                } else {
+                    Button("Airline Data Unavailable") {
+                        showAirlineDataError = true
+                    }
+                }
+            } label: {
+                Label("Airlines", systemImage: "airplane")
             }
             Divider()
+            Toggle("Accessible Countries Only", isOn: accessibleDiceCountriesOnlyBinding)
             Toggle("Include All Entry Requirements", isOn: $diceIncludesAllEntryRequirements)
         } label: {
             Image(systemName: "dice.fill")
@@ -128,8 +168,8 @@ struct SheetHeader: View {
         .menuActionDismissBehavior(.disabled)
         .disabled(appState.diceSpinTarget != nil)
         .overlay(alignment: .topTrailing) {
-            if !selectedDiceContinents.isEmpty {
-                Text(selectedDiceContinents.count, format: .number)
+            if !selectedDiceContinents.isEmpty || !selectedDiceAirlines.isEmpty {
+                Text(selectedDiceContinents.count + selectedDiceAirlines.count, format: .number)
                     .font(.system(size: 11, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(.white)
@@ -166,6 +206,51 @@ struct SheetHeader: View {
         }
     }
 
+    private var diceAirlines: [Airline] {
+        if case let .success(airlines) = AirlineRepository.catalog {
+            return airlines
+        }
+        return []
+    }
+
+    private var allDiceAirlinesBinding: Binding<Bool> {
+        Binding {
+            !diceAirlines.isEmpty && Set(diceAirlines.map(\.id)).isSubset(of: selectedDiceAirlines)
+        } set: { isSelected in
+            selectedDiceAirlines = isSelected ? Set(diceAirlines.map(\.id)) : []
+        }
+    }
+
+    private var noDiceAirlineRestrictionBinding: Binding<Bool> {
+        Binding {
+            selectedDiceAirlines.isEmpty
+        } set: { isSelected in
+            if isSelected {
+                selectedDiceAirlines.removeAll()
+            }
+        }
+    }
+
+    private var accessibleDiceCountriesOnlyBinding: Binding<Bool> {
+        Binding {
+            !diceIncludesAllEntryRequirements
+        } set: { isSelected in
+            diceIncludesAllEntryRequirements = !isSelected
+        }
+    }
+
+    private func diceAirlineBinding(_ id: String) -> Binding<Bool> {
+        Binding {
+            selectedDiceAirlines.contains(id)
+        } set: { isSelected in
+            if isSelected {
+                selectedDiceAirlines.insert(id)
+            } else {
+                selectedDiceAirlines.remove(id)
+            }
+        }
+    }
+
     private func continentTitle(_ continent: Continent) -> String {
         switch continent {
         case .africa: String(localized: "Africa")
@@ -185,7 +270,11 @@ struct SheetHeader: View {
         let entryRequirements = diceIncludesAllEntryRequirements
             ? String(localized: "All Entry Requirements")
             : String(localized: "Accessible Countries Only")
-        return String(localized: "\(continents), \(entryRequirements)")
+        let airlines = selectedDiceAirlines.isEmpty
+            ? String(localized: "No Airline Restriction")
+            : diceAirlines.filter { selectedDiceAirlines.contains($0.id) }
+                .map(\.localizedName).joined(separator: ", ")
+        return [continents, airlines, entryRequirements].joined(separator: ", ")
     }
 
     private var passportLabel: String {
@@ -196,12 +285,18 @@ struct SheetHeader: View {
 
     private func randomSelectCountry() {
         guard appState.diceSpinTarget == nil else { return }
+        guard case let .success(airlines) = AirlineRepository.catalog else {
+            showAirlineDataError = true
+            return
+        }
+        let airlineDestinations = AirlineRepository.destinationCodes(for: selectedDiceAirlines, in: airlines)
         let eligible = appState.countries.filter { country in
             guard country.code != appState.data.passportCode else { return false }
             let continent = Continent.of(country.code) ?? (["HKG", "MAC"].contains(country.code) ? .asia : nil)
             let matchesContinent = selectedDiceContinents.isEmpty ||
                 continent.map { selectedDiceContinents.contains($0) } == true
-            return matchesContinent &&
+            let matchesAirline = selectedDiceAirlines.isEmpty || airlineDestinations.contains(country.code)
+            return matchesContinent && matchesAirline &&
                 (diceIncludesAllEntryRequirements || appState.visaEligibility(for: country.code).isAccessible)
         }
         guard let picked = eligible.randomElement() else {

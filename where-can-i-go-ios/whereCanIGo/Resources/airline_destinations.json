@@ -1,0 +1,20 @@
+[
+  {
+    "id": "CX",
+    "name": "Cathay Pacific",
+    "logoAssetName": "CathayPacific",
+    "destinationCountryCodes": [
+      "ZAF", "AUS", "BGD", "KHM", "IND", "IDN", "JPN", "KAZ", "MYS",
+      "NPL", "NZL", "PHL", "SGP", "KOR", "LKA", "THA", "VNM", "CHN",
+      "TWN", "HKG", "ARE"
+    ]
+  },
+  {
+    "id": "UO",
+    "name": "HK Express",
+    "logoAssetName": "HKExpress",
+    "destinationCountryCodes": [
+      "CHN", "TWN", "HKG", "JPN", "THA", "VNM", "PHL", "MYS"
+    ]
+  }
+]
