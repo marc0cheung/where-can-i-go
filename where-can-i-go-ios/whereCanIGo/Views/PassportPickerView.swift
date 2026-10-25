@@ -5,6 +5,8 @@ struct PassportPickerView: View {
     @Environment(\.dismiss) private var dismiss
 
     let isFirstLaunch: Bool
+    var initialCode: String? = nil
+    var onSelect: ((String) -> Void)? = nil
     @State private var search: String = ""
     @State private var selectedCode: String = "HKG"
 
@@ -73,7 +75,11 @@ struct PassportPickerView: View {
                 .listStyle(.plain)
 
                 Button {
-                    appState.completePassportSelection(selectedCode)
+                    if let onSelect {
+                        onSelect(selectedCode)
+                    } else {
+                        appState.completePassportSelection(selectedCode)
+                    }
                     if !isFirstLaunch { dismiss() }
                 } label: {
                     Text("Use this Passport")
@@ -93,7 +99,7 @@ struct PassportPickerView: View {
                 }
             }
         }
-        .onAppear { selectedCode = appState.data.passportCode }
+        .onAppear { selectedCode = initialCode ?? appState.data.passportCode }
     }
 
     private func passportRow(_ country: Country) -> some View {

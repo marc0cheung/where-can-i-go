@@ -59,7 +59,10 @@ struct SheetHeader: View {
     @Binding var selectedDiceContinents: Set<Continent>
     @Binding var selectedDiceAirlines: Set<String>
     @Binding var diceIncludesAllEntryRequirements: Bool
-    @State private var showPassportPicker = false
+    @StateObject private var profileStore = UserProfileStore()
+    @State private var showProfileMenu = false
+    @State private var showProfile = false
+    @State private var showSettings = false
     @State private var showNoMatchingCountries = false
     @State private var showAirlineDataError = false
 
@@ -77,16 +80,7 @@ struct SheetHeader: View {
                 }
                 Spacer()
                 diceMenu
-                Button {
-                    showPassportPicker = true
-                } label: {
-                    Image(systemName: "person.text.rectangle.fill")
-                        .font(.title3)
-                        .foregroundStyle(.primary)
-                        .padding(10)
-                }
-                .buttonStyle(.glass)
-                .accessibilityLabel("Change passport")
+                profileMenu
             }
             .padding(.horizontal, 20)
             .padding(.top, 16)
@@ -94,8 +88,21 @@ struct SheetHeader: View {
 
             Divider()
         }
-        .sheet(isPresented: $showPassportPicker) {
-            PassportPickerView(isFirstLaunch: false)
+        .sheet(isPresented: $showProfile) {
+            UserProfileView(profileStore: profileStore, passportCode: appState.data.passportCode)
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+        }
+        .alert("Unable to Load Profile", isPresented: Binding {
+            profileStore.loadError != nil
+        } set: { isPresented in
+            if !isPresented { profileStore.loadError = nil }
+        }) {
+            Button("Retry") { profileStore.load() }
+            Button("Close", role: .cancel) { profileStore.loadError = nil }
+        } message: {
+            Text(profileStore.loadError ?? "")
         }
         .alert("No Matching Countries", isPresented: $showNoMatchingCountries) {
             if !selectedDiceContinents.isEmpty {
@@ -116,6 +123,60 @@ struct SheetHeader: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text("Unable to load airline destinations. Please restart the app or report this issue.")
+        }
+    }
+
+    private var profileMenu: some View {
+        Button {
+            showProfileMenu = true
+        } label: {
+            ProfileAvatar(photoData: profileStore.profile.photoData, size: 32)
+                .frame(minWidth: 44, minHeight: 44)
+        }
+        .buttonStyle(.glass)
+        .accessibilityLabel("User Profile")
+        .accessibilityValue(profileStore.profile.displayName)
+        .popover(isPresented: $showProfileMenu, arrowEdge: .top) {
+            VStack(alignment: .leading, spacing: 8) {
+                Button {
+                    showProfileMenu = false
+                    if profileStore.loadFailed {
+                        profileStore.load()
+                    }
+                    if !profileStore.loadFailed {
+                        showProfile = true
+                    }
+                } label: {
+                    HStack(spacing: 14) {
+                        ProfileAvatar(photoData: profileStore.profile.photoData, size: 48)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(profileStore.profile.displayName)
+                                .font(.headline)
+                            Text("Edit Profile")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                }
+                Divider()
+                Button {
+                    showProfileMenu = false
+                    showSettings = true
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                        .font(.body)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                }
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.primary)
+            .padding(20)
+            .frame(minWidth: 260, maxWidth: 340)
+            .presentationCompactAdaptation(.popover)
         }
     }
 
