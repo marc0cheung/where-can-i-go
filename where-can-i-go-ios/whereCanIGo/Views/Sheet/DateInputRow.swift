@@ -24,6 +24,7 @@ struct DateInputRow: View {
     @Binding var date: Date?
     var range: ClosedRange<Date> = Date.distantPast...Date.distantFuture
     var preferredDate: Date? = nil
+    var onPresent: () -> Void = {}
 
     @State private var selection: DateSelection?
 
@@ -32,6 +33,7 @@ struct DateInputRow: View {
             Text(title)
             Spacer(minLength: 8)
             Button {
+                onPresent()
                 selection = DateSelection(date: DateInputPolicy.initialDate(
                     value: date, preferredDate: preferredDate, range: range
                 ))
@@ -133,6 +135,7 @@ struct VisaValidityFields: View {
     @Binding var hasEffectiveDate: Bool
     @Binding var effectiveDate: Date?
     @Binding var expiryDate: Date?
+    var onPresent: () -> Void = {}
 
     var body: some View {
         VStack(spacing: 12) {
@@ -141,14 +144,16 @@ struct VisaValidityFields: View {
             if hasEffectiveDate {
                 DateInputRow(
                     title: "Effective date", clearLabel: "Clear effective date", date: $effectiveDate,
-                    range: Date.distantPast...(expiryDate ?? Date.distantFuture)
+                    range: Date.distantPast...(expiryDate ?? Date.distantFuture),
+                    onPresent: onPresent
                 )
             }
 
             DateInputRow(
                 title: "Expiry date", clearLabel: "Clear expiry date", date: $expiryDate,
                 range: ((hasEffectiveDate ? effectiveDate : nil) ?? Date.distantPast)...Date.distantFuture,
-                preferredDate: Calendar.current.date(byAdding: .year, value: 1, to: Date())
+                preferredDate: Calendar.current.date(byAdding: .year, value: 1, to: Date()),
+                onPresent: onPresent
             )
         }
         .onChange(of: hasEffectiveDate) { _, enabled in

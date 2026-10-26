@@ -571,6 +571,11 @@ private struct EntryPolicySheet: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
 
+    private enum Field: Hashable {
+        case policyDuration, policyRemark, visaType, visaDuration, visaNotes
+    }
+    @FocusState private var focusedField: Field?
+
     @State private var selectedCountry: Country?
     @State private var category: VisaCategory
     @State private var policyDuration: String
@@ -623,6 +628,7 @@ private struct EntryPolicySheet: View {
                 VStack(alignment: .leading, spacing: 16) {
                     formLabel("COUNTRY")
                     Button {
+                        focusedField = nil
                         showCountryPicker = true
                     } label: {
                         HStack(spacing: 12) {
@@ -656,6 +662,7 @@ private struct EntryPolicySheet: View {
                     formLabel("DURATION")
                     HStack {
                         TextField("e.g., 30 days", text: $policyDuration)
+                            .focused($focusedField, equals: .policyDuration)
                         if !policyDuration.isEmpty {
                             Button { policyDuration = "" } label: {
                                 Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
@@ -668,6 +675,7 @@ private struct EntryPolicySheet: View {
 
                     formLabel("REMARK")
                     TextField("Additional notes\u{2026}", text: $policyRemark, axis: .vertical)
+                        .focused($focusedField, equals: .policyRemark)
                         .lineLimit(3...8)
                         .accessibilityLabel("Remark")
                         .padding()
@@ -700,6 +708,7 @@ private struct EntryPolicySheet: View {
                         formLabel("VISA TYPE")
                         HStack {
                             TextField("e.g., Single / Multiple / Student / Work", text: $visaType)
+                                .focused($focusedField, equals: .visaType)
                             if !visaType.isEmpty {
                                 Button { visaType = "" } label: {
                                     Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
@@ -713,6 +722,7 @@ private struct EntryPolicySheet: View {
                         formLabel("DURATION PER VISIT")
                         HStack {
                             TextField("e.g., 90 days", text: $visaDuration)
+                                .focused($focusedField, equals: .visaDuration)
                             if !visaDuration.isEmpty {
                                 Button { visaDuration = "" } label: {
                                     Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
@@ -727,12 +737,14 @@ private struct EntryPolicySheet: View {
                         VisaValidityFields(
                             hasEffectiveDate: $hasVisaEffectiveDate,
                             effectiveDate: $visaEffectiveDate,
-                            expiryDate: $visaExpiry
+                            expiryDate: $visaExpiry,
+                            onPresent: { focusedField = nil }
                         )
                         .padding(.vertical, 4)
 
                         formLabel("NOTES (OPTIONAL)")
                         TextField("Additional notes\u{2026}", text: $visaNotes, axis: .vertical)
+                            .focused($focusedField, equals: .visaNotes)
                             .lineLimit(3...6)
                             .padding()
                             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))

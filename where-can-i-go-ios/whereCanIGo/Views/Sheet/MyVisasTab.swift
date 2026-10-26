@@ -391,6 +391,11 @@ struct MyVisasTab: View {
 private struct VisaDetailsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
+    private enum Field: Hashable {
+        case visaType, duration, notes
+    }
+    @FocusState private var focusedField: Field?
+
     @State private var draftCountry: Country?
     @State private var showCountryPicker = false
 
@@ -444,6 +449,7 @@ private struct VisaDetailsSheet: View {
                 VStack(alignment: .leading, spacing: 16) {
                     formLabel("ISSUING COUNTRY")
                     Button {
+                        focusedField = nil
                         showCountryPicker = true
                     } label: {
                         HStack {
@@ -484,6 +490,7 @@ private struct VisaDetailsSheet: View {
                     formLabel("VISA TYPE")
                     HStack {
                         TextField("e.g., Single / Multiple / Student / Work", text: $draftVisaType)
+                            .focused($focusedField, equals: .visaType)
                         if !draftVisaType.isEmpty {
                             Button { draftVisaType = "" } label: {
                                 Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
@@ -497,6 +504,7 @@ private struct VisaDetailsSheet: View {
                     formLabel("DURATION PER VISIT")
                     HStack {
                         TextField("e.g., 90 days", text: $draftDuration)
+                            .focused($focusedField, equals: .duration)
                         if !draftDuration.isEmpty {
                             Button { draftDuration = "" } label: {
                                 Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
@@ -511,12 +519,14 @@ private struct VisaDetailsSheet: View {
                     VisaValidityFields(
                         hasEffectiveDate: $draftHasEffectiveDate,
                         effectiveDate: $draftEffectiveDate,
-                        expiryDate: $draftExpiry
+                        expiryDate: $draftExpiry,
+                        onPresent: { focusedField = nil }
                     )
                     .padding(.vertical, 4)
 
                     formLabel("NOTES (OPTIONAL)")
                     TextField("Additional notes…", text: $draftNotes, axis: .vertical)
+                        .focused($focusedField, equals: .notes)
                         .lineLimit(3...6)
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
@@ -562,6 +572,7 @@ private struct VisaDetailsSheet: View {
                 }
                 .padding()
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Visa Details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

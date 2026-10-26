@@ -279,6 +279,11 @@ struct PlannedTripEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     let existingTrip: PlannedTrip?
 
+    private enum Field: Hashable {
+        case location, estimatedDays, notes
+    }
+    @FocusState private var focusedField: Field?
+
     @State private var country: Country?
     @State private var showCountryPicker = false
     @State private var location: String
@@ -312,7 +317,10 @@ struct PlannedTripEditorSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     label("COUNTRY")
-                    Button { showCountryPicker = true } label: {
+                    Button {
+                        focusedField = nil
+                        showCountryPicker = true
+                    } label: {
                         HStack(spacing: 12) {
                             if let country {
                                 Text(country.flag).font(.title2)
@@ -330,6 +338,7 @@ struct PlannedTripEditorSheet: View {
 
                     label("LOCATION (OPTIONAL)")
                     TextField("States / Province / City / Place", text: $location)
+                        .focused($focusedField, equals: .location)
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
@@ -352,10 +361,12 @@ struct PlannedTripEditorSheet: View {
                     } else if durationMode == .dates {
                         VStack(spacing: 0) {
                             DateInputRow(title: "Start date", clearLabel: "Clear start date", date: $startDate,
-                                         range: Date.distantPast...(endDate ?? .distantFuture))
+                                         range: Date.distantPast...(endDate ?? .distantFuture),
+                                         onPresent: { focusedField = nil })
                             Divider().padding(.vertical, 6)
                             DateInputRow(title: "End date", clearLabel: "Clear end date", date: $endDate,
-                                         range: (startDate ?? .distantPast)...Date.distantFuture, preferredDate: startDate)
+                                         range: (startDate ?? .distantPast)...Date.distantFuture, preferredDate: startDate,
+                                         onPresent: { focusedField = nil })
                         }
                         .padding(.vertical, 4)
                         if let days = makeTrip()?.plannedDayCount {
@@ -365,12 +376,14 @@ struct PlannedTripEditorSheet: View {
 
                     label("NOTES")
                     TextField("Optional notes", text: $notes, axis: .vertical)
+                        .focused($focusedField, equals: .notes)
                         .lineLimit(2...4)
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                     if existingTrip != nil {
                         Button("Mark Completed") {
+                            focusedField = nil
                             completingTrip = makeTrip()
                         }
                         .disabled(!canSave)
@@ -383,6 +396,7 @@ struct PlannedTripEditorSheet: View {
                 }
                 .padding()
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle(existingTrip == nil ? "Add to Wishlist" : "Edit Planned Trip")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -395,6 +409,7 @@ struct PlannedTripEditorSheet: View {
                                 completingTrip: plan)
             }
             .onChange(of: durationMode) { _, newMode in
+                focusedField = nil
                 estimatedDays = newMode == .estimatedDays ? "1" : ""
                 startDate = nil
                 endDate = nil
@@ -415,6 +430,7 @@ struct PlannedTripEditorSheet: View {
                 .minimumScaleFactor(0.6)
             Spacer(minLength: 0)
             TextField("Estimated days", text: $estimatedDays)
+                .focused($focusedField, equals: .estimatedDays)
                 .keyboardType(.numberPad)
                 .monospacedDigit()
                 .multilineTextAlignment(.trailing)

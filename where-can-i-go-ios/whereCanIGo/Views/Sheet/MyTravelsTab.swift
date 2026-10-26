@@ -703,6 +703,11 @@ struct TripEditorSheet: View {
     let existingVisit: Visit?
     let completingTrip: PlannedTrip?
 
+    private enum Field: Hashable {
+        case location, notes
+    }
+    @FocusState private var focusedField: Field?
+
     @State private var country: Country?
     @State private var showCountryPicker = false
     @State private var location: String
@@ -733,7 +738,10 @@ struct TripEditorSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     label("COUNTRY")
-                    Button { showCountryPicker = true } label: {
+                    Button {
+                        focusedField = nil
+                        showCountryPicker = true
+                    } label: {
                         HStack(spacing: 12) {
                             if let country {
                                 Text(country.flag).font(.title2)
@@ -752,6 +760,7 @@ struct TripEditorSheet: View {
 
                     label("LOCATION (OPTIONAL)")
                     TextField("States / Province / City / Place", text: $location)
+                        .focused($focusedField, equals: .location)
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
@@ -764,7 +773,8 @@ struct TripEditorSheet: View {
                             title: "Start date",
                             clearLabel: "Clear start date",
                             date: $startDate,
-                            range: Date.distantPast...(endDate ?? Date.distantFuture)
+                            range: Date.distantPast...(endDate ?? Date.distantFuture),
+                            onPresent: { focusedField = nil }
                         )
                         Divider().padding(.vertical, 6)
                         DateInputRow(
@@ -772,13 +782,15 @@ struct TripEditorSheet: View {
                             clearLabel: "Clear end date",
                             date: $endDate,
                             range: (startDate ?? Date.distantPast)...Date.distantFuture,
-                            preferredDate: startDate
+                            preferredDate: startDate,
+                            onPresent: { focusedField = nil }
                         )
                     }
                     .padding(.vertical, 4)
 
                     label("NOTES")
                     TextField("Optional notes", text: $notes, axis: .vertical)
+                        .focused($focusedField, equals: .notes)
                         .lineLimit(2...4)
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
@@ -794,6 +806,7 @@ struct TripEditorSheet: View {
                 }
                 .padding()
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle(existingVisit != nil ? "Edit Visit" : completingTrip != nil ? "Complete Trip" : "Log a Visit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
