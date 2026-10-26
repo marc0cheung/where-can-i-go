@@ -134,15 +134,18 @@ struct OverviewTab: View {
                             clearFilters()
                         } label: {
                             Label("Clear Search and Filters", systemImage: "arrow.counterclockwise")
+                                .labelStyle(.titleAndIcon)
                                 .font(.subheadline.weight(.semibold))
                                 .multilineTextAlignment(.center)
                         }
-                        .cardListRow()
-                        .buttonStyle(.glassProminent)
+                        .buttonStyle(.borderedProminent)
                         .tint(.blue)
                         .controlSize(.regular)
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 12)
                     }
+                    .fixedSize(horizontal: false, vertical: true)
+                    .cardListRow()
                 }
 
                 if search.isEmpty && !hasActiveFilters {
@@ -276,7 +279,6 @@ struct OverviewTab: View {
                             .font(.caption.weight(.semibold))
                             .frame(width: 44, height: 44)
                             .contentShape(Circle())
-                            .glassEffect(.clear.interactive(), in: .circle)
                     }
                     .accessibilityLabel("Clear Filters")
                     .help("Clear Filters")
@@ -327,7 +329,6 @@ struct OverviewTab: View {
         .padding(.horizontal, 6)
         .frame(maxWidth: .infinity, minHeight: 44)
         .contentShape(Capsule())
-        .glassEffect(.clear.interactive(), in: .capsule)
     }
 
     private func allSelectionBinding<Value: Hashable>(_ selection: Binding<Set<Value>>) -> Binding<Bool> {
