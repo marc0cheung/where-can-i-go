@@ -3,14 +3,14 @@ import SwiftUI
 enum PanelTab: String, CaseIterable, Hashable {
     case overview   = "Overview"
     case myVisas    = "My Visas"
-    case myTravels  = "My Travels"
+    case myTravels  = "Travels"
     case manageData = "Manage Data"
 
     var localizedTitle: String {
         switch self {
         case .overview: String(localized: "Overview")
         case .myVisas: String(localized: "My Visas")
-        case .myTravels: String(localized: "My Travels")
+        case .myTravels: String(localized: "Travels")
         case .manageData: String(localized: "Manage Data")
         }
     }
