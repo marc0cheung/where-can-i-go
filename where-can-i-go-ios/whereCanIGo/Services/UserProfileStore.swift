@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import ImageIO
 import UIKit
+import UniformTypeIdentifiers
 
 struct UserProfile: Codable {
     var name = ""
@@ -48,9 +49,86 @@ final class UserProfileStore: ObservableObject {
     func save(_ draft: UserProfile) throws {
         var savedProfile = draft
         savedProfile.name = draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        try persist(savedProfile)
+    }
+
+    private func persist(_ savedProfile: UserProfile) throws {
         let data = try JSONEncoder().encode(savedProfile)
         try data.write(to: fileURL, options: .atomic)
         profile = savedProfile
+        loadFailed = false
+        loadError = nil
+    }
+
+    var exportDisplayName: String? {
+        let name = profile.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? nil : name
+    }
+
+    func exportPhotoFile() throws -> BackupFile? {
+        guard let data = profile.photoData else { return nil }
+        guard let ext = Self.photoExtension(for: data) else {
+            throw ProfilePhotoError.invalidImage
+        }
+        return BackupFile(fileName: "avatar.\(ext)", data: data)
+    }
+
+    struct ProfileSnapshot: Codable {
+        let name: String
+        let photoData: Data?
+        let photoFileExtension: String?
+    }
+
+    func snapshot() -> ProfileSnapshot {
+        ProfileSnapshot(
+            name: profile.name,
+            photoData: profile.photoData,
+            photoFileExtension: profile.photoData.flatMap { Self.photoExtension(for: $0) }
+        )
+    }
+
+    func restoreSnapshot(_ snapshot: ProfileSnapshot) throws {
+        try persist(UserProfile(name: snapshot.name, photoData: snapshot.photoData))
+    }
+
+    func restore(_ importedProfile: UserDataBackup.Profile?, mode: UserDataImportMode) throws -> Bool {
+        guard let importedProfile else { return false }
+        var updated = profile
+        switch mode {
+        case .replace:
+            updated.name = importedProfile.displayName ?? ""
+        case .merge:
+            if exportDisplayName == nil {
+                updated.name = importedProfile.displayName ?? ""
+            }
+        }
+        updated.name = updated.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let shouldRestorePhoto: Bool
+        switch mode {
+        case .replace: shouldRestorePhoto = true
+        case .merge: shouldRestorePhoto = profile.photoData == nil
+        }
+        if shouldRestorePhoto, let photo = importedProfile.photo {
+            try photo.validateIntegrity()
+            guard photo.isSupported(for: .profilePhoto),
+                  UIImage(data: photo.data) != nil else {
+                throw ProfilePhotoError.invalidImage
+            }
+            updated.photoData = photo.data
+        }
+        guard updated.name != profile.name || updated.photoData != profile.photoData else {
+            return false
+        }
+        try persist(updated)
+        return true
+    }
+
+    private nonisolated static func photoExtension(for data: Data) -> String? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let type = CGImageSourceGetType(source) else {
+            return nil
+        }
+        return UTType(type as String)?.preferredFilenameExtension
     }
 
     nonisolated static func preparePhoto(_ data: Data) throws -> Data {

@@ -563,6 +563,7 @@ struct CountryMapView: UIViewRepresentable {
         /// Signature of only the data that affects overlay fill color.
         static func visaSignature(for appState: AppState) -> Int {
             var hasher = Hasher()
+            hasher.combine(appState.dataRevision)
             hasher.combine(appState.data.passportCode)
             hasher.combine(Calendar.current.startOfDay(for: appState.visaReferenceDate))
             for entry in appState.data.defaultVisas {
@@ -582,6 +583,7 @@ struct CountryMapView: UIViewRepresentable {
         /// Signature of only the data that affects the "visited" annotations.
         static func visitSignature(for appState: AppState) -> Int {
             var hasher = Hasher()
+            hasher.combine(appState.dataRevision)
             for visit in appState.data.visits {
                 hasher.combine(visit.countryCode)
             }

@@ -92,7 +92,7 @@ struct SheetHeader: View {
             UserProfileView(profileStore: profileStore, passportCode: appState.data.passportCode)
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView()
+            SettingsView(appState: appState, profileStore: profileStore)
         }
         .alert("Unable to Load Profile", isPresented: Binding {
             profileStore.loadError != nil

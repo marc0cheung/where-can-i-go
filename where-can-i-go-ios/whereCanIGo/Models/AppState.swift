@@ -15,6 +15,15 @@ final class AppState: ObservableObject {
     @Published var diceSpinTarget: String? = nil
     @Published private(set) var visaReferenceDate: Date = Date()
 
+    // MARK: Backup & restore state
+    /// True while an import is being applied; UI should disable import/export and edits.
+    @Published private(set) var isRestoring: Bool = false
+    /// Increments every time restored data is committed (including rollbacks).
+    /// Views can use `.onChange(of: appState.dataRevision)` or `.id(appState.dataRevision)` to rebuild caches.
+    @Published private(set) var dataRevision: Int = 0
+    /// Result of the last fully successful restore, for a success banner/alert.
+    @Published private(set) var lastRestoreSummary: UserDataRestoreSummary? = nil
+
     private let store: DataStore
 
     init(store: DataStore? = nil) {
@@ -146,6 +155,89 @@ final class AppState: ObservableObject {
         data = updated
     }
 
+    // MARK: - Backup & Restore
+
+    /// Bundled entry policies for a passport (used by export diffing and import rebuilding).
+    func bundledDefaultVisas(for passportCode: String) -> [DefaultVisaEntry] {
+        (try? CountryRepository.loadDefaultVisas(passport: passportCode)) ?? []
+    }
+
+    /// Read-only snapshot of the current data, for export or for rollback.
+    func exportSnapshot() -> AppData {
+        data
+    }
+
+    /// Marks the start of an import. Throws if another restore is already running.
+    func beginRestore() throws {
+        guard !isRestoring else { throw UserDataRestoreError.restoreInProgress }
+        isRestoring = true
+    }
+
+    /// Must always be called when an import finishes (use `defer`).
+    func endRestore() {
+        isRestoring = false
+    }
+
+    /// Persists and publishes restored data. Also used for rollback: `try appState.commitRestoredData(oldData)`.
+    ///
+    /// - Saves to disk FIRST; if saving fails, in-memory state is untouched and an error is thrown.
+    /// - `defaultVisas` is used as-is (the import plan already rebuilt it).
+    /// - Returns personal visa IDs that existed before but are gone now. The caller deletes their
+    ///   attachment folders only after the whole restore has succeeded.
+    @discardableResult
+    func commitRestoredData(_ restored: AppData) throws -> Set<UUID> {
+        var candidate = restored
+
+        let passport = candidate.passportCode
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .uppercased()
+        guard passport.count == 3, passport.allSatisfy({ $0.isASCII && $0.isLetter }) else {
+            throw UserDataRestoreError.invalidPassportCode(candidate.passportCode)
+        }
+        candidate.passportCode = passport
+
+        // 1. Persist first — memory is only updated if this succeeds.
+        do {
+            try store.saveAppData(candidate)
+        } catch {
+            throw UserDataRestoreError.persistenceFailed(underlying: error)
+        }
+
+        // 2. Visas removed by this commit (for attachment cleanup by the caller).
+        let removedVisaIDs = Set(data.personalVisas.map(\.id))
+            .subtracting(candidate.personalVisas.map(\.id))
+
+        // 3. Clear transient UI state that may point to records that no longer exist.
+        selectedCountryCode = nil
+        pendingAddVisaCountryCode = nil
+        pendingAddVisitCountryCode = nil
+        pendingAddWishlistCountryCode = nil
+        diceSpinTarget = nil
+
+        // 4. Publish the new state.
+        data = candidate
+        needsPassportSelection = false
+        visaReferenceDate = Date()
+        dataRevision &+= 1
+
+        return removedVisaIDs
+    }
+
+    /// Call once, only after data, attachments and profile have ALL been restored successfully.
+    func publishRestoreSummary(_ summary: UserDataRestoreSummary) {
+        lastRestoreSummary = summary
+        NotificationCenter.default.post(
+            name: .userDataDidRestore,
+            object: self,
+            userInfo: ["summary": summary]
+        )
+    }
+
+    /// Call after the success banner/alert is dismissed.
+    func clearLastRestoreSummary() {
+        lastRestoreSummary = nil
+    }
+
     // MARK: - Helpers
 
     func visaCategory(for code: String) -> VisaCategory {
@@ -172,6 +264,7 @@ final class AppState: ObservableObject {
     func save() {
         try? store.saveAppData(data)
     }
+
     // MARK: - Selection
 
     func selectCountry(code: String?) {
@@ -179,5 +272,4 @@ final class AppState: ObservableObject {
             selectedCountryCode = code
         }
     }
-
 }

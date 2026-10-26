@@ -554,6 +554,7 @@ struct CountryTripsSheet: View {
 
     @State private var editingVisit: Visit? = nil
     @State private var showAddTrip = false
+    @State private var pendingDeletion: RecordDeletion?
 
     private var visits: [Visit] { appState.visits(for: country.code) }
     private var totalDays: Int { visits.compactMap { $0.dayCount }.reduce(0, +) }
@@ -593,6 +594,22 @@ struct CountryTripsSheet: View {
                         }
                         .cardListRow()
                 }
+
+                if !visits.isEmpty {
+                    Button("Delete All Visits", role: .destructive) {
+                        let records = visits
+                        pendingDeletion = .visits(country: country.localizedName(), count: records.count) {
+                            for visit in records {
+                                appState.removeVisit(visit.id)
+                            }
+                            dismissIfEmpty()
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .cardListRow()
+                }
             }
             .cardListStyle()
             .navigationTitle(country.localizedName())
@@ -612,6 +629,7 @@ struct CountryTripsSheet: View {
                 if editingVisit == nil && !showAddTrip { dismissIfEmpty() }
             }
         }
+        .recordDeletionConfirmation($pendingDeletion)
     }
 
     private func dismissIfEmpty() {

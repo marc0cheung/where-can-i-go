@@ -4,7 +4,11 @@ final class DataStore {
     private let fileName = "app_data.json"
     private let storageURL: URL?
 
-    init(fileURL: URL? = nil) {
+    init(directory: URL? = nil) {
+        storageURL = directory?.appendingPathComponent("app_data.json")
+    }
+
+    init(fileURL: URL?) {
         storageURL = fileURL
     }
 

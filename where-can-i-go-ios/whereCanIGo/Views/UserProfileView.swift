@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import UniformTypeIdentifiers
 
 struct ProfileAvatar: View {
     let photoData: Data?
@@ -184,20 +185,98 @@ struct UserProfileView: View {
 }
 
 struct SettingsView: View {
+    @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var service: UserDataTransferService
+    @State private var showExport = false
+    @State private var showImporter = false
+    @State private var importURL: URL?
+    @State private var importSelection: ImportSelection?
+    @State private var importError: String?
+
+    init(appState: AppState, profileStore: UserProfileStore) {
+        _service = StateObject(wrappedValue: UserDataTransferService(
+            appState: appState, profileStore: profileStore
+        ))
+    }
+
+    private var isBusy: Bool { importURL != nil || appState.isRestoring }
+
+    private struct ImportSelection: Identifiable {
+        let id = UUID()
+        let backup: UserDataBackup
+    }
 
     var body: some View {
         NavigationStack {
             Form {
-                Text("Test")
-                    .foregroundStyle(.secondary)
+                Section {
+                    Button {
+                        showExport = true
+                    } label: {
+                        Label("Export Data", systemImage: "square.and.arrow.up")
+                            .foregroundStyle(.primary)
+                    }
+                    Button {
+                        showImporter = true
+                    } label: {
+                        Label("Import Data", systemImage: "square.and.arrow.down")
+                            .foregroundStyle(.primary)
+                    }
+                    if importURL != nil {
+                        ProgressView("import.reading")
+                    }
+                } header: {
+                    Text("Manage Data")
+                        .foregroundStyle(.primary)
+                }
             }
+            .disabled(isBusy)
             .navigationTitle("Settings")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
+                        .disabled(isBusy)
                 }
             }
+            .sheet(isPresented: $showExport) {
+                ExportDataView(service: service)
+            }
+            .fileImporter(isPresented: $showImporter, allowedContentTypes: [.json]) { result in
+                switch result {
+                case .success(let url):
+                    importURL = url
+                case .failure(let error):
+                    if let cocoaError = error as? CocoaError, cocoaError.code == .userCancelled { return }
+                    importError = error.localizedDescription
+                }
+            }
+            .task(id: importURL) {
+                guard let importURL else { return }
+                defer { self.importURL = nil }
+                do {
+                    let backup = try await service.readBackup(from: importURL)
+                    try Task.checkCancellation()
+                    importSelection = ImportSelection(backup: backup)
+                } catch is CancellationError {
+                    // A cancelled file read should not present an error or a preview.
+                } catch {
+                    importError = error.localizedDescription
+                }
+            }
+            .sheet(item: $importSelection) { selection in
+                ImportPreviewView(service: service, backup: selection.backup)
+            }
+            .alert("import.error.title", isPresented: Binding {
+                importError != nil
+            } set: { presented in
+                if !presented { importError = nil }
+            }) {
+                Button("OK", role: .cancel) { importError = nil }
+            } message: {
+                Text(verbatim: importError ?? "")
+            }
         }
+        .interactiveDismissDisabled(isBusy)
     }
 }

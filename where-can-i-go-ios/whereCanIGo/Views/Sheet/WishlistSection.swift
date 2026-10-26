@@ -137,6 +137,7 @@ struct CountryPlansSheet: View {
 
     @State private var showAddTrip = false
     @State private var editingTrip: PlannedTrip?
+    @State private var completingTrip: PlannedTrip?
     @State private var showSaveError = false
     @State private var pendingDeletion: RecordDeletion?
 
@@ -177,6 +178,14 @@ struct CountryPlansSheet: View {
                             }
                             .accessibilityLabel(Text("Delete"))
                             .tint(.red)
+
+                            Button {
+                                completingTrip = plan
+                            } label: {
+                                Image(systemName: "checkmark")
+                            }
+                            .accessibilityLabel(Text("Mark Completed"))
+                            .tint(.green)
                         }
                         .cardListRow()
                 }
@@ -210,6 +219,12 @@ struct CountryPlansSheet: View {
                 PlannedTripEditorSheet(
                     existingTrip: trip,
                     initialCountry: appState.country(for: trip.countryCode))
+            }
+            .sheet(item: $completingTrip, onDismiss: dismissIfEmpty) { plan in
+                TripEditorSheet(
+                    existingVisit: nil,
+                    initialCountry: appState.country(for: plan.countryCode),
+                    completingTrip: plan)
             }
             .alert("Couldn't Save", isPresented: $showSaveError) {
                 Button("OK", role: .cancel) {}
