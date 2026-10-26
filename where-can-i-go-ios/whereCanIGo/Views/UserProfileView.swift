@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
+import AVFoundation
 
 struct ProfileAvatar: View {
     let photoData: Data?
@@ -16,7 +17,7 @@ struct ProfileAvatar: View {
                 Image(systemName: "person.fill")
                     .resizable()
                     .scaledToFit()
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color(uiColor: .secondaryLabel))
                     .padding(size * 0.23)
                     .background(Color(uiColor: .tertiarySystemFill))
             }
@@ -36,6 +37,10 @@ struct UserProfileView: View {
     @State private var passportCode: String
     @State private var showPassportPicker = false
     @State private var selectedPhoto: PhotosPickerItem?
+    @State private var showPhotoPicker = false
+    @State private var showCamera = false
+    @State private var pendingPhoto: ProfilePhotoSelection?
+    @State private var photoToCrop: ProfilePhotoSelection?
     @State private var isLoadingPhoto = false
     @State private var photoError: String?
     @State private var saveError: String?
@@ -50,24 +55,33 @@ struct UserProfileView: View {
         NavigationStack {
             VStack(spacing: 24) {
                 VStack(spacing: 8) {
-                    ProfileAvatar(photoData: draft.photoData, size: 88)
-                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                        Text("Edit Photo")
-                            .font(.caption)
+                    Menu {
+                        if draft.photoData != nil {
+                            Button("Edit Photo", systemImage: "crop") {
+                                editPhoto()
+                            }
+                        }
+                        Button("Take Photo", systemImage: "camera") {
+                            Task { await takePhoto() }
+                        }
+                        Button("Choose from Album", systemImage: "photo.on.rectangle") {
+                            showPhotoPicker = true
+                        }
+                        if draft.photoData != nil {
+                            Button("Remove Photo", systemImage: "trash", role: .destructive) {
+                                draft.photoData = nil
+                            }
+                        }
+                    } label: {
+                        ProfileAvatar(photoData: draft.photoData, size: 88)
                     }
+                    .accessibilityLabel("Profile photo")
+                    .accessibilityHint("Open photo options")
                     .disabled(isLoadingPhoto)
 
                     if isLoadingPhoto {
                         ProgressView()
                             .accessibilityLabel("Loading photo")
-                    }
-                    if draft.photoData != nil {
-                        Button("Remove Photo", role: .destructive) {
-                            draft.photoData = nil
-                            selectedPhoto = nil
-                        }
-                        .font(.caption)
-                        .disabled(isLoadingPhoto)
                     }
                 }
                 .padding(.top, 12)
@@ -133,6 +147,29 @@ struct UserProfileView: View {
                     passportCode = $0
                 }
             }
+            .photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhoto, matching: .images)
+            .onChange(of: showPhotoPicker) { _, isPresented in
+                if !isPresented { presentPendingPhoto() }
+            }
+            .fullScreenCover(isPresented: $showCamera, onDismiss: presentPendingPhoto) {
+                CameraImagePicker { image in
+                    do {
+                        guard let data = image.jpegData(compressionQuality: 0.95) else {
+                            throw ProfilePhotoError.invalidImage
+                        }
+                        try stagePhoto(data)
+                    } catch {
+                        photoError = error.localizedDescription
+                    }
+                }
+                .ignoresSafeArea()
+            }
+            .sheet(item: $photoToCrop) { photo in
+                ProfilePhotoEditorSheet(image: photo.image) { data in
+                    draft.photoData = data
+                    photoToCrop = nil
+                }
+            }
             .task(id: selectedPhoto) {
                 guard let selectedPhoto else { return }
                 isLoadingPhoto = true
@@ -142,7 +179,8 @@ struct UserProfileView: View {
                         throw ProfilePhotoError.invalidImage
                     }
                     try Task.checkCancellation()
-                    draft.photoData = try UserProfileStore.preparePhoto(data)
+                    try stagePhoto(data)
+                    presentPendingPhoto()
                 } catch is CancellationError {
                     // Dismissing the editor cancels photo loading without changing the saved profile.
                 } catch {
@@ -161,6 +199,51 @@ struct UserProfileView: View {
                 Text(saveError ?? "")
             }
         }
+    }
+
+    private func editPhoto() {
+        guard let data = draft.photoData, let image = UIImage(data: data) else {
+            photoError = ProfilePhotoError.invalidImage.localizedDescription
+            return
+        }
+        photoToCrop = ProfilePhotoSelection(image: image)
+    }
+
+    private func stagePhoto(_ data: Data) throws {
+        let prepared = try UserProfileStore.preparePhoto(data, maximumPixelSize: 2048)
+        guard let image = UIImage(data: prepared) else {
+            throw ProfilePhotoError.invalidImage
+        }
+        pendingPhoto = ProfilePhotoSelection(image: image)
+    }
+
+    private func presentPendingPhoto() {
+        guard !showPhotoPicker, !showCamera, let pendingPhoto else { return }
+        photoToCrop = pendingPhoto
+        self.pendingPhoto = nil
+    }
+
+    private func takePhoto() async {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            photoError = String(localized: "A camera is not available on this device.")
+            return
+        }
+        isLoadingPhoto = true
+        defer { isLoadingPhoto = false }
+        let authorized: Bool
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            authorized = true
+        case .notDetermined:
+            authorized = await AVCaptureDevice.requestAccess(for: .video)
+        default:
+            authorized = false
+        }
+        guard authorized else {
+            photoError = String(localized: "Allow camera access in Settings to take a photo.")
+            return
+        }
+        showCamera = true
     }
 
     private func save() {

@@ -131,12 +131,12 @@ final class UserProfileStore: ObservableObject {
         return UTType(type as String)?.preferredFilenameExtension
     }
 
-    nonisolated static func preparePhoto(_ data: Data) throws -> Data {
+    nonisolated static func preparePhoto(_ data: Data, maximumPixelSize: Int = 512) throws -> Data {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               let thumbnail = CGImageSourceCreateThumbnailAtIndex(source, 0, [
                 kCGImageSourceCreateThumbnailFromImageAlways: true,
                 kCGImageSourceCreateThumbnailWithTransform: true,
-                kCGImageSourceThumbnailMaxPixelSize: 512
+                kCGImageSourceThumbnailMaxPixelSize: maximumPixelSize
               ] as CFDictionary),
               let jpeg = UIImage(cgImage: thumbnail).jpegData(compressionQuality: 0.85) else {
             throw ProfilePhotoError.invalidImage
