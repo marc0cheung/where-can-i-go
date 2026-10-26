@@ -71,7 +71,6 @@ struct MyTravelsTab: View {
             }
         }
         .cardListStyle()
-        .id(showingWishlist)
         .recordDeletionConfirmation($pendingDeletion)
         .sheet(isPresented: $showSummary) { TravelSummaryView() }
         .sheet(isPresented: $showAddTrip) {

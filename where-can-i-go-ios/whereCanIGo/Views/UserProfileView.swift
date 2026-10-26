@@ -215,13 +215,13 @@ struct SettingsView: View {
                         showExport = true
                     } label: {
                         Label("Export Data", systemImage: "square.and.arrow.up")
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(Color.primary)
                     }
                     Button {
                         showImporter = true
                     } label: {
                         Label("Import Data", systemImage: "square.and.arrow.down")
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(Color.primary)
                     }
                     if importURL != nil {
                         ProgressView("import.reading")
