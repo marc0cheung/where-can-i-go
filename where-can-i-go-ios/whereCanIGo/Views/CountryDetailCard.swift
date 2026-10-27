@@ -4,6 +4,8 @@ import SwiftUI
 /// Displays the country flag, name, visa category, duration, and a dismiss button.
 struct CountryDetailCard: View {
     @EnvironmentObject var appState: AppState
+    @Environment(\.openURL) private var openURL
+    @AppStorage(SearchEngine.storageKey) private var searchEngine: SearchEngine = .google
     let countryCode: String
     @Binding var selectedTab: PanelTab
     @Binding var panelState: PanelState
@@ -97,6 +99,15 @@ struct CountryDetailCard: View {
                         } label: {
                             Label("Add Visa", systemImage: "doc.badge.plus")
                         }
+                    }
+
+                    Button {
+                        let query = country?.localizedName() ?? countryCode
+                        if let url = searchEngine.searchURL(for: query) {
+                            openURL(url)
+                        }
+                    } label: {
+                        Label("Search on \(searchEngine.displayName)", systemImage: "magnifyingglass")
                     }
                 } label: {
                     Image(systemName: "ellipsis")
