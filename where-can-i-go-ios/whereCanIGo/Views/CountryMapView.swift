@@ -353,7 +353,8 @@ struct CountryMapView: UIViewRepresentable {
                     lastVisitSignature = nil
                     isLoadingGeometry = false
 
-                    map.addOverlays(detailLevels[currentLevel], level: .aboveLabels)
+                    // Keep native place labels above the opaque country fills.
+                    map.addOverlays(detailLevels[currentLevel], level: .aboveRoads)
                     refreshOverlayColors(on: map)
                     handleDiceSpinTargetIfNeeded(appState.diceSpinTarget, in: map)
                     onGeometryLoaded()
@@ -503,7 +504,7 @@ struct CountryMapView: UIViewRepresentable {
             // Add the new level before removing the old one so there is never a frame
             // where the country fills are missing.
             if !nextAlreadyOnMap {
-                map.addOverlays(detailLevels[next], level: .aboveLabels)
+                map.addOverlays(detailLevels[next], level: .aboveRoads)
             }
             rebuildSelectionHighlight(on: map)
 
@@ -526,7 +527,7 @@ struct CountryMapView: UIViewRepresentable {
 
         // MARK: - Selection highlight
 
-        /// Draws the selected country's outline (soft glow + crisp line) above all fills,
+        /// Draws the selected country's outline above all fills but below native labels,
         /// using the geometry of the current detail level.
         private func rebuildSelectionHighlight(on map: MKMapView) {
             if !highlightOverlays.isEmpty {
@@ -548,7 +549,7 @@ struct CountryMapView: UIViewRepresentable {
             }
             highlightOverlays = [SelectionGlowOverlay(rings), SelectionLineOverlay(rings)]
 
-            map.addOverlays(highlightOverlays, level: .aboveLabels)
+            map.addOverlays(highlightOverlays, level: .aboveRoads)
         }
 
         /// Signature of only the data that affects overlay fill color.
