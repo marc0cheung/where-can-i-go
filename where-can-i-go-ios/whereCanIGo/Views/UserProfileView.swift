@@ -285,6 +285,7 @@ struct SettingsView: View {
     @State private var importURL: URL?
     @State private var importSelection: ImportSelection?
     @State private var importError: String?
+    @AppStorage(SearchEngine.storageKey) private var searchEngine: SearchEngine = .google
 
     init(appState: AppState, profileStore: UserProfileStore) {
         _service = StateObject(wrappedValue: UserDataTransferService(
@@ -302,6 +303,20 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    Picker(selection: $searchEngine) {
+                        ForEach(SearchEngine.allCases) { engine in
+                            Text(verbatim: engine.displayName).tag(engine)
+                        }
+                    } label: {
+                        Label("Search Engine", systemImage: "magnifyingglass")
+                            .foregroundStyle(Color.primary)
+                    }
+                } header: {
+                    Text("General")
+                        .foregroundStyle(.primary)
+                }
+
                 Section {
                     Button {
                         showExport = true
