@@ -70,6 +70,8 @@ struct UserProfileView: View {
                         if draft.photoData != nil {
                             Button("Remove Photo", systemImage: "trash", role: .destructive) {
                                 draft.photoData = nil
+                                draft.photoSourceData = nil
+                                draft.photoCrop = nil
                             }
                         }
                     } label: {
@@ -165,8 +167,10 @@ struct UserProfileView: View {
                 .ignoresSafeArea()
             }
             .sheet(item: $photoToCrop) { photo in
-                ProfilePhotoEditorSheet(image: photo.image) { data in
+                ProfilePhotoEditorSheet(image: photo.image, initialCrop: photo.crop) { data, crop in
                     draft.photoData = data
+                    draft.photoSourceData = photo.sourceData
+                    draft.photoCrop = crop
                     photoToCrop = nil
                 }
             }
@@ -202,11 +206,16 @@ struct UserProfileView: View {
     }
 
     private func editPhoto() {
+        if let source = draft.photoSourceData, let image = UIImage(data: source) {
+            photoToCrop = ProfilePhotoSelection(image: image, sourceData: source, crop: draft.photoCrop)
+            return
+        }
+        // Avatars saved before original photos were retained can only be re-cropped from the avatar.
         guard let data = draft.photoData, let image = UIImage(data: data) else {
             photoError = ProfilePhotoError.invalidImage.localizedDescription
             return
         }
-        photoToCrop = ProfilePhotoSelection(image: image)
+        photoToCrop = ProfilePhotoSelection(image: image, sourceData: data, crop: nil)
     }
 
     private func stagePhoto(_ data: Data) throws {
@@ -214,7 +223,7 @@ struct UserProfileView: View {
         guard let image = UIImage(data: prepared) else {
             throw ProfilePhotoError.invalidImage
         }
-        pendingPhoto = ProfilePhotoSelection(image: image)
+        pendingPhoto = ProfilePhotoSelection(image: image, sourceData: prepared, crop: nil)
     }
 
     private func presentPendingPhoto() {

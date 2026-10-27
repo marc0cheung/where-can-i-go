@@ -7,10 +7,19 @@ import UniformTypeIdentifiers
 struct UserProfile: Codable {
     var name = ""
     var photoData: Data?
+    /// Uncropped photo and crop position, kept locally so the avatar can be re-cropped.
+    var photoSourceData: Data?
+    var photoCrop: ProfilePhotoCrop?
 
     var displayName: String {
         name.isEmpty ? String(localized: "Your Profile") : name
     }
+}
+
+struct ProfilePhotoCrop: Codable, Equatable {
+    var zoom: Double
+    var offsetX: Double
+    var offsetY: Double
 }
 
 @MainActor
@@ -29,9 +38,14 @@ final class UserProfileStore: ObservableObject {
     func load() {
         do {
             let data = try Data(contentsOf: fileURL)
-            let savedProfile = try JSONDecoder().decode(UserProfile.self, from: data)
+            var savedProfile = try JSONDecoder().decode(UserProfile.self, from: data)
             if let photoData = savedProfile.photoData, UIImage(data: photoData) == nil {
                 throw ProfilePhotoError.invalidImage
+            }
+            if savedProfile.photoData == nil
+                || savedProfile.photoSourceData.flatMap(UIImage.init(data:)) == nil {
+                savedProfile.photoSourceData = nil
+                savedProfile.photoCrop = nil
             }
             profile = savedProfile
             loadFailed = false
@@ -77,18 +91,26 @@ final class UserProfileStore: ObservableObject {
         let name: String
         let photoData: Data?
         let photoFileExtension: String?
+        var photoSourceData: Data?
+        var photoCrop: ProfilePhotoCrop?
     }
 
     func snapshot() -> ProfileSnapshot {
         ProfileSnapshot(
             name: profile.name,
             photoData: profile.photoData,
-            photoFileExtension: profile.photoData.flatMap { Self.photoExtension(for: $0) }
+            photoFileExtension: profile.photoData.flatMap { Self.photoExtension(for: $0) },
+            photoSourceData: profile.photoSourceData,
+            photoCrop: profile.photoCrop
         )
     }
 
     func restoreSnapshot(_ snapshot: ProfileSnapshot) throws {
-        try persist(UserProfile(name: snapshot.name, photoData: snapshot.photoData))
+        try persist(UserProfile(
+            name: snapshot.name,
+            photoData: snapshot.photoData,
+            photoSourceData: snapshot.photoSourceData,
+            photoCrop: snapshot.photoCrop))
     }
 
     func restore(_ importedProfile: UserDataBackup.Profile?, mode: UserDataImportMode) throws -> Bool {
@@ -115,6 +137,8 @@ final class UserProfileStore: ObservableObject {
                 throw ProfilePhotoError.invalidImage
             }
             updated.photoData = photo.data
+            updated.photoSourceData = nil
+            updated.photoCrop = nil
         }
         guard updated.name != profile.name || updated.photoData != profile.photoData else {
             return false

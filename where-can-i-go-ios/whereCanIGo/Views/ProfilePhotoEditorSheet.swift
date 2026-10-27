@@ -3,15 +3,18 @@ import SwiftUI
 struct ProfilePhotoSelection: Identifiable {
     let id = UUID()
     let image: UIImage
+    let sourceData: Data
+    let crop: ProfilePhotoCrop?
 }
 
 struct ProfilePhotoEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     let image: UIImage
-    let onChoose: (Data) -> Void
+    let onChoose: (Data, ProfilePhotoCrop) -> Void
 
-    @State private var zoom: CGFloat = 1
-    @State private var offset = CGSize.zero
+    @State private var zoom: CGFloat
+    /// Offset relative to the crop circle diameter, so it survives layout changes.
+    @State private var offset: CGSize
     @State private var cropDiameter: CGFloat = 1
     @State private var photoError: String?
     @GestureState private var adjustment = Adjustment()
@@ -19,6 +22,18 @@ struct ProfilePhotoEditorSheet: View {
     private struct Adjustment {
         var translation = CGSize.zero
         var magnification: CGFloat = 1
+    }
+
+    init(
+        image: UIImage, initialCrop: ProfilePhotoCrop?,
+        onChoose: @escaping (Data, ProfilePhotoCrop) -> Void
+    ) {
+        self.image = image
+        self.onChoose = onChoose
+        _zoom = State(initialValue: min(max(CGFloat(initialCrop?.zoom ?? 1), 1), 6))
+        _offset = State(
+            initialValue: CGSize(
+                width: initialCrop?.offsetX ?? 0, height: initialCrop?.offsetY ?? 0))
     }
 
     var body: some View {
@@ -29,8 +44,8 @@ struct ProfilePhotoEditorSheet: View {
                     let currentZoom = clampedZoom(zoom * adjustment.magnification)
                     let currentOffset = clampedOffset(
                         CGSize(
-                            width: offset.width + adjustment.translation.width,
-                            height: offset.height + adjustment.translation.height),
+                            width: offset.width * diameter + adjustment.translation.width,
+                            height: offset.height * diameter + adjustment.translation.height),
                         diameter: diameter, zoom: currentZoom)
                     let size = displayedSize(diameter: diameter, zoom: currentZoom)
 
@@ -73,10 +88,10 @@ struct ProfilePhotoEditorSheet: View {
                                 .onEnded { value in
                                     zoom = clampedZoom(zoom * (value.second?.magnification ?? 1))
                                     let translation = value.first?.translation ?? .zero
-                                    offset = clampedOffset(
+                                    offset = normalizedOffset(
                                         CGSize(
-                                            width: offset.width + translation.width,
-                                            height: offset.height + translation.height),
+                                            width: offset.width * diameter + translation.width,
+                                            height: offset.height * diameter + translation.height),
                                         diameter: diameter, zoom: zoom)
                                 }
                         )
@@ -84,7 +99,8 @@ struct ProfilePhotoEditorSheet: View {
                         .accessibilityHint("Drag to move the photo. Pinch to scale.")
                         .onChange(of: diameter, initial: true) { _, newDiameter in
                             cropDiameter = newDiameter
-                            offset = clampedOffset(offset, diameter: newDiameter, zoom: zoom)
+                            offset = normalizedOffset(
+                                pointOffset(diameter: newDiameter), diameter: newDiameter, zoom: zoom)
                         }
                     }
                 }
@@ -93,7 +109,9 @@ struct ProfilePhotoEditorSheet: View {
                         Text("Photo zoom")
                     }
                     .onChange(of: zoom) { _, newZoom in
-                        offset = clampedOffset(offset, diameter: cropDiameter, zoom: newZoom)
+                        offset = normalizedOffset(
+                            pointOffset(diameter: cropDiameter), diameter: cropDiameter,
+                            zoom: newZoom)
                     }
                     HStack {
                         Button("Cancel") { dismiss() }
@@ -147,9 +165,19 @@ struct ProfilePhotoEditorSheet: View {
             height: min(max(value.height, -limitY), limitY))
     }
 
+    private func pointOffset(diameter: CGFloat) -> CGSize {
+        CGSize(width: offset.width * diameter, height: offset.height * diameter)
+    }
+
+    private func normalizedOffset(_ value: CGSize, diameter: CGFloat, zoom: CGFloat) -> CGSize {
+        let clamped = clampedOffset(value, diameter: diameter, zoom: zoom)
+        return CGSize(width: clamped.width / diameter, height: clamped.height / diameter)
+    }
+
     private func choose(diameter: CGFloat) {
         let size = displayedSize(diameter: diameter, zoom: zoom)
-        let position = clampedOffset(offset, diameter: diameter, zoom: zoom)
+        let position = clampedOffset(
+            pointOffset(diameter: diameter), diameter: diameter, zoom: zoom)
         let outputSide: CGFloat = 512
         let scale = outputSide / diameter
         let format = UIGraphicsImageRendererFormat()
@@ -170,6 +198,11 @@ struct ProfilePhotoEditorSheet: View {
             photoError = ProfilePhotoError.invalidImage.localizedDescription
             return
         }
-        onChoose(data)
+        onChoose(
+            data,
+            ProfilePhotoCrop(
+                zoom: Double(zoom),
+                offsetX: Double(position.width / diameter),
+                offsetY: Double(position.height / diameter)))
     }
 }
