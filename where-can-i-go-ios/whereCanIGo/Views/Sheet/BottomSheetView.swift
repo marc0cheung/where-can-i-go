@@ -182,6 +182,33 @@ struct SheetHeader: View {
     }
 
     private var diceMenu: some View {
+        // The badge is a persistent sibling (not a conditional overlay) so it isn't re-inserted
+        // beneath the Liquid Glass button while the menu morph transition is active.
+        ZStack(alignment: .topTrailing) {
+            diceMenuButton
+            diceBadge
+                .zIndex(1)
+        }
+    }
+
+    private var diceFilterCount: Int {
+        selectedDiceContinents.count + selectedDiceAirlines.count
+    }
+
+    private var diceBadge: some View {
+        Text(diceFilterCount, format: .number)
+            .font(.system(size: 11, weight: .bold))
+            .monospacedDigit()
+            .foregroundStyle(.white)
+            .frame(width: 20, height: 20)
+            .background(.red, in: Circle())
+            .offset(x: 4, y: -4)
+            .opacity(diceFilterCount > 0 ? 1 : 0)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+
+    private var diceMenuButton: some View {
         Menu {
             Menu {
                 Toggle("All Continents", isOn: allDiceContinentsBinding)
@@ -229,19 +256,6 @@ struct SheetHeader: View {
         .buttonStyle(.glass)
         .menuActionDismissBehavior(.disabled)
         .disabled(appState.diceSpinTarget != nil)
-        .overlay(alignment: .topTrailing) {
-            if !selectedDiceContinents.isEmpty || !selectedDiceAirlines.isEmpty {
-                Text(selectedDiceContinents.count + selectedDiceAirlines.count, format: .number)
-                    .font(.system(size: 11, weight: .bold))
-                    .monospacedDigit()
-                    .foregroundStyle(.white)
-                    .frame(width: 20, height: 20)
-                    .background(.red, in: Circle())
-                    .offset(x: 4, y: -4)
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-            }
-        }
         .accessibilityLabel("Random select a country")
         .accessibilityValue(diceAccessibilityValue)
         .accessibilityHint("Touch and hold to change dice options.")

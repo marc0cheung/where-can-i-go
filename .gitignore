@@ -193,3 +193,7 @@ playground.xcworkspace
 
 # Swift Package Manager
 # Package.resolved
+
+### Agent skills
+.agents/
+skills-lock.json
