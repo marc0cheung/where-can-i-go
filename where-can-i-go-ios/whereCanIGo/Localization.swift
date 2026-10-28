@@ -2,7 +2,28 @@ import Foundation
 
 extension Country {
     func localizedName(locale: Locale = .autoupdatingCurrent) -> String {
-        locale.localizedString(forRegionCode: iso2) ?? name
+        if iso2.uppercased() == "CN", let override = Self.chinaName(for: locale) {
+            return override
+        }
+        return locale.localizedString(forRegionCode: iso2) ?? name
+    }
+
+    private static func chinaName(for locale: Locale) -> String? {
+        let language = locale.language
+        switch language.languageCode?.identifier {
+        case "zh":
+            if let script = language.script?.identifier {
+                return script == "Hant" ? "中國" : "中国"
+            }
+            switch language.region?.identifier {
+            case "TW", "HK", "MO": return "中國"
+            default: return "中国"
+            }
+        case "en":
+            return "China"
+        default:
+            return nil
+        }
     }
 }
 
