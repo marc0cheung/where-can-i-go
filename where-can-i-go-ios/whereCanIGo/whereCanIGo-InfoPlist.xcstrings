@@ -62,6 +62,7 @@
     },
     "Travel Card" : {
       "comment" : "Document type name for shared travel cards",
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
