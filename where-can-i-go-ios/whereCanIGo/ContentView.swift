@@ -195,8 +195,7 @@ struct ContentView: View {
 
     /// The rounded panel itself: drag handle at top, then the shared
     /// `panelContent`. Forced to compact horizontal size class so the inner
-    /// TabView renders the iPhone-style bottom tab bar instead of the iPad
-    /// floating/top tab bar.
+    /// TabView uses the iPhone-style bottom tab bar on iPad too.
     @ViewBuilder
     private func iPadFloatingPanel(currentHeight: CGFloat, availableHeight: CGFloat) -> some View {
         VStack(spacing: 0) {

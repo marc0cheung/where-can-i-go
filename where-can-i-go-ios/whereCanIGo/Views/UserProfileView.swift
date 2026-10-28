@@ -366,7 +366,7 @@ struct SettingsView: View {
                     try Task.checkCancellation()
                     importSelection = ImportSelection(backup: backup)
                 } catch is CancellationError {
-                    // A cancelled file read should not present an error or a preview.
+                    // A cancelled file read ends quietly.
                 } catch {
                     importError = error.localizedDescription
                 }

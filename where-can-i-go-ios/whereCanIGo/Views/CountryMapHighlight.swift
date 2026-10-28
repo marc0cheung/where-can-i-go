@@ -4,7 +4,7 @@ import UIKit
 // MARK: - Selection outline
 
 /// Soft halo drawn under the selection outline. Added above every country fill so
-/// neighbouring countries can never paint over half of the stroke.
+/// the whole stroke stays above neighbouring countries.
 final class SelectionGlowOverlay: MKMultiPolyline {}
 
 /// Crisp outline of the selected country.

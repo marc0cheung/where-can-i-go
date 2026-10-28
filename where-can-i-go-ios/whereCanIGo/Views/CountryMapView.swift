@@ -34,7 +34,7 @@ struct CountryMapView: UIViewRepresentable {
         map.setCameraBoundary(nil, animated: false)
         map.setCameraZoomRange(nil, animated: false)
 
-        // Initialize with camera distance (instead of region) for globe-friendly behavior.
+        // Start from a camera distance so zooming out reaches the 3D globe.
         let worldCamera = MKMapCamera(
             lookingAtCenter: CLLocationCoordinate2D(latitude: 20, longitude: 20),
             fromDistance: 35_000_000,
@@ -108,14 +108,14 @@ struct CountryMapView: UIViewRepresentable {
         private var levelTolerances: [Double] = []
         private var currentLevel = 0
         /// Previous level kept on the map briefly after a swap, so the base imagery
-        /// never flashes through while MapKit prepares the new geometry.
+        /// stays covered while MapKit prepares the new geometry.
         private var retiringLevel: Int?
         private var retireWorkItem: DispatchWorkItem?
         private let retireDelay: TimeInterval = 0.35
         /// Use the coarsest level whose tolerance is at most this many screen points…
         private let maxToleranceInPoints = 0.5
         /// …and only fall back to a coarser level once the current one is this precise,
-        /// so small zoom changes around a threshold don't cause swaps.
+        /// so small zoom changes around a threshold keep the current level.
         private let minToleranceInPoints = 0.18
 
         // MARK: Selection highlight
@@ -144,8 +144,8 @@ struct CountryMapView: UIViewRepresentable {
         private let spinDistancePerCountrySize: Double = 4.0
 
         /// How many degrees south the camera center is offset from the target country
-        /// at `spinMaxEndDistance`, so the country appears above the CountryDetailCard
-        /// rather than behind it. Scaled down proportionally for closer cameras.
+        /// at `spinMaxEndDistance`, so the country appears above the CountryDetailCard.
+        /// Scaled down proportionally for closer cameras.
         private let spinCameraLatOffset: Double = -18.0
 
         init(appState: AppState, onGeometryLoaded: @escaping () -> Void) {
@@ -207,7 +207,7 @@ struct CountryMapView: UIViewRepresentable {
                 if let coordinate = centroid(for: target) {
                     startSpinAnimation(to: coordinate, targetCode: target, in: mapView)
                 } else {
-                    // No GeoJSON data for this code — fall back to instant select.
+                    // No GeoJSON data for this code: select it immediately.
                     appState.selectCountry(code: target)
                     refreshOverlayColors(on: mapView)
                     appState.diceSpinTarget = nil
@@ -231,7 +231,7 @@ struct CountryMapView: UIViewRepresentable {
             spinEndCoordinate = coordinate
             spinEndDistance = preferredCameraDistance(for: targetCode)
             // Bias the camera's final latitude southward so the country appears
-            // above the CountryDetailCard rather than behind it.
+            // above the CountryDetailCard.
             let latOffset = spinCameraLatOffset * spinEndDistance / spinMaxEndDistance
             spinEndCameraLat = min(max(coordinate.latitude + latOffset, -75), 75)
             spinTargetCode = targetCode
@@ -501,8 +501,8 @@ struct CountryMapView: UIViewRepresentable {
             let previous = currentLevel
             currentLevel = next
 
-            // Add the new level before removing the old one so there is never a frame
-            // where the country fills are missing.
+            // Add the new level before removing the old one so the country fills
+            // stay visible during the swap.
             if !nextAlreadyOnMap {
                 map.addOverlays(detailLevels[next], level: .aboveRoads)
             }

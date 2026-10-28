@@ -1,96 +1,113 @@
 # where-can-i-go | 跟住去邊度
 
-An interactive visa-availability tracker for visualizing global travel accessibility with a dynamic map and customizable data.
-
-## Overview
-
-`where-can-i-go` is a lightweight application (currently iOS only, later may expand to Android and Web Application) that helps users explore which countries are accessible based on selected passport and visa policy data. The app visualizes country-level visa rules on a world map, provides details per country, and includes tools for importing or editing local datasets for research and personal planning.
-
-## Screenshots
+See which countries your passport can enter, keep track of your own visas, and log the places you have been and want to go. Everything stays on your iPhone.
 
 | Main View | My Visas | Manage Data |
 |:---:|:---:|:---:|
-| ![App Screenshot - Main View](assets/MainApp.png) | ![My Visas](assets/MyVisas.png) | ![Manage Data](assets/ManageData.png) |
-| Screenshot: Main view | Screenshot: My Visas Tab | Screenshot: Manage Default Entry Policy Data |
+| ![Main view](assets/MainApp.png) | ![My Visas](assets/MyVisas.png) | ![Manage Data](assets/ManageData.png) |
 
-## Features
+## For Users
 
-- **Interactive Map:** Pan and zoom the world map to discover travel accessibility. Tap the countries on the map to see accessibility info.
-- **Overview Tab:** Quick summary and visa requirements for selected countries, with swipe shortcuts to locate a country on the globe or open its wishlist plans. A filled heart indicates existing plans.
-- **Passport & Visa Presets:** Select your passport to filter accessible destinations.
-- **Random Place To Go:** Tap the dice to pick an accessible country. Long-press for continent and airline submenus (both support multiple selections), plus **Accessible Countries Only** and **Include All Entry Requirements** choices. Filters combine: a destination must match a selected continent, be served by any selected airline, and meet the entry filter. The passport country remains excluded. **All Continents** removes the continent restriction. No selected airlines means no airline restriction; **All Airlines** selects every bundled airline and restricts results to their combined destinations. Turn it off or choose **No Airline Restriction** to clear the airline restriction. Explicit default choices keep a checkmark present in each menu so selecting options does not shift the menu's contents sideways.
-- **Add Visa:** Add your personal visa(s) in the app and manage them.
-- **Offline-capable Data:** Uses bundled resources in the app bundle for fast lookup.
-- **Manage Default Data:** In case the JSON files are not up-to-date, you may edit visa-free/ETA/Visa-On-Arrival based on the latest policy related to your passport.
+### What the app does
 
-## Getting Started (iOS)
+- **World map by entry requirement.** Countries are coloured by what your passport needs: visa free, visa on arrival, ETA, visa required, or covered by one of your own visas. Tap a country to see the details, add it to your wishlist, log a visit, add a visa, or search the web for it.
+- **Overview.** A searchable list of countries with filters for entry requirement, continent and visited status.
+- **My Visas.** Save the visas you hold, with validity dates, notes and photo or PDF attachments. A valid visa updates the map. Schengen visas can cover the whole Schengen area.
+- **Travels.**
+  - *Been*: log trips with dates, purpose and location. A summary card shows countries, trips, continents and days, and you can share it as a passport-style image.
+  - *Wishlist*: plan future trips. When you go, mark the plan as visited and it moves to Been.
+- **Random destination.** Tap the dice to pick a country. Long-press it to limit the pick by continent, airline (Cathay Pacific and HK Express for now), or entry requirement.
+- **Edit entry policies.** If a bundled rule is out of date, you can change it for your passport, or reset to the bundled data.
+- **Backup.** In Settings you can export your data to a JSON file and import it on another device. Import can replace everything or merge in new records only. Profile photo and visa attachments are optional in the export.
+- **Languages.** English, Traditional Chinese and Simplified Chinese.
+
+### Supported passports
+
+Hong Kong SAR (HKG), Macao SAR (MAC), China (CHN) and Taiwan (TWN).
+
+### Requirements
+
+iOS 26.2 or later. iPhone is the main target; iPad works but some layouts still need work.
+
+### Your data
+
+The app has no account and no server. Your records, profile and attachments are stored in the app's own folder on your device. They only leave the device when you export a backup or share an image yourself.
+
+### Important
+
+Entry policies in the app are maintained by hand and can be out of date. Use them for planning only. **Always confirm the current rules with the destination's authorities and your airline before you travel**, especially temporary exemptions and territory-specific arrangements.
+
+## For Contributors
+
+### Getting started
 
 1. Clone the repository:
 
+   ```sh
+   git clone https://github.com/marc0cheung/where-can-i-go.git
+   ```
+
+2. Open `where-can-i-go-ios/whereCanIGo.xcodeproj` in Xcode 26.2 or later.
+3. Select the `whereCanIGo` scheme and run it on a simulator or device. To run on a device, set your own development team under *Signing & Capabilities*.
+
+The project has no third-party dependencies.
+
+### Where things are
+
 ```
-git clone https://github.com/marc0cheung/where-can-i-go.git
+where-can-i-go-ios/whereCanIGo/
+├── Models/       Data types, AppState, backup format
+├── Services/     Persistence, bundled data loading, backup import/export
+├── Views/        SwiftUI and MapKit views (Sheet/ holds the bottom panel tabs)
+└── Resources/    Bundled JSON data and the world GeoJSON
 ```
 
-2. Open the Xcode workspace `whereCanIGo.xcodeproj`.
+Architecture, data formats and design decisions are described in [tech_notes.md](tech_notes.md). Please read it before changing persistence, the backup format or the map.
 
-3. Build and run on a simulator or device (iOS target supported in project file).
+### Common contributions
 
-4. Data files are located in `whereCanIGo/Resources/`:
+- **Fix an entry policy.** Edit `Resources/default_visas_<ISO3>.json` and add the source to the section below.
+- **Add a passport.** Add `default_visas_<ISO3>.json`, add the code to `supportedPassportCodes` in `Views/PassportPickerView.swift`, and list the source below.
+- **Add an airline.** Add a record to `Resources/airline_destinations.json` and a logo image set with the matching `logoAssetName`. Add the name to `Localizable.xcstrings` if it needs translating.
+- **Translations.** All UI strings are in `Localizable.xcstrings`.
 
-- `countries.json` — country metadata used by the UI.
-- `airline_destinations.json` — manually maintained airline destination-country snapshots, initially using the supplied Cathay Pacific (CX) and HK Express (UO) lists. Each record has a stable `id`, a `name`, a `logoAssetName` matching an image set, and ISO3 `destinationCountryCodes` matching `countries.json`. Add a record and its logo asset to support another airline; the menu and **All Airlines** option update automatically. Add name translations to `Localizable.xcstrings` as needed. Selection lasts for the current app session, like the other dice options.
-- `default_visas_HKG.json` — example visa defaults for Hong Kong passport.
-- `world-countries.geojson` — geometry for map rendering.
+### Pull requests
 
-To modify data, edit the JSON files and rebuild the app.
+- Open an issue first for larger changes.
+- Keep each pull request focused on one change and describe what you tested.
+- Add screenshots for UI changes.
+- Update this README or `tech_notes.md` when you change data formats or behaviour described there.
 
-## Data & Attribution
+## Data Sources
 
-The repository includes sample and geometric datasets bundled under `whereCanIGo/Resources/`. If you add external data sources, please note their licenses and include attribution in this README.
+- **Hong Kong (HKG):** [Immigration Department, visa-free access information](https://www.immd.gov.hk/hkt/service/travel_document/visa_free_access.html).
+- **China (CHN):** [source summary and disclaimer](where-can-i-go-ios/whereCanIGo/Resources/Source/default_visas_CHN.sources.md).
+- **Taiwan (TWN):** [source summary and disclaimer](where-can-i-go-ios/whereCanIGo/Resources/Source/default_visas_TWN.sources.md). Assumes an ordinary passport with a national ID number (household registration).
+- **Macao (MAC):** [Identification Services Bureau, travel convenience information](https://www.dsi.gov.mo/en/visa).
 
-### Entry Policy Sources
+Duration remarks are shortened. eVisas that need an application are listed as visa required. If you add another data source, note its licence and add it here.
 
-- **Hong Kong (HKG):** [Hong Kong Immigration Department's visa-free access information](https://www.immd.gov.hk/hkt/service/travel_document/visa_free_access.html) for Hong Kong SAR passport holders.
-- **China (CHN):** [Source summary and disclaimer](where-can-i-go-ios/whereCanIGo/Resources/Source/default_visas_CHN.sources.md), including the user-provided Henley screenshots, researched policy tables, and destination-authority references.
-- **Taiwan (TWN):** [Source summary and disclaimer](where-can-i-go-ios/whereCanIGo/Resources/Source/default_visas_TWN.sources.md). The preset assumes an ordinary Taiwan passport with a national ID number (household registration).
-- **Macao (MAC):** [Macao Identification Services Bureau's travel convenience information](https://www.dsi.gov.mo/en/visa) for Macau SAR passport holders.
+## Known Issues
 
-Bundled entry policies are manually maintained snapshots, not live immigration advice or guarantees of entry. Duration remarks are abbreviated; consult the source notes and destination authorities for full eligibility, supporting documents, and current conditions before travel. eVisas requiring an application remain classified as `visa_required`.
+- iOS only.
+- Some entry policies may be inaccurate or out of date.
+- Country borders are simplified for map performance, so small areas may be imprecise.
+- The selected country's outline can look thicker in some places than others.
+- iPad layouts may have problems.
 
-All data presented in this App shall be treated as manually maintained planning aid, **NOT** live immigration advice, or a complete checklist, or a guarantee of entry. 
+## Roadmap
 
-**!!! Reconfirm current rules with destination authorities and the airline before travel, especially for temporary exemptions and territory-specific arrangements.**
-
-## Contributing
-
-Contributions are welcome. Please open issues for feature requests or bugs and submit pull requests with clear descriptions and small, focused changes.
-
-Guidelines:
-
-- Fork the repo and create a feature branch.
-- Keep changes focused and include tests or screenshots if relevant.
-- Update this README or `Resources/` notes if you change data formats.
-
-## Current Known Issues
-- The application is iOS only now.
-- Travel Policy for the listed passports are not accurate, and need to add more supported passports with correct and up-to-date data.
-- The area coverage of each country is NOT accurate to maintain the map rendering performance.
-- For selected country, the border lines thickness are not the same.
-- (iOS) Only supports iOS 26 or above. Currently iPadOS may experience UI issues. 
-
-## Feature Backlog
-- Refine the country border lines display & enhance performance
-- Export App Record with JSON file
-- Friends Function via AirDrop
-- Redirect to Google Search of the country after lucky draw
-- Travel Journal
-- Detect (with GPS permission ON) & save visited countries
-- Multiple passport(s) support
+- Friends: exchange travel cards with friends over AirDrop and view their Been and Wishlist (design in [tech_notes.md](tech_notes.md#friends-planned))
+- Smoother country borders and better map performance
+- Travel journal
+- Detect visited countries with location permission
+- More than one passport
+- iOS 16 support
 
 ## License
 
-This project is licensed under the terms in the `LICENSE` file.
+See [LICENSE](LICENSE).
 
 ## Contact
 
-If you have questions or want to collaborate, open an issue or contact the maintainer listed in the repository.
+Open an issue on GitHub for questions or ideas.

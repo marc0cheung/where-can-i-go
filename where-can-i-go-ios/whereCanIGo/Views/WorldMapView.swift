@@ -43,7 +43,7 @@ enum WorldShapeStore {
 }
 
 /// Flat equirectangular world map that fills visited countries with an accent color.
-/// Renders reliably inside `ImageRenderer` (unlike a live MapKit view).
+/// Works inside `ImageRenderer`, which can't capture a live MapKit view.
 struct WorldMapView: View {
     let visitedCodes: Set<String>
     var landColor: Color = Color.white.opacity(0.13)

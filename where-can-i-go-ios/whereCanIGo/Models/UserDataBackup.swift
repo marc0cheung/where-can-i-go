@@ -4,14 +4,15 @@ import UniformTypeIdentifiers
 
 // MARK: - Root document
 
-/// Portable, versioned backup file. Deliberately independent from the persisted `AppData`
-/// format so internal models can evolve without breaking previously exported files.
+/// Portable, versioned backup file. It has its own record types, separate from the persisted
+/// `AppData` format, so internal models can change without breaking exported files.
 ///
 /// Compatibility rules:
 /// - Additive changes (new optional fields, new enum values) keep `schemaVersion`;
 ///   older apps ignore unknown keys and fall back on unknown enum values.
 /// - Breaking changes bump `schemaVersion`; older apps reject newer versions.
-/// - A missing optional section means "not included in this file", NOT "the user has none".
+/// - A missing optional section means the section was left out of the file.
+///   An empty array means the user has no records of that type.
 nonisolated struct UserDataBackup: Codable, Sendable {
     static let formatIdentifier = "wherecanigo.backup"
     static let currentSchemaVersion = 1
@@ -42,7 +43,7 @@ nonisolated extension UserDataBackup {
         init(rawValue: String) { self.rawValue = rawValue }
 
         static let fullBackup = Kind(rawValue: "fullBackup")
-        /// Reserved for the future Friends / AirDrop feature: display name + visits only.
+        /// Reserved for the planned Friends feature (see tech_notes.md).
         static let visitShare = Kind(rawValue: "visitShare")
     }
 
@@ -480,7 +481,7 @@ nonisolated extension UserDataBackup {
     }
 
     /// Background-safe: header → version → JSON decode → media checksums.
-    /// Does NOT touch app models. Call `validate(checkMediaChecksums: false)` on the main actor afterwards.
+    /// Leaves app models untouched. Call `validate(checkMediaChecksums: false)` on the main actor afterwards.
     static func decodeVerifyingMedia(from data: Data) throws -> UserDataBackup {
         guard data.count <= maxFileByteCount else { throw UserDataBackupError.fileTooLarge }
 
@@ -532,7 +533,7 @@ nonisolated extension UserDataBackup {
     }
 
     /// Structural checks; checksums are optional because hashing large media is expensive.
-    /// Unsupported-but-intact media is NOT an error here.
+    /// Intact media with an unsupported type or size passes here; the import plan skips it.
     func validate(checkMediaChecksums: Bool = true) throws {
         if let code = passport?.code { try Self.requireCountryCode(code) }
         if let entryPolicies {
@@ -618,7 +619,7 @@ struct UserDataExportResult {
             visits: data.visits.map { VisitRecord($0) },
             wishlist: data.plannedTrips.map { WishlistRecord($0) }
         )
-        try backup.validate(checkMediaChecksums: false)   // never produce a file we can't import
+        try backup.validate(checkMediaChecksums: false)   // exports pass the same checks as imports
         return UserDataExportResult(backup: backup, skippedFileNames: skipped)
     }
 }
@@ -630,7 +631,7 @@ struct UserDataImportPlan {
     /// Pass to AppState.commitRestoredData(_:).
     var data: AppData
     var summary: UserDataRestoreSummary
-    /// Visa ID → the COMPLETE new set of files for that visa (may be empty = clear the folder).
+    /// Visa ID → the full new set of files for that visa (may be empty = clear the folder).
     /// Visas not listed here keep their existing folder untouched.
     var attachmentsToStage: [UUID: [BackupMedia]]
     /// Pass to UserProfileStore.restore(_:mode:). Unsupported photos are already removed.

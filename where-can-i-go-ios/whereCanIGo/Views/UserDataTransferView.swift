@@ -76,7 +76,7 @@ struct ExportDataView: View {
                     result = try service.makeBackup(options: options)
                     showExporter = true
                 } catch is CancellationError {
-                    // Cancellation does not mean an export failed.
+                    // A cancelled export closes quietly.
                 } catch {
                     notice = TransferNotice(title: "export.error.title", message: error.localizedDescription)
                 }

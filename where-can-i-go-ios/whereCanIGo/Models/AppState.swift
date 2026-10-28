@@ -173,14 +173,14 @@ final class AppState: ObservableObject {
         isRestoring = true
     }
 
-    /// Must always be called when an import finishes (use `defer`).
+    /// Call when an import finishes, usually from `defer`.
     func endRestore() {
         isRestoring = false
     }
 
     /// Persists and publishes restored data. Also used for rollback: `try appState.commitRestoredData(oldData)`.
     ///
-    /// - Saves to disk FIRST; if saving fails, in-memory state is untouched and an error is thrown.
+    /// - Saves to disk first. If saving fails, in-memory state stays as it was and an error is thrown.
     /// - `defaultVisas` is used as-is (the import plan already rebuilt it).
     /// - Returns personal visa IDs that existed before but are gone now. The caller deletes their
     ///   attachment folders only after the whole restore has succeeded.
@@ -196,7 +196,7 @@ final class AppState: ObservableObject {
         }
         candidate.passportCode = passport
 
-        // 1. Persist first — memory is only updated if this succeeds.
+        // 1. Persist. Memory is updated only after a successful save.
         do {
             try store.saveAppData(candidate)
         } catch {
@@ -223,7 +223,7 @@ final class AppState: ObservableObject {
         return removedVisaIDs
     }
 
-    /// Call once, only after data, attachments and profile have ALL been restored successfully.
+    /// Call once, only after data, attachments and profile have all been restored successfully.
     func publishRestoreSummary(_ summary: UserDataRestoreSummary) {
         lastRestoreSummary = summary
         NotificationCenter.default.post(

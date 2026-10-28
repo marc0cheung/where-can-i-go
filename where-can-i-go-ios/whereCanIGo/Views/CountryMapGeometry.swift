@@ -66,7 +66,7 @@ nonisolated enum CountryGeometry {
     /// Simplifies a polygon in Mercator map-point space (so the tolerance maps to a
     /// constant on-screen distance at every latitude). Rings smaller than the tolerance
     /// are invisible at that zoom and are dropped, unless `keepTiny` is set so that
-    /// micro-states and small islands nations never disappear.
+    /// micro-states and small island nations stay visible.
     static func simplified(_ polygon: MKPolygon, tolerance: Double, keepTiny: Bool) -> MKPolygon? {
         let rect = polygon.boundingMapRect
         if !keepTiny && max(rect.width, rect.height) < tolerance { return nil }

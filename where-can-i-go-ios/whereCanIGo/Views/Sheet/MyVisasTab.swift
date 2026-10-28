@@ -31,7 +31,7 @@ struct MyVisasTab: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Add Personal Visa").font(.headline)
 
-                // MARK: Input Cards (Flighty-style)
+                // MARK: Input Cards
                 HStack(spacing: 10) {
                     Button {
                         showVisaDetailsSheet = true
@@ -59,7 +59,7 @@ struct MyVisasTab: View {
                     .transition(.opacity)
                 }
 
-                // MARK: Add Visa Button (save trigger — logic preserved)
+                // MARK: Add Visa Button
                 Button(action: addVisa) {
                     Text("ADD VISA")
                         .font(.headline).foregroundStyle(.white)
@@ -184,7 +184,7 @@ struct MyVisasTab: View {
             }
         }
         .onDisappear {
-            // Requirement: wipe everything when user leaves this tab
+            // Clear the draft when the user leaves this tab.
             resetDraft()
         }
     }
@@ -243,7 +243,7 @@ struct MyVisasTab: View {
         }
     }
 
-    /// Card only shows filled state when BOTH duration and expiry are set.
+    /// Card only shows filled state when both duration and expiry are set.
     private var isVisaDetailsFilled: Bool {
         !duration.isEmpty && expiry != nil
     }
@@ -258,7 +258,7 @@ struct MyVisasTab: View {
     }
 
     private func addVisa() {
-        // Validation with clear per-field messages
+        // Per-field validation messages
         guard let c = country else {
             withAnimation { errorMessage = String(localized: "Please select a country.") }
             return
@@ -399,7 +399,7 @@ private struct VisaDetailsSheet: View {
     @State private var draftCountry: Country?
     @State private var showCountryPicker = false
 
-    // Local draft — only committed to parent on "Done"
+    // Local draft, committed to the parent on "Done"
     @State private var draftVisaType: String
     @State private var draftDuration: String
     @State private var draftExpiry: Date?
@@ -577,7 +577,7 @@ private struct VisaDetailsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    // Swipe-down = cancel, this button is just an explicit alternative
+                    // Same result as swiping the sheet down.
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -669,7 +669,7 @@ private struct VisaDetailsSheet: View {
     }
 }
 
-// MARK: - Button Card (unchanged shape)
+// MARK: - Button Card
 
 private struct ButtonCard: View {
     let label: LocalizedStringResource

@@ -14,7 +14,7 @@ enum CountryRepository {
     }
 
     /// Loads bundled defaults named `default_visas_<ISO3>.json`.
-    /// Returns an empty array if the file does not exist (no crash).
+    /// Returns an empty array when the file is missing.
     static func loadDefaultVisas(passport code: String) throws -> [DefaultVisaEntry] {
         let resource = "default_visas_\(code.uppercased())"
         guard let url = Bundle.main.url(forResource: resource, withExtension: "json") else {
