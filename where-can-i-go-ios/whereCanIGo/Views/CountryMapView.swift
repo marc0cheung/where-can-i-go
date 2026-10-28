@@ -165,7 +165,7 @@ struct CountryMapView: UIViewRepresentable {
             level.filter { ($0 as? MKShape)?.title == isoCode }
         }
 
-        private static func polygons(of overlay: MKOverlay) -> [MKPolygon] {
+        nonisolated private static func polygons(of overlay: MKOverlay) -> [MKPolygon] {
             if let multi = overlay as? MKMultiPolygon { return multi.polygons }
             if let polygon = overlay as? MKPolygon { return [polygon] }
             return []
