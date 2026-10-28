@@ -16,9 +16,10 @@ See which countries your passport can enter, keep track of your own visas, and l
 - **Travels.**
   - *Been*: log trips with dates, purpose and location. A summary card shows countries, trips, continents and days, and you can share it as a passport-style image.
   - *Wishlist*: plan future trips. When you go, mark the plan as visited and it moves to Been.
+  - *Friends*: swap travel cards with friends over AirDrop, Messages or any app, then browse their Been and Wishlist offline. You choose what your card includes in Settings → Sharing: name, photo, Been, Wishlist, and how much detail (dates, length of stay, location, purpose). A friend's card updates when they share again.
 - **Random destination.** Tap the dice to pick a country. Long-press it to limit the pick by continent, airline (Cathay Pacific and HK Express for now), or entry requirement.
 - **Edit entry policies.** If a bundled rule is out of date, you can change it for your passport, or reset to the bundled data.
-- **Backup.** In Settings you can export your data to a JSON file and import it on another device. Import can replace everything or merge in new records only. Profile photo and visa attachments are optional in the export.
+- **Backup.** In Settings you can export your data to a JSON file and import it on another device. Import can replace everything or merge in new records only. Profile photo, visa attachments, friends and your sharing identity are optional in the export.
 - **Languages.** English, Traditional Chinese and Simplified Chinese.
 
 ### Supported passports
@@ -31,7 +32,7 @@ iOS 26.2 or later. iPhone is the main target; iPad works but some layouts still 
 
 ### Your data
 
-The app has no account and no server. Your records, profile and attachments are stored in the app's own folder on your device. They only leave the device when you export a backup or share an image yourself.
+The app has no account and no server. Your records, profile and attachments are stored in the app's own folder on your device. They only leave the device when you export a backup, share an image, or send a travel card yourself. A travel card holds only what you chose to include. Notes, passport, My Visas and visa attachments stay on your device.
 
 ### Important
 
@@ -97,7 +98,7 @@ Duration remarks are shortened. eVisas that need an application are listed as vi
 
 ## Roadmap
 
-- Friends: exchange travel cards with friends over AirDrop and view their Been and Wishlist (design in [tech_notes.md](tech_notes.md#friends-planned))
+- Friends phase 2: exchange cards with someone nearby in one step, and compare your travels with a friend's ([tech_notes.md](tech_notes.md#friends))
 - Smoother country borders and better map performance
 - Travel journal
 - Detect visited countries with location permission

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject private var friendStore: FriendStore
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.scenePhase) private var scenePhase
     @State private var sheetPresented: Bool = true
@@ -153,6 +154,10 @@ struct ContentView: View {
         }
         .onAppear {
             appState.refreshVisaValidity()
+            showIncomingCard(friendStore.incomingCardURL)
+        }
+        .onChange(of: friendStore.incomingCardURL) { _, url in
+            showIncomingCard(url)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { appState.refreshVisaValidity() }
@@ -163,6 +168,15 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange)) { _ in
             appState.refreshVisaValidity()
         }
+    }
+
+    /// Opens the Travels tab so the Friends screen can handle an opened card file.
+    private func showIncomingCard(_ url: URL?) {
+        guard url != nil else { return }
+        selectedTab = .myTravels
+        appState.selectedCountryCode = nil
+        sheetPresented = true
+        withAnimation(.smooth(duration: 0.25)) { panelState = .high }
     }
 
     /// Bottom-leading floating column used on iPad / regular-width windows.

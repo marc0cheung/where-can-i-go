@@ -5999,6 +5999,1490 @@
           }
         }
       }
+    },
+    "%@ can add you after receiving your card." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 收到你的名片后，就可以添加你为朋友。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 收到你的名片後，就可以加你為朋友。"
+          }
+        }
+      }
+    },
+    "%@ didn't include Been records in this card." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 这张名片没有包含足迹。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 這張名片沒有包含足跡。"
+          }
+        }
+      }
+    },
+    "%@ didn't include the Wishlist in this card." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 这张名片没有包含心愿清单。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 這張名片沒有包含願望清單。"
+          }
+        }
+      }
+    },
+    "%@ shares Been records and hasn't logged any yet." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 有分享足迹，但目前还没有记录。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 有分享足跡，但目前還沒有紀錄。"
+          }
+        }
+      }
+    },
+    "%@ shares the Wishlist and hasn't added any trips yet." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 有分享心愿清单，但目前还没有计划行程。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 有分享願望清單，但目前還沒有計劃行程。"
+          }
+        }
+      }
+    },
+    "%lld days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 天"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 天"
+          }
+        }
+      }
+    },
+    "Add Friend" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加朋友"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增朋友"
+          }
+        }
+      }
+    },
+    "Add as New Friend" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加为另一位朋友"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增為另一位朋友"
+          }
+        }
+      }
+    },
+    "Added %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已添加 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已新增 %@"
+          }
+        }
+      }
+    },
+    "Been not shared" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未分享足迹"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未分享足跡"
+          }
+        }
+      }
+    },
+    "Choose what your travel card includes by default." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择旅行名片默认包含的内容。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇旅行名片預設包含的內容。"
+          }
+        }
+      }
+    },
+    "Compare this code with the one in your friend's Sharing settings. Matching codes mean the cards came from their device.\n\n%@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请与朋友“分享设置”中的安全码核对。两者相同，表示名片来自对方的设备。\n\n%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請與朋友「分享設定」中的安全碼核對。兩者相同，代表名片來自對方的裝置。\n\n%@"
+          }
+        }
+      }
+    },
+    "Couldn't Create Travel Card" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法制作旅行名片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法製作旅行名片"
+          }
+        }
+      }
+    },
+    "Couldn't Open Travel Card" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法打开旅行名片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法開啟旅行名片"
+          }
+        }
+      }
+    },
+    "Couldn't load friends" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法载入朋友"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法載入朋友"
+          }
+        }
+      }
+    },
+    "Created %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "制作于 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "製作於 %@"
+          }
+        }
+      }
+    },
+    "Display Name" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示名称"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示名稱"
+          }
+        }
+      }
+    },
+    "Estimated Days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预估天数"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預估天數"
+          }
+        }
+      }
+    },
+    "Exchange travel cards with friends to see where they've been and where they want to go, even offline. Cards update only when a friend shares again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "与朋友交换旅行名片，即使离线也能查看彼此去过和想去的地方。朋友再次分享时，名片才会更新。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "與朋友交換旅行名片，即使離線也能查看彼此去過和想去的地方。朋友再次分享時，名片才會更新。"
+          }
+        }
+      }
+    },
+    "Friend Removed" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已移除朋友"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已移除朋友"
+          }
+        }
+      }
+    },
+    "Friends" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友"
+          }
+        }
+      }
+    },
+    "Friends (%lld)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友（%lld）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友（%lld）"
+          }
+        }
+      }
+    },
+    "Friends and the sharing identity in the file replace the ones on this device." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用文件中的朋友和分享身份替换此设备上的数据。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以檔案中的朋友和分享身分取代此裝置上的資料。"
+          }
+        }
+      }
+    },
+    "Friends can compare this code with the one shown on their device to confirm a card came from you. Your identity is kept in iCloud Keychain when it's turned on." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友可以核对此安全码与他们设备上显示的是否相同，以确认名片来自你。开启 iCloud 钥匙串时，你的分享身份会保存在其中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友可以核對此安全碼與他們裝置上顯示的是否相同，以確認名片來自你。開啟 iCloud 鑰匙圈時，你的分享身分會保存在其中。"
+          }
+        }
+      }
+    },
+    "Friends in the file are added, and newer cards update existing friends. The sharing identity is used only if this device doesn't have one yet." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加文件中的朋友，较新的名片会更新现有朋友。此设备尚无分享身份时，才会使用文件中的分享身份。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增檔案中的朋友，較新的名片會更新現有朋友。此裝置尚未有分享身分時，才會使用檔案中的分享身分。"
+          }
+        }
+      }
+    },
+    "Friends see this name on your card. Any nickname works." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友会在你的名片上看到这个名称，可以使用任何昵称。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友會在你的名片上看到這個名稱，可以使用任何暱稱。"
+          }
+        }
+      }
+    },
+    "Friends see this name on your card. Any nickname works. Add a profile photo to share it." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友会在你的名片上看到这个名称，可以使用任何昵称。设置头像后即可分享头像。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友會在你的名片上看到這個名稱，可以使用任何暱稱。設定頭像後即可分享頭像。"
+          }
+        }
+      }
+    },
+    "Friends' cards contain other people's travel records. Store this file somewhere private." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友的名片包含他人的旅行记录，请将此文件存放在私人位置。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朋友的名片包含他人的旅行紀錄，請將此檔案存放在私人位置。"
+          }
+        }
+      }
+    },
+    "Future cards from %@ are accepted only from this new identity. Ask %@ to confirm that the safety code in their Sharing settings is %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Future cards from %1$@ are accepted only from this new identity. Ask %2$@ to confirm that the safety code in their Sharing settings is %3$@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "之后只会接受 %1$@ 以这个新身份制作的名片。请 %2$@ 确认其“分享设置”中的安全码是 %3$@。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "之後只會接受 %1$@ 以這個新身分製作的名片。請 %2$@ 確認其「分享設定」中的安全碼是 %3$@。"
+          }
+        }
+      }
+    },
+    "Include the sharing identity when moving to a device without iCloud Keychain, so friends keep recognizing your cards." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "若新设备没有使用 iCloud 钥匙串，请包含分享身份，朋友才能继续认出你的名片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "若新裝置沒有使用 iCloud 鑰匙圈，請包含分享身分，朋友才能繼續認得你的名片。"
+          }
+        }
+      }
+    },
+    "Included" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已包含"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已包含"
+          }
+        }
+      }
+    },
+    "Kept on This Device" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅保留在此设备"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "僅保留在此裝置"
+          }
+        }
+      }
+    },
+    "Kept this device's identity" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留此设备的分享身份"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留此裝置的分享身分"
+          }
+        }
+      }
+    },
+    "Last received %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上次接收于 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上次接收於 %@"
+          }
+        }
+      }
+    },
+    "Length of Stay" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停留天数"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停留天數"
+          }
+        }
+      }
+    },
+    "Location" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地点"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地點"
+          }
+        }
+      }
+    },
+    "More" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更多"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更多"
+          }
+        }
+      }
+    },
+    "My Visas and Attachments" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的签证和附件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的簽證及附件"
+          }
+        }
+      }
+    },
+    "Nickname" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "昵称"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暱稱"
+          }
+        }
+      }
+    },
+    "No friends yet" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还没有朋友"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未有朋友"
+          }
+        }
+      }
+    },
+    "No trips on this card" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这张名片没有行程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這張名片沒有行程"
+          }
+        }
+      }
+    },
+    "Not Now" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂时不用"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫時不用"
+          }
+        }
+      }
+    },
+    "Not shared" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未分享"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未分享"
+          }
+        }
+      }
+    },
+    "Notes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备注"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "備註"
+          }
+        }
+      }
+    },
+    "Notes, passport details, My Visas and visa attachments stay on this device. Friends keep the copy they receive, and later changes reach them only when you share again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备注、护照资料、我的签证和签证附件只保留在此设备。朋友会保留收到的副本，你再次分享时，之后的更改才会传给他们。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "備註、護照資料、我的簽證及簽證附件只保留在此裝置。朋友會保留收到的副本，你再次分享時，之後的變更才會傳給他們。"
+          }
+        }
+      }
+    },
+    "Only you see this name. New cards from this friend keep it." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只有你看得到这个名称，收到此朋友的新名片时会保留。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只有你看得到這個名稱，收到此朋友的新名片時會保留。"
+          }
+        }
+      }
+    },
+    "Planned Dates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "计划日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計劃日期"
+          }
+        }
+      }
+    },
+    "Planned dates show friends when you may be away." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "计划日期会让朋友知道你可能不在的时间。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計劃日期會讓朋友知道你可能不在的時間。"
+          }
+        }
+      }
+    },
+    "Profile" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个人资料"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個人資料"
+          }
+        }
+      }
+    },
+    "Profile Photo" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "头像"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頭像"
+          }
+        }
+      }
+    },
+    "Remember as Default" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "记住为默认值"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記住為預設值"
+          }
+        }
+      }
+    },
+    "Remove %@?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除 %@？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除 %@？"
+          }
+        }
+      }
+    },
+    "Remove Friend" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除朋友"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除朋友"
+          }
+        }
+      }
+    },
+    "Replace %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "替换 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取代 %@"
+          }
+        }
+      }
+    },
+    "Replace %@?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "替换 %@？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取代 %@？"
+          }
+        }
+      }
+    },
+    "Safety Code" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全码"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全碼"
+          }
+        }
+      }
+    },
+    "Safety code %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全码 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全碼 %@"
+          }
+        }
+      }
+    },
+    "Set Nickname" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置昵称"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定暱稱"
+          }
+        }
+      }
+    },
+    "Share" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享"
+          }
+        }
+      }
+    },
+    "Share Been Records" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享足迹"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享足跡"
+          }
+        }
+      }
+    },
+    "Share My Travel Card" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享我的旅行名片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享我的旅行名片"
+          }
+        }
+      }
+    },
+    "Share Wishlist" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享心愿清单"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享願望清單"
+          }
+        }
+      }
+    },
+    "Share with %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享给 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享給 %@"
+          }
+        }
+      }
+    },
+    "Share your travel card with %@?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "也把你的旅行名片分享给 %@？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "也把你的旅行名片分享給 %@？"
+          }
+        }
+      }
+    },
+    "Shared as %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对方名称：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "對方名稱：%@"
+          }
+        }
+      }
+    },
+    "Sharing" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享设置"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享設定"
+          }
+        }
+      }
+    },
+    "Sharing Identity" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享身份"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享身分"
+          }
+        }
+      }
+    },
+    "Show Safety Code" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示安全码"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示安全碼"
+          }
+        }
+      }
+    },
+    "The new card replaces the one you received %@. Your nickname for this friend stays the same." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新名片会替换你于 %@ 收到的名片，你为此朋友设置的昵称保持不变。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新名片會取代你於 %@ 收到的名片，你為此朋友設定的暱稱維持不變。"
+          }
+        }
+      }
+    },
+    "The sharing identity is saved without a password. Anyone with this file can make travel cards that your friends accept as yours." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享身份以未加密方式保存。获得此文件的人可以制作被朋友视为来自你的旅行名片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享身分以未加密方式儲存。取得此檔案的人可以製作被朋友視為來自你的旅行名片。"
+          }
+        }
+      }
+    },
+    "These settings are the defaults for your next travel card. You can change them each time you share." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这些设置是下一张旅行名片的默认内容，每次分享时仍可调整。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這些設定是下一張旅行名片的預設內容，每次分享時仍可調整。"
+          }
+        }
+      }
+    },
+    "This Card Includes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此名片包含"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此名片包含"
+          }
+        }
+      }
+    },
+    "This deletes their card from this device. Your friend isn't notified, and they keep any card you shared." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此操作会从此设备删除对方的名片。对方不会收到通知，并会保留你分享过的名片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此操作會從此裝置刪除對方的名片。對方不會收到通知，並會保留你分享過的名片。"
+          }
+        }
+      }
+    },
+    "This file is too large to be a travel card." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此文件过大，无法作为旅行名片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此檔案過大，無法作為旅行名片。"
+          }
+        }
+      }
+    },
+    "This file isn't a travel card." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此文件并非旅行名片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此檔案並非旅行名片。"
+          }
+        }
+      }
+    },
+    "This is your own travel card." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这是你自己的旅行名片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這是你自己的旅行名片。"
+          }
+        }
+      }
+    },
+    "This travel card contains invalid data." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此旅行名片包含无效数据。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此旅行名片包含無效資料。"
+          }
+        }
+      }
+    },
+    "This travel card couldn't be verified. It may have been changed after it was shared." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法验证此旅行名片，名片可能在分享后被修改。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法驗證此旅行名片，名片可能在分享後被修改。"
+          }
+        }
+      }
+    },
+    "This travel card was made by a newer version of the app. Update the app and try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此旅行名片由较新版本的应用制作，请更新应用后再试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此旅行名片由較新版本的 App 製作，請更新 App 後再試。"
+          }
+        }
+      }
+    },
+    "Travel Card" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行名片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行名片"
+          }
+        }
+      }
+    },
+    "Try Again" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試一次"
+          }
+        }
+      }
+    },
+    "Update %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新 %@"
+          }
+        }
+      }
+    },
+    "Update Friend" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新朋友资料"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新朋友資料"
+          }
+        }
+      }
+    },
+    "Updated %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已更新 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已更新 %@"
+          }
+        }
+      }
+    },
+    "Wishlist not shared" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未分享心愿清单"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未分享願望清單"
+          }
+        }
+      }
+    },
+    "With every detail off, only countries are shared." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部细项关闭时，只会分享国家或地区。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部細項關閉時，只會分享國家或地區。"
+          }
+        }
+      }
+    },
+    "You already have a friend with this name. This card comes from a different sharing identity, such as a new phone or a different person. Replace the existing friend only after comparing safety codes." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已有同名的朋友。这张名片来自另一个分享身份，可能是对方换了手机，也可能是另一个人。请先核对安全码，再决定是否替换现有朋友。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已有同名的朋友。這張名片來自另一個分享身分，可能是對方換了手機，也可能是另一個人。請先核對安全碼，再決定是否取代現有朋友。"
+          }
+        }
+      }
+    },
+    "You already have a newer card from %@, received %@. This card wasn't saved." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You already have a newer card from %1$@, received %2$@. This card wasn't saved."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已于 %2$@ 收到 %1$@ 较新的名片，这张名片未保存。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已於 %2$@ 收到 %1$@ 較新的名片，這張名片未儲存。"
+          }
+        }
+      }
+    },
+    "You already have this card from %@." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已经有 %@ 的这张名片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已經有 %@ 的這張名片。"
+          }
+        }
+      }
+    },
+    "Your friends could not be loaded. Retry loading them in Travels before transferring data." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法载入朋友数据。请先在“旅行”中重新载入，再进行数据迁移。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法載入朋友資料。請先在「旅行」中重新載入，再進行資料轉移。"
+          }
+        }
+      }
+    },
+    "Your sharing identity couldn't be accessed. (%@)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法访问你的分享身份。（%@）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法存取你的分享身分。（%@）"
+          }
+        }
+      }
+    },
+    "Your sharing identity is created the first time you share a card." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第一次分享名片时会创建你的分享身份。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第一次分享名片時會建立你的分享身分。"
+          }
+        }
+      }
     }
   },
   "version" : "1.2"

@@ -14,7 +14,7 @@ How the app is built, how its data is stored, and the rules behind the main feat
 - [Random destination (dice)](#random-destination-dice)
 - [Backup format and import](#backup-format-and-import)
 - [Localization](#localization)
-- [Friends (planned)](#friends-planned)
+- [Friends](#friends)
 - [iOS 16 support (planned)](#ios-16-support-planned)
 - [Testing](#testing)
 - [Conventions](#conventions)
@@ -25,13 +25,15 @@ How the app is built, how its data is stored, and the rules behind the main feat
 - Deployment target: iOS 26.2. Bundle ID `com.marcocheung.whereCanIGo`.
 - Swift 5 language mode with `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and approachable concurrency. Types are main-actor isolated by default. Code that must run in the background (backup decoding, DTOs, geometry preparation) is marked `nonisolated` explicitly.
 - State uses `ObservableObject` / `@Published` / `@EnvironmentObject`. The project uses no `@Observable` and no SwiftData.
-- Info.plist values are generated from build settings (`INFOPLIST_KEY_*`). The only privacy usage string is the camera description.
+- Info.plist values are generated from build settings (`INFOPLIST_KEY_*`) and merged with `whereCanIGo-Info.plist`, which holds what build settings can't express: the travel card document type and exported UTType. The only privacy usage string is the camera description.
+- CryptoKit is used for travel card signing. Files that read `.publicKey` or `.rawRepresentation` need their own `import CryptoKit`.
 
 ## Project layout
 
 ```
 where-can-i-go-ios/whereCanIGo/
-├── whereCanIGoApp.swift      App entry; creates AppState and runs bootstrap()
+├── whereCanIGoApp.swift      App entry; creates AppState, UserProfileStore and FriendStore,
+│                             runs bootstrap() and passes opened files to FriendStore
 ├── RootView.swift            Loading → first-launch passport picker → ContentView
 ├── ContentView.swift         Map + bottom panel (system sheet or floating iPad panel)
 ├── Localization.swift        Localized names for countries and enums
@@ -42,6 +44,7 @@ where-can-i-go-ios/whereCanIGo/
 │   │   VisitPurpose, Continent, SearchEngine
 │   ├── UserDataBackup.swift  Backup file format, validation, export, import planning
 │   ├── UserDataRestore.swift Import mode, restore summary, restore errors
+│   ├── TravelCard.swift      Travel card format, signing, verification, limits
 │   └── UserDataPreview.swift Display-only mappings for the import preview
 ├── Services/
 │   ├── DataStore.swift               Reads/writes app_data.json
@@ -51,6 +54,9 @@ where-can-i-go-ios/whereCanIGo/
 │   ├── UserProfileStore.swift        Name and avatar (user_profile.json)
 │   ├── VisaAttachmentStore.swift     Attachment files and restore staging/rollback
 │   ├── UserDataTransferService.swift Export and transactional import
+│   ├── SharingIdentity.swift         Keychain signing key and card revision counter
+│   ├── TravelCardBuilder.swift       SharingOptions, builds and signs a card file
+│   ├── FriendStore.swift             friends.json, receipt rules, TravelCardReader
 │   └── UserDataBackupDocument.swift  FileDocument used by the exporter
 ├── Views/
 │   ├── CountryMapView.swift, CountryMapGeometry.swift, CountryMapHighlight.swift
@@ -58,13 +64,15 @@ where-can-i-go-ios/whereCanIGo/
 │   ├── CountryDetailCard.swift, CountryPickerSheet.swift, PassportPickerView.swift
 │   ├── UserProfileView.swift (also contains SettingsView), ProfilePhotoEditorSheet.swift
 │   ├── UserDataTransferView.swift  Export screen and import preview
+│   ├── Friends/              Friends segment, share and receive sheets, friend sheet,
+│   │                         Sharing settings
 │   └── Sheet/                Bottom panel: header, tabs and their sheets
 └── Resources/                Bundled JSON, GeoJSON and data source notes
 ```
 
 ## App lifecycle and state
 
-1. `whereCanIGoApp` creates one `AppState` and injects it with `.environmentObject`.
+1. `whereCanIGoApp` creates one `AppState`, `UserProfileStore` and `FriendStore` and injects them with `.environmentObject`.
 2. `AppState.bootstrap()` loads `countries.json`, then tries to load `app_data.json`.
    - Found: the saved data is used.
    - Missing or unreadable: HKG defaults are loaded so the map has colours, and `needsPassportSelection` shows the passport picker.
@@ -89,6 +97,9 @@ All files live in the app's Documents directory.
 | `user_profile.json` | Name, cropped avatar, original photo and crop position | `UserProfileStore` |
 | `visa_attachments/<visaID>/` | Attachment files; names are `<UUID>.<ext>` | `VisaAttachmentStore` |
 | `visa_attachments/.restore-tmp/<UUID>/` | Staging and backup folders used during an import | `VisaAttachmentStore` |
+| `friends.json` | Friends and their last received cards, photos inline | `FriendStore` |
+| UserDefaults `sharing.defaults` | Default `SharingOptions` for the next card | `SharingOptions` |
+| Keychain service `com.marcocheung.whereCanIGo.sharing` | Signing key and last card revision | `SharingIdentity` |
 
 - `app_data.json` uses ISO 8601 dates, sorted keys, and atomic writes.
 - `AppData` decodes `visits` and `plannedTrips` with `decodeIfPresent` so files from older versions still load. Follow the same pattern for any new field.
@@ -157,8 +168,8 @@ When the camera changes, the coordinator picks the coarsest level whose error is
   - Regular width: a custom floating panel, 390 pt wide, with its own drag handle and the same three states (`PanelState`).
   - Both use the same `panelContent`: `SheetHeader` (passport, dice, profile) and a `TabView`.
 - Tabs (`PanelTab`): Overview, My Visas, Travels. A Manage Data tab exists behind `showsManageDataTab` (currently `false`); its features are reached from the Overview tab.
-- **Travels** (`MyTravelsTab`) has a segmented control for Been and Wishlist. Been uses `TravelSummaryCard`, `TravelCountryRow`, `CountryTripsSheet` and `TripEditorSheet`. Wishlist uses `WishlistSection`, `CountryPlansSheet` and `PlannedTripEditorSheet`.
-- **Settings** (`SettingsView`, inside `UserProfileView.swift`) holds the search engine choice (`@AppStorage("searchEngine")`) and backup export/import.
+- **Travels** (`MyTravelsTab`) has a segmented control for Been, Wishlist and Friends. Been uses `TravelSummaryCard`, `TravelCountryRow`, `CountryTripsSheet` and `TripEditorSheet`. Wishlist uses `WishlistSection`, `CountryPlansSheet` and `PlannedTripEditorSheet`. Friends uses `FriendsSection`, see [Friends](#friends).
+- **Settings** (`SettingsView`, inside `UserProfileView.swift`) holds the search engine choice (`@AppStorage("searchEngine")`), Sharing settings for travel cards, and backup export/import.
 - **Excel import** in My Visas is hidden. It is shown only when the localized string `MyVisas.ShowExcelImport` is `"true"`, and the button does nothing yet.
 
 ## Random destination (dice)
@@ -190,20 +201,23 @@ The backup is one JSON file described by `UserDataBackup`. It has its own record
   "entryPolicies": { "overrides": [...], "removedCountryCodes": [...] },
   "personalVisas": [ { ..., "attachments": [ ...media ] } ],
   "visits": [...],
-  "wishlist": [...]
+  "wishlist": [...],
+  "sharingIdentity": { "privateKey": "<base64>", "lastRevision": 1767225600 },
+  "friends": [ { "sharerID": ..., "publicKey": ..., "nickname": ..., "addedAt": ..., "lastReceivedAt": ..., "card": { ...payload } } ]
 }
 ```
 
 - **Entry policies** store only the user's edits compared with the bundled file for that passport: overrides plus removed codes. On import they are applied to the bundled list of the importing app.
 - **Dates**: calendar days (`startDate`, `expiryDate`, …) are `yyyy-MM-dd` strings in the device's time zone (`BackupDay`), so a trip on 1 April stays on 1 April in another time zone. Instants (`exportedAt`, `createdAt`) are ISO 8601 UTC with milliseconds (`BackupTimestamp`).
 - **Media** (`BackupMedia`): `fileName`, informational `mimeType`, `byteCount`, `sha256`, base64 `data`. The type comes from the file extension. Allowed types and size limits live in `BackupMediaPolicy`: attachments are images or PDF up to 20 MB, the profile photo is an image up to 10 MB. The whole file may be up to 100 MB.
+- **Friends sections**: `sharingIdentity` and `friends` are optional and off by default on export. Older apps ignore them. See [Friends in backups](#friends-in-backups).
 - **Optional sections**: a missing section means it was left out of the file. For example, `attachments: null` keeps the device's existing files for that visa, and `attachments: []` clears them.
 
 ### Compatibility rules
 
 - Additive changes (new optional fields, new enum values) keep `schemaVersion`. Older apps ignore unknown keys. Unknown enum values fall back (`BackupValue.decode`), for example an unknown visit purpose becomes `other`.
 - Breaking changes increase `schemaVersion`. Apps reject files with a newer version.
-- `kind` is an open string type so unknown kinds still decode and can be rejected with a clear message. `visitShare` is reserved for the Friends feature.
+- `kind` is an open string type so unknown kinds still decode and can be rejected with a clear message. `visitShare` is reserved and unused; travel cards have their own format (`wherecanigo.travelcard`).
 
 ### Reading a file
 
@@ -228,10 +242,11 @@ The backup is one JSON file described by `UserDataBackup`. It has its own record
 3. Write new attachments into `staging/`.
 4. `AppState.commitRestoredData` saves `app_data.json`, then publishes it and clears selection state.
 5. Move staged attachment folders into place; existing folders move to `backup/` first.
-6. Apply the profile.
-7. Delete attachment folders of visas that no longer exist, delete the workspace, publish the summary and post `.userDataDidRestore`.
+6. Apply the profile, then restore friends (replace or merge in `FriendStore`).
+7. Install the sharing identity last, since a Keychain write can't be rolled back.
+8. Delete attachment folders of visas that no longer exist, delete the workspace, publish the summary and post `.userDataDidRestore`.
 
-If a step fails, earlier steps are rolled back. If the rollback also fails, the workspace is kept and the error message shows its path so the files can be recovered by hand.
+If a step fails, earlier steps are rolled back, including the previous friends list. If the rollback also fails, the workspace is kept and the error message shows its path so the files can be recovered by hand.
 
 ### Export
 
@@ -244,120 +259,149 @@ If a step fails, earlier steps are rolled back. If the rollback also fails, the 
 - Country names come from `Locale.localizedString(forRegionCode:)`. China has an override in `Localization.swift` so it shows 中國 / 中国 / China consistently.
 - Enums have both `displayName` (English, older) and `localizedDisplayName`. Use `localizedDisplayName` in UI.
 
-## Friends (planned)
+## Friends
 
-Status: agreed design, implementation not started.
+Status: phase 1 implemented.
 
-### Goal
-
-Under Travels, add a third segment: **Been | Wishlist | Friends**. Users exchange a "travel card" file through the share sheet (AirDrop, Messages, or any app). The receiver can view the sender's Been and Wishlist offline. The app keeps running without a server.
+Under Travels, the **Friends** segment lets users exchange a "travel card" file through the share sheet (AirDrop, Messages, or any app). The receiver can view the sender's Been and Wishlist offline. There is no server.
 
 ### What this model means for users
 
 - A friend's data is a snapshot from the last card received. New trips appear only after the friend shares again.
 - Removing a friend deletes the data from this device only. The friend is not notified.
 - Turning off sharing affects future cards only. Cards already sent stay with the people who received them.
-- Adding is one-way: A can hold B's card while B has nothing from A.
+- Adding is one-way: A can hold B's card while B has nothing from A. After adding or updating a friend, the app offers to share a card back.
 
-UI wording should match this: "Share My Travel Card", "Add Friend", "Update Friend", "Last received …".
+UI wording follows this: "Share My Travel Card", "Add Friend", "Update Friend", "Last received …".
 
 ### Phases
 
 | Phase | Scope |
 |---|---|
-| 1 | Card format and file type, signing (TOFU), sharing identity, Sharing Settings, share confirmation, Friends tab, read-only friend sheet, snapshot updates, "share back" prompt, friends in backup (optional) |
+| 1 (done) | Card format and file type, signing (TOFU), sharing identity, Sharing settings, share confirmation, Friends segment, read-only friend sheet, snapshot updates, "share back" prompt, friends and identity in backups |
 | 2 | Nearby two-way exchange with the Network framework; compare view (countries in common, "they've been where I want to go") |
 | 3 (optional) | Automatic updates through CloudKit sharing |
 
+### Files
+
+| File | Role |
+|---|---|
+| `Models/TravelCard.swift` | Envelope, payload types, `TravelCardCrypto` (sharer ID, safety code), signing, `decodeAndVerify`, `validateAndNormalize`, limits, errors |
+| `Services/SharingIdentity.swift` | Signing key and revision counter in the Keychain |
+| `Services/TravelCardBuilder.swift` | `SharingOptions` (defaults in UserDefaults), builds the payload from `AppData` and the profile, writes the signed file |
+| `Services/FriendStore.swift` | `Friend`, `friends.json`, receipt rules, save/merge, `TravelCardReader` |
+| `Views/Friends/FriendsSection.swift` | Friends segment: share and add buttons, friend list, opening files |
+| `Views/Friends/ShareCardView.swift` | Share confirmation (`ShareCardView`, `ShareCardSheet`) and `SharingSettingsView` |
+| `Views/Friends/ReceiveCardSheet.swift` | Shown after a card is opened: add, update, or explain why nothing changed |
+| `Views/Friends/FriendDetailSheet.swift` | Read-only friend sheet with Been and Wishlist |
+| `Views/Friends/TravelCardComponents.swift` | Shared pieces: option toggles, content rows, header, share sheet wrapper |
+
 ### Card file
 
-- File extension `.wcigcard`, declared as an exported UTType conforming to `public.json`, plus a document type so iOS offers to open it in the app. The app receives it through `onOpenURL`, copies it into its own storage, and removes the incoming copy.
-- The backup importer and the card importer each reject the other's files.
+- File extension `.wcigcard`, UTType `com.marcocheung.whereCanIGo.travelcard` conforming to `public.json`, declared with a document type in `whereCanIGo-Info.plist`.
+- Opening a card from another app: `onOpenURL` stores the URL in `FriendStore.incomingCardURL`. `ContentView` opens the panel on Travels, `MyTravelsTab` switches to Friends, and `FriendsSection` reads the file. Files iOS copied to `Documents/Inbox` are deleted after reading.
+- "Add Friend" uses `fileImporter` with the card type and plain JSON.
+- The backup reader and the card reader check `format` first, so each rejects the other's files with a clear message.
 - Envelope:
 
   ```json
   {
     "format": "wherecanigo.travelcard",
     "schemaVersion": 1,
-    "publicKey": "<base64 P-256 public key>",
+    "publicKey": "<base64 P-256 raw public key>",
     "payload": "<base64 JSON bytes>",
-    "signature": "<base64 ECDSA signature of the payload bytes>"
+    "signature": "<base64 raw r||s ECDSA signature of the payload bytes>"
   }
   ```
 
-  Signing the exact payload bytes avoids having to define a canonical JSON form.
-- Payload: `sharerID`, `cardRevision`, `createdAt`, `displayName`, optional `photo`, optional `been`, optional `wishlist`, and a `shared` object listing which categories and fields were included.
-- `cardRevision` is a counter that increases with every card the user creates. It decides which card is newer, since device clocks can be wrong.
-- Same envelope versioning rules as the backup format.
+  The signature covers the exact payload bytes, so no canonical JSON form is needed.
+- Payload: `sharerID`, `cardRevision`, `createdAt`, `displayName`, optional `photo`, optional `been`, optional `wishlist`, and `shared`, which lists the categories and fields the sender chose. Dates are `yyyy-MM-dd` (`BackupDay`); `purpose` is the `VisitPurpose` raw value.
+- Same versioning rules as the backup format: additive changes keep `schemaVersion`, newer versions are rejected.
 
 ### Identity and signing
 
-- On first share, the app creates a P-256 signing key with CryptoKit and stores it in the Keychain with `kSecAttrSynchronizable`, so iCloud Keychain carries it to the user's other devices and through reinstalls.
-- `sharerID` is the SHA-256 of the public key. There is one definition of "same person": holding the same private key.
-- Trust on first use: the first card from a `sharerID` stores its public key. Later cards for that friend must verify against the stored key.
-- Each friend shows a short safety code derived from the public key, so two people can compare codes in person.
-- The full backup gets an option "Include my sharing identity" (off by default). When on, the private key is written in plain text, with a clear warning that anyone holding the file can send cards as this user. Password encryption can be added later.
+- The first share creates a P-256 key with CryptoKit. `SharingIdentity` stores it as a synchronizable Keychain item (`kSecAttrAccessibleAfterFirstUnlock`), so iCloud Keychain carries it to the user's other devices. If a synchronizable write fails, it falls back to a device-only item.
+- `sharerID` is the hex SHA-256 of the raw public key. Holding the same private key is the only definition of "same person".
+- Safety code: 12 digits from SHA-256 of `"wcig-safety"` plus the public key, shown in groups of four. It appears in Sharing settings, on the receive sheet, and in the friend menu.
+- Trust on first use: the first card from a `sharerID` stores its public key. Since the ID is the hash of the key, later cards with the same ID always carry the same key, and the signature must verify.
+- `cardRevision` is `max(last + 1, current Unix seconds)`, stored in the Keychain next to the key. It keeps increasing across devices that share the key, and still increases when the clock is wrong.
 
 ### Receiving a card
 
-1. Verify the envelope, the signature, and that `sharerID` matches the public key.
-2. If `sharerID` is the user's own: show "This is your own card" and stop.
-3. If `sharerID` is known:
-   - Lower `cardRevision` than stored: reject as older.
-   - Same revision: no change.
-   - Higher: show what will change (name, counts added/removed), then replace the snapshot.
-4. If `sharerID` is new but the display name matches an existing friend: explain that this may be the same person with a new identity (for example a new phone without a backup). Choices:
-   - Add as a new friend (default).
-   - Replace the existing friend and trust the new key. The user should compare safety codes first. The local nickname is kept.
-   - Cancel.
-5. Otherwise add a new friend.
-6. After a successful add or update, offer "Share your card with <name>?" which opens the share confirmation.
+`FriendStore.receipt(for:ownSharerID:)` decides what `ReceiveCardSheet` shows:
+
+| Receipt | When | Sheet |
+|---|---|---|
+| `ownCard` | `sharerID` is the user's own | Message only |
+| `older` | Known friend, lower revision | Message; card not saved |
+| `unchanged` | Known friend, same revision | Message and "Share My Travel Card" |
+| `update` | Known friend, higher revision | Old → new name, photo and counts; "Update Friend" |
+| `new` | Unknown `sharerID` | Card contents; "Add Friend" |
+
+For `new`, if a friend with the same display name exists, the sheet explains that this may be the same person on a new phone without a backup, or someone else. The user can add a new friend, or replace the existing one after comparing safety codes. Replacing moves the nickname and `addedAt` to the new identity.
+
+After saving, the sheet asks "Share your travel card with <name>?" and opens the share confirmation.
 
 ### Snapshot rules
 
 - A new card replaces the stored snapshot. Records the friend deleted disappear.
-- A category marked as not shared in the new card clears the stored data for it and the UI shows "Not shared". The profile photo follows the same rule.
-- "Not shared" and "Shared, no records" are separate states with separate messages.
-- The local nickname set by the receiver is kept when the friend's display name changes.
+- A category missing from the new card is shown as "Not shared". The photo follows the same rule.
+- "Not shared" and "Shared, no records" have separate messages in the friend sheet.
+- The local nickname is kept when the friend's display name changes.
+- `FriendStore.save` ignores a card whose revision is not higher than the stored one, so an older file can't overwrite a newer card.
 
 ### What can be shared
 
-Sharing Settings (in Settings) store the defaults for the next card. They are all off at first.
+`SharingOptions` is stored in UserDefaults under `sharing.defaults`. Everything is off at first.
 
 | Group | Options |
 |---|---|
-| Profile | Display name (required, any nickname), Profile photo |
-| Been | On/off; then Dates, Length of stay, Location, Purpose |
-| Wishlist | On/off; then Planned dates, Estimated days, Location, Purpose |
+| Profile | Display name (falls back to the profile name), Profile photo |
+| Been | On/off; Dates, Length of Stay, Location, Purpose |
+| Wishlist | On/off; Planned Dates, Estimated Days, Location, Purpose |
 
-With every field option off, a category shares country codes only. Notes, passport, entry policies, My Visas and visa attachments stay on the device; the settings page states this.
+With every field off, a category shares country codes only. Notes, passport, entry policies, My Visas and visa attachments stay on the device. `TravelCardBuilder` reads only the fields listed above, so a new field on `Visit` or `PlannedTrip` stays private until the builder is changed.
 
-Before each share a confirmation sheet lists what this card contains, for example "Display name, photo, Been: 12 trips (countries and dates)". The user can change options for this card and choose "Remember as default".
+The share sheet (`ShareCardView`) shows what this card contains and lets the user change options for this card. "Remember as Default" saves them back to `sharing.defaults`.
 
 ### Validation of received cards
 
-- Limits on file size, record counts and string lengths.
-- Country codes must be three uppercase letters; dates must parse.
-- The photo is re-encoded with `UserProfileStore.preparePhoto` (512 px JPEG). This also removes EXIF data such as GPS position. The same step runs when creating a card.
+`decodeAndVerify` checks, in order: file size (4 MB), `format`, `schemaVersion`, signature, `sharerID` against the key, then `validateAndNormalize`:
+
+- Display name 1–60 characters, locations up to 200, up to 5,000 Been and 2,000 Wishlist records, day counts up to 36,500.
+- Country codes are three uppercase letters, dates parse, end dates are not before start dates.
+- Categories the `shared` object marks as off are dropped. Unknown purposes display as Other.
+- The photo (up to 1 MB) is re-encoded with `UserProfileStore.preparePhoto`, which also removes EXIF data such as GPS position. Cards restored from a backup skip the re-encode, because they were checked when first received.
 
 ### Storage
 
-- `friends.json` (separate from `app_data.json`) holds each friend: `sharerID`, public key, local nickname, last received time, last `cardRevision`, and the snapshot. Photos are stored next to it.
-- Full backup gets an option "Include friends" (off by default). When on, friends are exported with their public keys so later cards still verify after a restore.
-- Any future "delete all data" action must clear friends too.
+`friends.json` in Documents holds `schemaVersion` and a list of `Friend`: `sharerID`, `publicKey`, `nickname`, `addedAt`, `lastReceivedAt`, and the verified `card` payload with its photo inline. Dates are ISO 8601 with whole seconds; `save` truncates times so the copy in memory matches the file.
 
-### UI
+If `friends.json` fails to load, `FriendStore.loadError` is set, the Friends segment offers "Try Again", and backup export and import refuse to touch friends until it loads.
 
-- Friends segment: "Share My Travel Card", "Import Card", and a list of friend cards (avatar or default avatar, name, "Last received …"). Empty state: "Exchange travel cards with friends to see where they've been and want to go, offline. Cards don't update automatically."
-- Tapping a friend opens a sheet (medium and large detents) with avatar, name, last received time, and a Been | Wishlist control showing a summary and the country list.
-- Everything in the friend sheet is read-only. A friend's data stays separate from the user's own records, map colours, visa state and filters.
-- Friend menu: set nickname, show safety code, remove friend.
+Any future "delete all data" action must clear `friends.json`, the Keychain items and `sharing.defaults`.
 
-### Code changes this needs
+### Friends in backups
 
-- `TravelStats(appState:)` and `WishlistStats` read from `AppState`. Add initializers that take an array of visits or trips plus the country list, and build read-only list views on top, so the friend sheet can reuse them.
-- A new `FriendStore` (like `UserProfileStore`) for `friends.json`, and a `SharingIdentity` service for the Keychain key.
-- The backup format gains optional `sharingIdentity` and `friends` sections. These are additive, so `schemaVersion` stays at 1.
+Export has two extra toggles, both off by default:
+
+- **Friends**: writes `friends` with each friend's public key and payload, so later cards still verify after a restore. The footer reminds the user the file holds other people's records.
+- **Sharing Identity**: writes the private key and last revision in plain text. The footer warns that anyone with the file can make cards friends accept as this user. Password protection can be added later.
+
+On import, each friend is checked again (`FriendRecord.toModel`): the key parses, `sharerID` matches the key and the card, and the payload passes validation.
+
+| Mode | Friends | Sharing identity |
+|---|---|---|
+| Replace | `FriendStore.replaceAll` | Installed from the file |
+| Merge | `FriendStore.merge`: new friends are added, a newer card replaces an older one, local nicknames win | Installed only if this device has no key or the same key; otherwise this device's key is kept and the summary says so |
+
+When installing, the revision counter becomes the higher of the file's and the device's value.
+
+### Friend sheet
+
+`FriendDetailSheet` uses medium and large detents. It reuses `TravelSummaryCard` (with `showsChevron: false`), `WishlistSummaryCard` and `TravelCountryRow`, fed by `TravelStats(records:countries:)` and `WishlistStats(trips:countries:)`. Payload records are turned into temporary `PlannedTrip` values for display only. The sheet is read-only. A friend's records live in `FriendStore` and stay separate from `AppState`, the map and visa state.
+
+The menu has Set Nickname, Show Safety Code and Remove Friend.
 
 ### Phase 2 notes
 
@@ -384,8 +428,9 @@ The project has no test target yet. Good first candidates, since they are pure l
 - `AppData.completePlannedTrip`
 - `AirlineRepository.decode`
 - `CountryGeometry` simplification
+- `TravelCardEnvelope` sign and verify (tampered payload, wrong key), `validateAndNormalize`, and `FriendStore` receipts, save and merge. `FriendStore(fileURL:)` takes a temporary file. Avoid `SharingIdentity` in tests, since it writes to the real Keychain.
 
-`DataStore`, `UserProfileStore` and `AppState` accept custom file locations, so tests can use a temporary directory.
+`DataStore`, `UserProfileStore`, `FriendStore` and `AppState` accept custom file locations, so tests can use a temporary directory.
 
 ## Conventions
 

@@ -37,6 +37,11 @@ struct UserDataRestoreSummary: Equatable {
     /// Entry-policy overrides skipped because their category is unknown to this app version.
     var entryPoliciesSkipped: Int = 0
     var profileUpdated: Bool = false
+    /// Friends added or updated from the file.
+    var friendsRestored: Int = 0
+    var sharingIdentityRestored: Bool = false
+    /// Merge kept this device's sharing identity because it differs from the file's.
+    var sharingIdentityKept: Bool = false
     var restoredAt: Date = Date()
 }
 

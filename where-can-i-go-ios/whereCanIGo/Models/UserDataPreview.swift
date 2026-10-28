@@ -19,6 +19,9 @@ struct UserDataBackupPreviewDetails: Equatable {
     var wishlistCount: Int
     var includesProfilePhoto: Bool
     var includesVisaAttachments: Bool
+    /// nil = the file has no friends section.
+    var friendCount: Int?
+    var includesSharingIdentity: Bool
 }
 
 extension UserDataBackup {
@@ -32,7 +35,9 @@ extension UserDataBackup {
             wishlistCount: wishlist.count,
             includesProfilePhoto: profile?.photo != nil,
             // true if the file carries the attachments section for any visa (even if empty)
-            includesVisaAttachments: personalVisas.contains { $0.attachments != nil }
+            includesVisaAttachments: personalVisas.contains { $0.attachments != nil },
+            friendCount: friends?.count,
+            includesSharingIdentity: sharingIdentity != nil
         )
     }
 }

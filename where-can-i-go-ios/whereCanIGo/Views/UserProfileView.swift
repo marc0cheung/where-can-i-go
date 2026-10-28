@@ -287,9 +287,9 @@ struct SettingsView: View {
     @State private var importError: String?
     @AppStorage(SearchEngine.storageKey) private var searchEngine: SearchEngine = .google
 
-    init(appState: AppState, profileStore: UserProfileStore) {
+    init(appState: AppState, profileStore: UserProfileStore, friendStore: FriendStore) {
         _service = StateObject(wrappedValue: UserDataTransferService(
-            appState: appState, profileStore: profileStore
+            appState: appState, profileStore: profileStore, friendStore: friendStore
         ))
     }
 
@@ -315,6 +315,20 @@ struct SettingsView: View {
                 } header: {
                     Text("General")
                         .foregroundStyle(.primary)
+                }
+
+                Section {
+                    NavigationLink {
+                        SharingSettingsView()
+                    } label: {
+                        Label("Sharing", systemImage: "person.2")
+                            .foregroundStyle(Color.primary)
+                    }
+                } header: {
+                    Text("Friends")
+                        .foregroundStyle(.primary)
+                } footer: {
+                    Text("Choose what your travel card includes by default.")
                 }
 
                 Section {

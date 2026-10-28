@@ -29,10 +29,14 @@ nonisolated struct UserDataBackup: Codable, Sendable {
     var personalVisas: [PersonalVisaRecord] = []
     var visits: [VisitRecord] = []
     var wishlist: [WishlistRecord] = []
+    /// Optional. Holds the travel card signing key in plain form.
+    var sharingIdentity: SharingIdentityRecord? = nil
+    /// Optional. nil = friends not included in this file.
+    var friends: [FriendRecord]? = nil
 
     enum CodingKeys: String, CodingKey {
         case format, schemaVersion, kind, exportedAt, app, profile, passport,
-             entryPolicies, personalVisas, visits, wishlist
+             entryPolicies, personalVisas, visits, wishlist, sharingIdentity, friends
     }
 }
 
@@ -43,7 +47,7 @@ nonisolated extension UserDataBackup {
         init(rawValue: String) { self.rawValue = rawValue }
 
         static let fullBackup = Kind(rawValue: "fullBackup")
-        /// Reserved for the planned Friends feature (see tech_notes.md).
+        /// Reserved and unused. Travel cards have their own format in TravelCard.swift.
         static let visitShare = Kind(rawValue: "visitShare")
     }
 
@@ -92,6 +96,8 @@ nonisolated extension UserDataBackup {
         personalVisas = try c.decodeIfPresent([PersonalVisaRecord].self, forKey: .personalVisas) ?? []
         visits = try c.decodeIfPresent([VisitRecord].self, forKey: .visits) ?? []
         wishlist = try c.decodeIfPresent([WishlistRecord].self, forKey: .wishlist) ?? []
+        sharingIdentity = try c.decodeIfPresent(SharingIdentityRecord.self, forKey: .sharingIdentity)
+        friends = try c.decodeIfPresent([FriendRecord].self, forKey: .friends)
     }
 }
 
@@ -280,6 +286,52 @@ nonisolated struct WishlistRecord: Codable, Sendable {
                            estimatedDays: estimatedDays,
                            startDate: try startDate.map { try BackupDay.date(from: $0) },
                            endDate: try endDate.map { try BackupDay.date(from: $0) })
+    }
+}
+
+nonisolated struct SharingIdentityRecord: Codable, Sendable {
+    var privateKey: Data              // raw P-256 key, base64 in JSON
+    var lastRevision: Int64
+
+    func validate() throws {
+        guard (try? P256.Signing.PrivateKey(rawRepresentation: privateKey)) != nil, lastRevision >= 0 else {
+            throw UserDataBackupError.corrupted
+        }
+    }
+}
+
+nonisolated struct FriendRecord: Codable, Sendable {
+    var sharerID: String
+    var publicKey: Data
+    var nickname: String? = nil
+    var addedAt: Date
+    var lastReceivedAt: Date
+    var card: TravelCardPayload
+
+    init(_ friend: Friend) {
+        sharerID = friend.sharerID
+        publicKey = friend.publicKey
+        nickname = friend.nickname
+        addedAt = friend.addedAt
+        lastReceivedAt = friend.lastReceivedAt
+        card = friend.card
+    }
+
+    /// The card signature isn't stored, so this checks that the ID matches
+    /// the key and that the card passes the same limits as a received card.
+    func toModel() throws -> Friend {
+        guard (try? P256.Signing.PublicKey(rawRepresentation: publicKey)) != nil,
+              sharerID == TravelCardCrypto.sharerID(forPublicKey: publicKey),
+              card.sharerID == sharerID else {
+            throw UserDataBackupError.corrupted
+        }
+        var card = card
+        do { try card.validateAndNormalize(reencodePhoto: false) }
+        catch { throw UserDataBackupError.corrupted }
+        let name = nickname?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return Friend(sharerID: sharerID, publicKey: publicKey,
+                      nickname: name?.isEmpty == false ? String(name!.prefix(TravelCardLimits.displayNameLength)) : nil,
+                      addedAt: addedAt, lastReceivedAt: lastReceivedAt, card: card)
     }
 }
 
@@ -559,6 +611,11 @@ nonisolated extension UserDataBackup {
         try visits.forEach { _ = try $0.toModel() }
         try wishlist.forEach { _ = try $0.toModel() }
         if let photo = profile?.photo { try check(photo) }
+        try sharingIdentity?.validate()
+        if let friends {
+            try Self.requireUnique(friends.map(\.sharerID))
+            try friends.forEach { _ = try $0.toModel() }
+        }
     }
 }
 
@@ -575,11 +632,15 @@ struct UserDataExportResult {
     ///   - profilePhoto: nil = do not include the profile photo.
     ///   - attachmentLoader: nil = records only (no visa attachments).
     ///   - bundledDefaults: bundled entry policies for `data.passportCode`.
+    ///   - sharingIdentity: nil = leave the signing key out.
+    ///   - friends: nil = leave friends out.
     static func make(from data: AppData,
                      displayName: String?,
                      profilePhoto: BackupFile?,
                      attachmentLoader: ((PersonalVisa) throws -> [BackupFile])?,
                      bundledDefaults: [DefaultVisaEntry],
+                     sharingIdentity: SharingIdentityRecord? = nil,
+                     friends: [Friend]? = nil,
                      exportedAt: Date = Date()) throws -> UserDataExportResult {
         var skipped: [String] = []
 
@@ -617,7 +678,9 @@ struct UserDataExportResult {
             entryPolicies: EntryPolicies.diff(current: data.defaultVisas, bundled: bundledDefaults),
             personalVisas: visaRecords,
             visits: data.visits.map { VisitRecord($0) },
-            wishlist: data.plannedTrips.map { WishlistRecord($0) }
+            wishlist: data.plannedTrips.map { WishlistRecord($0) },
+            sharingIdentity: sharingIdentity,
+            friends: friends?.map { FriendRecord($0) }
         )
         try backup.validate(checkMediaChecksums: false)   // exports pass the same checks as imports
         return UserDataExportResult(backup: backup, skippedFileNames: skipped)
@@ -636,6 +699,9 @@ struct UserDataImportPlan {
     var attachmentsToStage: [UUID: [BackupMedia]]
     /// Pass to UserProfileStore.restore(_:mode:). Unsupported photos are already removed.
     var profile: UserDataBackup.Profile?
+    /// nil = the file has no friends section; local friends stay as they are.
+    var friends: [Friend]?
+    var sharingIdentity: SharingIdentityRecord?
 }
 
 @MainActor extension UserDataBackup {
@@ -744,7 +810,9 @@ struct UserDataImportPlan {
         }
 
         return UserDataImportPlan(mode: mode, data: result, summary: summary,
-                                  attachmentsToStage: staged, profile: importedProfile)
+                                  attachmentsToStage: staged, profile: importedProfile,
+                                  friends: try friends?.map { try $0.toModel() },
+                                  sharingIdentity: sharingIdentity)
     }
 }
 

@@ -2,14 +2,19 @@ import SwiftUI
 
 // MARK: - My Travels Tab
 
+enum TravelsSegment: Hashable {
+    case been, wishlist, friends
+}
+
 struct MyTravelsTab: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject private var friendStore: FriendStore
 
     @State private var showSummary = false
     @State private var showAddTrip = false
     @State private var addTripInitialCountry: Country? = nil
     @State private var countryDetail: Country? = nil
-    @State private var showingWishlist = false
+    @State private var segment: TravelsSegment = .been
     @State private var addWishlistCountry: Country?
     @State private var pendingDeletion: RecordDeletion?
 
@@ -30,44 +35,50 @@ struct MyTravelsTab: View {
     var body: some View {
         List {
             VStack(alignment: .leading, spacing: 16) {
-                Picker("Travel view", selection: $showingWishlist) {
-                    Text("Been").tag(false)
-                    Text("Wishlist").tag(true)
+                Picker("Travel view", selection: $segment) {
+                    Text("Been").tag(TravelsSegment.been)
+                    Text("Wishlist").tag(TravelsSegment.wishlist)
+                    Text("Friends").tag(TravelsSegment.friends)
                 }
                 .pickerStyle(.segmented)
 
-                Text(showingWishlist ? "Where I Want to Go" : "Where I've Been")
-                    .font(.headline)
+                if segment != .friends {
+                    Text(showingWishlist ? "Where I Want to Go" : "Where I've Been")
+                        .font(.headline)
 
-                ZStack {
-                    Button {
-                        showSummary = true
-                    } label: {
-                        TravelSummaryCard(stats: TravelStats(appState: appState))
+                    ZStack {
+                        Button {
+                            showSummary = true
+                        } label: {
+                            TravelSummaryCard(stats: TravelStats(appState: appState))
+                        }
+                        .buttonStyle(.plain)
+                        .opacity(showingWishlist ? 0 : 1)
+                        .allowsHitTesting(!showingWishlist)
+                        .accessibilityHidden(showingWishlist)
+
+                        WishlistSummaryCard(
+                            stats: WishlistStats(
+                                trips: appState.data.plannedTrips,
+                                countries: appState.countries)
+                        )
+                        .opacity(showingWishlist ? 1 : 0)
+                        .allowsHitTesting(showingWishlist)
+                        .accessibilityHidden(!showingWishlist)
                     }
-                    .buttonStyle(.plain)
-                    .opacity(showingWishlist ? 0 : 1)
-                    .allowsHitTesting(!showingWishlist)
-                    .accessibilityHidden(showingWishlist)
-
-                    WishlistSummaryCard(
-                        stats: WishlistStats(
-                            trips: appState.data.plannedTrips,
-                            countries: appState.countries)
-                    )
-                    .opacity(showingWishlist ? 1 : 0)
-                    .allowsHitTesting(showingWishlist)
-                    .accessibilityHidden(!showingWishlist)
                 }
 
             }
             .padding(.vertical, 8)
             .cardListRow()
 
-            if showingWishlist {
-                WishlistSection(pendingDeletion: $pendingDeletion)
-            } else {
+            switch segment {
+            case .been:
                 visitedContent
+            case .wishlist:
+                WishlistSection(pendingDeletion: $pendingDeletion)
+            case .friends:
+                FriendsSection()
             }
         }
         .cardListStyle()
@@ -88,11 +99,17 @@ struct MyTravelsTab: View {
         .onChange(of: appState.pendingAddWishlistCountryCode) { _, newCode in
             handlePendingWishlist(newCode)
         }
+        .onChange(of: friendStore.incomingCardURL) { _, url in
+            if url != nil { segment = .friends }
+        }
         .onAppear {
             handlePendingVisit(appState.pendingAddVisitCountryCode)
             handlePendingWishlist(appState.pendingAddWishlistCountryCode)
+            if friendStore.incomingCardURL != nil { segment = .friends }
         }
     }
+
+    private var showingWishlist: Bool { segment == .wishlist }
 
     private var visitedContent: some View {
         Group {
@@ -151,7 +168,7 @@ struct MyTravelsTab: View {
     private func handlePendingVisit(_ code: String?) {
         guard let code, let country = appState.country(for: code) else { return }
         appState.pendingAddVisitCountryCode = nil
-        showingWishlist = false
+        segment = .been
         addTripInitialCountry = country
         showAddTrip = true
     }
@@ -160,7 +177,7 @@ struct MyTravelsTab: View {
         guard let code else { return }
         appState.pendingAddWishlistCountryCode = nil
         guard let country = appState.country(for: code) else { return }
-        showingWishlist = true
+        segment = .wishlist
         addWishlistCountry = country
     }
 
@@ -241,22 +258,35 @@ struct TravelStats {
     let lastTrip: Date?
     let visitedCodes: Set<String>
 
+    struct Record {
+        let countryCode: String
+        let days: Int?
+        let startDate: Date?
+    }
+
     init(appState: AppState) {
-        let visits = appState.data.visits
-        let codes = Set(visits.map { $0.countryCode })
+        self.init(
+            records: appState.data.visits.map {
+                Record(countryCode: $0.countryCode, days: $0.dayCount, startDate: $0.startDate)
+            },
+            countries: appState.countries)
+    }
+
+    init(records: [Record], countries: [Country]) {
+        let codes = Set(records.map(\.countryCode))
         countryCount = codes.count
-        tripCount = visits.count
-        totalDays = visits.compactMap { $0.dayCount }.reduce(0, +)
+        tripCount = records.count
+        totalDays = records.compactMap(\.days).reduce(0, +)
 
         let contSet = Set(codes.compactMap { Continent.of($0) })
         continents = Continent.allCases.filter { contSet.contains($0) }
         continentCount = contSet.count
 
-        let starts = visits.compactMap { $0.startDate }
+        let starts = records.compactMap(\.startDate)
         firstTrip = starts.min()
         lastTrip = starts.max()
 
-        flags = codes.compactMap { appState.country(for: $0)?.flag }.sorted()
+        flags = countries.filter { codes.contains($0.code) }.map(\.flag).sorted()
         visitedCodes = codes
     }
 }
@@ -270,6 +300,7 @@ private enum TravelCardPalette {
 
 struct TravelSummaryCard: View {
     let stats: TravelStats
+    var showsChevron = true
 
     var body: some View {
         TravelCompactCard(
@@ -279,7 +310,7 @@ struct TravelSummaryCard: View {
             tripCount: stats.tripCount,
             tripLabel: stats.tripCount == 1 ? "trip" : "trips",
             flags: stats.flags, continentCount: stats.continentCount,
-            days: stats.totalDays.formatted(), daysLabel: "Days", showsChevron: true,
+            days: stats.totalDays.formatted(), daysLabel: "Days", showsChevron: showsChevron,
             colors: TravelCardPalette.colors
         )
     }
@@ -903,7 +934,11 @@ struct VisitPurposePicker: View {
 
 enum TravelFormat {
     static func dateRange(_ visit: Visit) -> String {
-        switch (visit.startDate, visit.endDate) {
+        dateRange(start: visit.startDate, end: visit.endDate)
+    }
+
+    static func dateRange(start: Date?, end: Date?) -> String {
+        switch (start, end) {
         case let (start?, end?):
             return "\(short(start)) – \(short(end))"
         case let (start?, nil):

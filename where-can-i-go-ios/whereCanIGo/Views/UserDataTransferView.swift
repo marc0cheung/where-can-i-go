@@ -11,6 +11,7 @@ struct ExportDataView: View {
     @State private var result: UserDataExportResult?
     @State private var exportCompleted = false
     @State private var notice: TransferNotice?
+    @State private var hasSharingIdentity = false
 
     private var isBusy: Bool { isPreparing || showExporter || appState.isRestoring }
 
@@ -31,6 +32,25 @@ struct ExportDataView: View {
                     visits: appState.data.visits.count,
                     wishlist: appState.data.plannedTrips.count
                 )
+                Section {
+                    Toggle("Friends (\(service.friendCount))", isOn: $options.includeFriends)
+                        .disabled(service.friendCount == 0)
+                    Toggle("Sharing Identity", isOn: $options.includeSharingIdentity)
+                        .disabled(!hasSharingIdentity)
+                } header: {
+                    Text("Friends")
+                } footer: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        if options.includeFriends {
+                            Text("Friends' cards contain other people's travel records. Store this file somewhere private.")
+                        }
+                        if options.includeSharingIdentity {
+                            Text("The sharing identity is saved without a password. Anyone with this file can make travel cards that your friends accept as yours.")
+                        } else {
+                            Text("Include the sharing identity when moving to a device without iCloud Keychain, so friends keep recognizing your cards.")
+                        }
+                    }
+                }
                 if exportCompleted, let result, !result.skippedFileNames.isEmpty {
                     Section("export.skipped.title") {
                         ForEach(Array(result.skippedFileNames.enumerated()), id: \.offset) { _, name in
@@ -85,6 +105,9 @@ struct ExportDataView: View {
                 Alert(title: Text(notice.title), message: Text(verbatim: notice.message),
                       dismissButton: .default(Text("OK")))
             }
+            .task {
+                hasSharingIdentity = (try? SharingIdentity.currentKey()) != nil
+            }
         }
         .interactiveDismissDisabled(isBusy)
     }
@@ -132,6 +155,10 @@ struct ImportPreviewView: View {
                     LabeledContent("Passport", value: displayValue(details.passportCode))
                     LabeledContent("transfer.profilePhoto", value: inclusionText(details.includesProfilePhoto))
                     LabeledContent("transfer.visaAttachments", value: inclusionText(details.includesVisaAttachments))
+                    LabeledContent("Friends",
+                                   value: details.friendCount.map { $0.formatted() }
+                                   ?? String(localized: "transfer.notIncluded"))
+                    LabeledContent("Sharing Identity", value: inclusionText(details.includesSharingIdentity))
                 }
                 BackupRecordCounts(
                     visas: details.personalVisaCount,
@@ -155,6 +182,17 @@ struct ImportPreviewView: View {
                         Text("import.attachmentsNotIncluded.note")
                             .foregroundStyle(.secondary)
                     }
+                }
+                if details.friendCount != nil || details.includesSharingIdentity {
+                    Section {
+                        switch mode {
+                        case .replace:
+                            Text("Friends and the sharing identity in the file replace the ones on this device.")
+                        case .merge:
+                            Text("Friends in the file are added, and newer cards update existing friends. The sharing identity is used only if this device doesn't have one yet.")
+                        }
+                    }
+                    .foregroundStyle(.secondary)
                 }
                 if let summary {
                     Section {
@@ -329,6 +367,15 @@ private func restoreSummaryRows(
     }
     if completed, summary.profileUpdated {
         rows.append(("User Profile", String(localized: "import.updated")))
+    }
+    if completed, summary.friendsRestored > 0 {
+        rows.append(("Friends", summary.friendsRestored.formatted()))
+    }
+    if completed, summary.sharingIdentityRestored {
+        rows.append(("Sharing Identity", String(localized: "import.updated")))
+    }
+    if completed, summary.sharingIdentityKept {
+        rows.append(("Sharing Identity", String(localized: "Kept this device's identity")))
     }
     return rows
 }

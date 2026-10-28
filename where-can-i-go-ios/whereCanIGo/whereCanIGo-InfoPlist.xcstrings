@@ -59,6 +59,40 @@
           }
         }
       }
+    },
+    "Travel Card" : {
+      "comment" : "Document type name for shared travel cards",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行名片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行名片"
+          }
+        }
+      }
+    },
+    "Where Can I Go Travel Card" : {
+      "comment" : "File type description for .wcigcard files",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟住去边度旅行名片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟住去邊度旅行名片"
+          }
+        }
+      }
     }
   },
   "version" : "1.2"

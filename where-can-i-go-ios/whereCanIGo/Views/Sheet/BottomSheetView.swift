@@ -59,7 +59,8 @@ struct SheetHeader: View {
     @Binding var selectedDiceContinents: Set<Continent>
     @Binding var selectedDiceAirlines: Set<String>
     @Binding var diceIncludesAllEntryRequirements: Bool
-    @StateObject private var profileStore = UserProfileStore()
+    @EnvironmentObject private var profileStore: UserProfileStore
+    @EnvironmentObject private var friendStore: FriendStore
     @State private var showProfileMenu = false
     @State private var showProfile = false
     @State private var showSettings = false
@@ -92,7 +93,7 @@ struct SheetHeader: View {
             UserProfileView(profileStore: profileStore, passportCode: appState.data.passportCode)
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView(appState: appState, profileStore: profileStore)
+            SettingsView(appState: appState, profileStore: profileStore, friendStore: friendStore)
         }
         .alert("Unable to Load Profile", isPresented: Binding {
             profileStore.loadError != nil
