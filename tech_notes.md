@@ -57,13 +57,17 @@ where-can-i-go-ios/whereCanIGo/
 │   ├── SharingIdentity.swift         Keychain signing key and card revision counter
 │   ├── TravelCardBuilder.swift       SharingOptions, builds and signs a card file
 │   ├── FriendStore.swift             friends.json, receipt rules, TravelCardReader
-│   └── UserDataBackupDocument.swift  FileDocument used by the exporter
+│   ├── UserDataBackupDocument.swift  FileDocument used by the exporter
+│   └── AppInfo.swift                 Version, public links, feedback email and mailto builder
 ├── Views/
 │   ├── CountryMapView.swift, CountryMapGeometry.swift, CountryMapHighlight.swift
 │   ├── WorldMapView.swift    Flat map used for the shareable passport image
 │   ├── CountryDetailCard.swift, CountryPickerSheet.swift, PassportPickerView.swift
 │   ├── UserProfileView.swift (also contains SettingsView), ProfilePhotoEditorSheet.swift
 │   ├── UserDataTransferView.swift  Export screen and import preview
+│   ├── About/                About, Privacy Policy, FAQ, Send Feedback, Acknowledgements,
+│   │                         and the hidden "open world" page (tap the Where I've Been
+│   │                         card five times)
 │   ├── Friends/              Friends segment, share and receive sheets, friend sheet,
 │   │                         Sharing settings
 │   └── Sheet/                Bottom panel: header, tabs and their sheets

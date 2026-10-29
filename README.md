@@ -21,6 +21,7 @@ See which countries your passport can enter, keep track of your own visas, and l
 - **Edit entry policies.** If a bundled rule is out of date, you can change it for your passport, or reset to the bundled data.
 - **Backup.** In Settings you can export your data to a JSON file and import it on another device. Import can replace everything or merge in new records only. Profile photo, visa attachments, friends and your sharing identity are optional in the export.
 - **Languages.** English, Traditional Chinese and Simplified Chinese.
+- **Help and feedback.** Settings has an FAQ, a privacy policy, an About page and Send Feedback (email or GitHub issue).
 
 ### Supported passports
 
@@ -31,6 +32,8 @@ Hong Kong SAR (HKG), Macao SAR (MAC), China (CHN) and Taiwan (TWN).
 iOS 26.2 or later. iPhone is the main target; iPad works but some layouts still need work.
 
 ### Your data
+
+See the full [Privacy Policy](PRIVACY.md).
 
 The app has no account and no server. Your records, profile and attachments are stored in the app's own folder on your device. They only leave the device when you export a backup, share an image, or send a travel card yourself. A travel card holds only what you chose to include. Notes, passport, My Visas and visa attachments stay on your device.
 
@@ -111,4 +114,4 @@ See [LICENSE](LICENSE).
 
 ## Contact
 
-Open an issue on GitHub for questions or ideas.
+Open an issue on GitHub for questions or ideas, or find us on Instagram at [@wherecanigo_app](https://www.instagram.com/wherecanigo_app/).

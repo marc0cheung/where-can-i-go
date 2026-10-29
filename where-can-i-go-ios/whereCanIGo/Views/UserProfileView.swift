@@ -351,6 +351,46 @@ struct SettingsView: View {
                     Text("Manage Data")
                         .foregroundStyle(.primary)
                 }
+
+                Section {
+                    NavigationLink {
+                        FAQView()
+                    } label: {
+                        Label("FAQ", systemImage: "questionmark.circle")
+                            .foregroundStyle(Color.primary)
+                    }
+                    NavigationLink {
+                        FeedbackView()
+                    } label: {
+                        Label("Send Feedback", systemImage: "paperplane")
+                            .foregroundStyle(Color.primary)
+                    }
+                } header: {
+                    Text("Support")
+                        .foregroundStyle(.primary)
+                }
+
+                Section {
+                    NavigationLink {
+                        AboutView()
+                    } label: {
+                        Label("About", systemImage: "info.circle")
+                            .foregroundStyle(Color.primary)
+                    }
+                    NavigationLink {
+                        PrivacyPolicyView()
+                    } label: {
+                        Label("Privacy Policy", systemImage: "hand.raised")
+                            .foregroundStyle(Color.primary)
+                    }
+                } header: {
+                    Text("About")
+                        .foregroundStyle(.primary)
+                } footer: {
+                    Text("Version \(AppInfo.version) (\(AppInfo.build))")
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 8)
+                }
             }
             .disabled(isBusy)
             .navigationTitle("Settings")

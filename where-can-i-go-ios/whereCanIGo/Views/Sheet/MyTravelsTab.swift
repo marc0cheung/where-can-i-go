@@ -293,7 +293,7 @@ struct TravelStats {
 
 // MARK: - Compact Summary Card
 
-private enum TravelCardPalette {
+enum TravelCardPalette {
     static let colors = [Color(red: 0.30, green: 0.18, blue: 0.55),
                          Color(red: 0.08, green: 0.25, blue: 0.42)]
 }
@@ -417,14 +417,24 @@ struct TravelSummaryView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.displayScale) private var displayScale
 
+    @State private var cardTapCount = 0
+    @State private var lastCardTap = Date.distantPast
+    @State private var showEasterEgg = false
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
                     TravelPassportCard(stats: TravelStats(appState: appState))
                         .frame(maxWidth: 400)
+                        .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .onTapGesture(perform: registerCardTap)
+                        .sensoryFeedback(.impact(weight: .light), trigger: cardTapCount) { _, new in new > 0 }
                 }
                 .padding()
+            }
+            .fullScreenCover(isPresented: $showEasterEgg) {
+                OpenWorldEasterEggView()
             }
             .navigationTitle("Where I've Been")
             .navigationBarTitleDisplayMode(.inline)
@@ -443,6 +453,16 @@ struct TravelSummaryView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func registerCardTap() {
+        let now = Date()
+        cardTapCount = now.timeIntervalSince(lastCardTap) < 1.5 ? cardTapCount + 1 : 1
+        lastCardTap = now
+        if cardTapCount >= 5 {
+            cardTapCount = 0
+            showEasterEgg = true
         }
     }
 
