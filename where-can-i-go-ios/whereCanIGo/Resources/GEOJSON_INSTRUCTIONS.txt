@@ -1,0 +1,17 @@
+Download the world countries GeoJSON file and place it in this Resources folder.
+
+URL:
+  https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson
+
+Save as:
+  Resources/world-countries.geojson
+
+The file is ~24 MB and contains ISO 3166-1 alpha-3 codes under the "ISO_A3" property
+of each feature, which is what CountryMapView matches against.
+
+Quick download (macOS Terminal):
+  curl -L -o world-countries.geojson \
+    https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson
+
+After downloading, drag the file into your Xcode project's Resources group
+(make sure "Copy items if needed" and "Add to target" are checked).
