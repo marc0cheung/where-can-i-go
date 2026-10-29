@@ -3,8 +3,10 @@ import CryptoKit
 import UniformTypeIdentifiers
 
 extension UTType {
-    /// Declared in whereCanIGo-Info.plist as an exported type conforming to public.json.
-    nonisolated static let travelCard = UTType(exportedAs: "com.marcocheung.whereCanIGo.travelcard", conformingTo: .json)
+    /// Declared in whereCanIGo-Info.plist as an exported type conforming to public.data and
+    /// public.content. The file is JSON, but a text type would make Files show a text preview
+    /// when the card is tapped.
+    nonisolated static let travelCard = UTType(exportedAs: "com.marcocheung.whereCanIGo.travelcard", conformingTo: .data)
 }
 
 /// Signed file exchanged between friends. See tech_notes.md, "Friends".

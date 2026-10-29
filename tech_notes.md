@@ -298,9 +298,11 @@ UI wording follows this: "Share My Travel Card", "Add Friend", "Update Friend", 
 
 ### Card file
 
-- File extension `.wcigcard`, UTType `com.marcocheung.whereCanIGo.travelcard` conforming to `public.json`, declared with a document type in `whereCanIGo-Info.plist`.
+- File extension `.wcigcard`, UTType `com.marcocheung.whereCanIGo.travelcard` conforming to `public.data` and `public.content`, declared with a document type (`LSHandlerRank` Owner) in `whereCanIGo-Info.plist`. The content is JSON, but the type does not conform to `public.json`: a text type makes Files show a text preview when the card is tapped.
+- `LSSupportsOpeningDocumentsInPlace` is on, so tapping a card in Files opens the app with the original file. `TravelCardReader` reads it with `NSFileCoordinator`, which also downloads a card stored only in iCloud Drive.
+- AirDrop: since iOS 17, files received by AirDrop for third-party apps are saved to Files › Downloads and the app is not opened (Apple DTS, developer forums thread 737971). Users open the card by tapping it in Downloads. Sending a custom-scheme URL with the card inside is a possible way to open the app directly; it is untested.
 - Opening a card from another app: `onOpenURL` stores the URL in `FriendStore.incomingCardURL`. `ContentView` opens the panel on Travels, `MyTravelsTab` switches to Friends, and `FriendsSection` reads the file. Files iOS copied to `Documents/Inbox` are deleted after reading.
-- "Add Friend" uses `fileImporter` with the card type and plain JSON.
+- "Add Friend" uses `fileImporter` with the card type and plain JSON, so cards saved under a `.json` name still import.
 - The backup reader and the card reader check `format` first, so each rejects the other's files with a clear message.
 - Envelope:
 

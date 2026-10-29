@@ -183,7 +183,8 @@ final class FriendStore: ObservableObject {
 
 enum TravelCardReader {
     /// Reads and verifies a card from a file URL off the main thread.
-    /// Files delivered to Documents/Inbox are removed after reading.
+    /// Files delivered to Documents/Inbox are removed after reading. Files
+    /// opened in place from the Files app are left where they are.
     static func read(from url: URL) async throws -> VerifiedTravelCard {
         let hasAccess = url.startAccessingSecurityScopedResource()
         defer {
@@ -193,13 +194,22 @@ enum TravelCardReader {
             }
         }
         let task = Task.detached(priority: .userInitiated) { () throws -> VerifiedTravelCard in
-            let values = try url.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
-            guard values.isRegularFile == true else { throw TravelCardError.notATravelCard }
-            guard (values.fileSize ?? 0) <= TravelCardEnvelope.maxFileByteCount else {
-                throw TravelCardError.fileTooLarge
+            // Files opens cards in place. Coordinated reading downloads a card
+            // that is still only in iCloud Drive.
+            var coordinationError: NSError?
+            var result: Result<Data, Error> = .failure(TravelCardError.notATravelCard)
+            NSFileCoordinator().coordinate(readingItemAt: url, options: [], error: &coordinationError) { readURL in
+                result = Result {
+                    let values = try readURL.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
+                    guard values.isRegularFile == true else { throw TravelCardError.notATravelCard }
+                    guard (values.fileSize ?? 0) <= TravelCardEnvelope.maxFileByteCount else {
+                        throw TravelCardError.fileTooLarge
+                    }
+                    return try Data(contentsOf: readURL)
+                }
             }
-            let data = try Data(contentsOf: url)
-            return try TravelCardEnvelope.decodeAndVerify(data)
+            if let coordinationError { throw coordinationError }
+            return try TravelCardEnvelope.decodeAndVerify(try result.get())
         }
         return try await task.value
     }
