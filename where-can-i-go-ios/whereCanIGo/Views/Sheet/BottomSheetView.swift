@@ -181,16 +181,6 @@ struct SheetHeader: View {
         }
     }
 
-    private var diceMenu: some View {
-        // The badge is a persistent sibling (not a conditional overlay) so it isn't re-inserted
-        // beneath the Liquid Glass button while the menu morph transition is active.
-        ZStack(alignment: .topTrailing) {
-            diceMenuButton
-            diceBadge
-                .zIndex(1)
-        }
-    }
-
     private var diceFilterCount: Int {
         selectedDiceContinents.count + selectedDiceAirlines.count
     }
@@ -202,13 +192,14 @@ struct SheetHeader: View {
             .foregroundStyle(.white)
             .frame(width: 20, height: 20)
             .background(.red, in: Circle())
-            .offset(x: 4, y: -4)
+            // Kept within the glass shape: Liquid Glass clips label content on device.
+            .offset(x: 2, y: -2)
             .opacity(diceFilterCount > 0 ? 1 : 0)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
     }
 
-    private var diceMenuButton: some View {
+    private var diceMenu: some View {
         Menu {
             Menu {
                 Toggle("All Continents", isOn: allDiceContinentsBinding)
@@ -250,6 +241,9 @@ struct SheetHeader: View {
                 .font(.title3)
                 .foregroundStyle(diceIncludesAllEntryRequirements ? Color.accentColor : Color.primary)
                 .frame(minWidth: 44, minHeight: 44)
+                .overlay(alignment: .topTrailing) {
+                    diceBadge
+                }
         } primaryAction: {
             randomSelectCountry()
         }
