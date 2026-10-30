@@ -35,7 +35,7 @@ iOS / iPadOS 26.2 or later. Supports iPhone and iPad.
 
 See the full [Privacy Policy](PRIVACY.md).
 
-The app has no account and no server. Your records, profile and attachments are kept in private app storage. Device backups may include them. A travel card holds only what you chose to include; notes, passport, My Visas and visa attachments are not included. The signing identity is stored separately in Keychain and may sync through iCloud Keychain or survive reinstallations. See the privacy policy for Apple services and user-directed exports.
+The app has no account and no server. Your records, profile and attachments are kept in private app storage. Device backups may include them. A travel card holds only what you chose to include; notes, passport, My Visas and visa attachments are not included. The signing identity is stored separately in Keychain and may sync through iCloud Keychain or survive reinstallations. You can reset it in Sharing settings, after which friends see you as a new person. See the privacy policy for Apple services and user-directed exports.
 
 ### Important
 

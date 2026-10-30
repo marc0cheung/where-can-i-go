@@ -29,7 +29,7 @@ When you first share a travel card, the app creates a signing key and revision c
 
 ## Deleting your data
 
-Delete travel, visa and friend records in the app at any time. Deleting the app removes its private files from your device, but Keychain items, iCloud or computer backups, exported files and copies of cards held by recipients are not removed. The sharing identity may remain in Keychain through reinstallations. The app does not currently provide a control to reset that identity.
+Delete travel, visa and friend records in the app at any time. Deleting the app removes its private files from your device, but Keychain items, iCloud or computer backups, exported files and copies of cards held by recipients are not removed. The sharing identity may remain in Keychain through reinstallations. You can reset it in Sharing settings.
 
 ## Changes to this policy
 

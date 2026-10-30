@@ -116,6 +116,7 @@ struct SharingSettingsView: View {
     @State private var options = SharingOptions.load()
     @State private var safetyCode: String?
     @State private var identityError: String?
+    @State private var confirmReset = false
 
     var body: some View {
         Form {
@@ -138,10 +139,24 @@ struct SharingSettingsView: View {
             }
 
             Section {
-                if let safetyCode {
+                if let code = safetyCode {
                     LabeledContent("Safety Code") {
-                        Text(verbatim: safetyCode).monospacedDigit()
+                        Text(verbatim: code).monospacedDigit()
                     }
+                    Button("Reset Safety Code", role: .destructive) { confirmReset = true }
+                        .confirmationDialog("Reset your safety code?", isPresented: $confirmReset, titleVisibility: .visible) {
+                            Button("Reset", role: .destructive) {
+                                do {
+                                    try SharingIdentity.reset()
+                                    safetyCode = nil
+                                    identityError = nil
+                                } catch {
+                                    identityError = error.localizedDescription
+                                }
+                            }
+                        } message: {
+                            Text("Your next travel card will come from a new identity, and friends will see you as a new person. This can't be undone.")
+                        }
                 } else if let identityError {
                     Text(verbatim: identityError).foregroundStyle(.secondary)
                 } else {

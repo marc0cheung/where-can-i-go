@@ -331,6 +331,7 @@ UI wording follows this: "Share My Travel Card", "Add Friend", "Update Friend", 
 - The first share creates a P-256 key with CryptoKit. `SharingIdentity` stores it as a synchronizable Keychain item (`kSecAttrAccessibleAfterFirstUnlock`), so iCloud Keychain carries it to the user's other devices. If a synchronizable write fails, it falls back to a device-only item.
 - `sharerID` is the hex SHA-256 of the raw public key. Holding the same private key is the only definition of "same person".
 - Safety code: 12 digits from SHA-256 of `"wcig-safety"` plus the public key, shown in groups of four. It appears in Sharing settings, on the receive sheet, and in the friend menu.
+- Reset: Sharing settings has "Reset Safety Code", which calls `SharingIdentity.reset()` to delete the key and revision items (synced copies included). The next share creates a new key, so recipients see a new `sharerID` and treat the user as a new person.
 - Trust on first use: the first card from a `sharerID` stores its public key. Since the ID is the hash of the key, later cards with the same ID always carry the same key, and the signature must verify.
 - `cardRevision` is `max(last + 1, current Unix seconds)`, stored in the Keychain next to the key. It keeps increasing across devices that share the key, and still increases when the clock is wrong.
 

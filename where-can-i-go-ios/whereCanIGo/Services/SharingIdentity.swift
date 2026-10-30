@@ -64,6 +64,17 @@ nonisolated enum SharingIdentity {
         try write(Data(String(revision).utf8), account: revisionAccount)
     }
 
+    /// Deletes the key and revision counter, including the iCloud Keychain copies.
+    /// The next share creates a new identity.
+    static func reset() throws {
+        for account in [keyAccount, revisionAccount] {
+            let status = SecItemDelete(baseQuery(account: account) as CFDictionary)
+            guard status == errSecSuccess || status == errSecItemNotFound else {
+                throw KeychainError.unexpectedStatus(status)
+            }
+        }
+    }
+
     // MARK: Keychain
 
     private static func baseQuery(account: String) -> [String: Any] {
