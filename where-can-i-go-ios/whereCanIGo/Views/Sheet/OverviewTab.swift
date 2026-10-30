@@ -584,6 +584,7 @@ private struct EntryPolicySheet: View {
     @State private var showCountryPicker = false
     @State private var originalEntry: DefaultVisaEntry?
     @State private var originalPersonalVisa: PersonalVisa?
+    @State private var bundledEntries: [DefaultVisaEntry]?
 
     // Personal visa editing state (used only when a personal visa exists for the selected country)
     @State private var personalVisaID: UUID?
@@ -681,6 +682,10 @@ private struct EntryPolicySheet: View {
                         .accessibilityLabel("Remark")
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+
+                    if isUsingBundledPolicy {
+                        TravelConfirmationNotice()
+                    }
 
                     if hasExistingPolicy {
                         Button("Remove Policy", role: .destructive) {
@@ -869,11 +874,22 @@ private struct EntryPolicySheet: View {
         .onChange(of: visaExpiry) { _, _ in refreshVisaErrorVisibility() }
         .onChange(of: visaEffectiveDate) { _, _ in refreshVisaErrorVisibility() }
         .onChange(of: hasVisaEffectiveDate) { _, _ in refreshVisaErrorVisibility() }
+        .task(id: appState.data.passportCode) {
+            bundledEntries = appState.bundledDefaultVisas(for: appState.data.passportCode)
+        }
     }
 
     private var hasExistingPolicy: Bool {
         guard let selectedCountry else { return false }
         return appState.data.defaultVisas.contains { $0.countryCode == selectedCountry.code }
+    }
+
+    /// True when the saved policy for the selected country still matches the bundled data.
+    private var isUsingBundledPolicy: Bool {
+        guard let selectedCountry, let bundledEntries else { return false }
+        let saved = appState.data.defaultVisas.first { $0.countryCode == selectedCountry.code }
+        let bundled = bundledEntries.first { $0.countryCode == selectedCountry.code }
+        return saved == bundled
     }
 
     private var hasPersonalVisa: Bool { personalVisaID != nil }

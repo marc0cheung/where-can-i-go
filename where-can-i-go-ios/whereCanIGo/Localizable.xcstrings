@@ -1178,6 +1178,22 @@
         }
       }
     },
+    "Back" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回"
+          }
+        }
+      }
+    },
     "backup.error.corrupted" : {
       "comment" : "Shown when a backup file can't be decoded or fails a check.",
       "localizations" : {
@@ -1413,6 +1429,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未分享足跡"
+          }
+        }
+      }
+    },
+    "Before You Travel" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出发前须知"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出發前須知"
           }
         }
       }
@@ -4084,6 +4116,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "香港：入境事務處"
+          }
+        }
+      }
+    },
+    "I Understand" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我明白了"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我明白了"
           }
         }
       }
@@ -7911,6 +7959,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "旅行檢視"
+          }
+        }
+      }
+    },
+    "travel.warning.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entry policies are manually maintained.\nThey might be out of date. \nUse them for planning only. Always confirm the current rules with related authorities & airlines before travel."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境信息由人工维护，可能并非最新。\n仅供规划参考。出发前请务必向相关政府部门及航空公司确认最新规定。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境資料由人手維護，可能並非最新。\n僅供規劃參考。\n出發前請務必向相關政府部門及航空公司確認最新規定。"
           }
         }
       }
