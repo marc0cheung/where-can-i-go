@@ -568,7 +568,7 @@ private struct CountryFlag: View {
     }
 }
 
-private struct EntryPolicySheet: View {
+struct EntryPolicySheet: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
 

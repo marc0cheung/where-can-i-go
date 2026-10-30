@@ -10,6 +10,7 @@ struct CountryDetailCard: View {
     @Binding var selectedTab: PanelTab
     @Binding var panelState: PanelState
     let onReviewWishlist: () -> Void
+    let onShowPolicy: () -> Void
 
     private var country: Country? { appState.country(for: countryCode) }
     private var hasPlans: Bool {
@@ -26,9 +27,8 @@ struct CountryDetailCard: View {
         return appState.data.defaultVisas.first(where: { $0.countryCode == countryCode })?.duration
     }
 
-    var body: some View {
+    private var summary: some View {
         HStack(spacing: 14) {
-            // Flag
             Text(country?.flag ?? "🏳️")
                 .font(.system(size: 44))
 
@@ -61,8 +61,16 @@ struct CountryDetailCard: View {
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+    }
 
-            Spacer(minLength: 0)
+    var body: some View {
+        HStack(spacing: 14) {
+            Button(action: onShowPolicy) { summary }
+                .buttonStyle(.plain)
+                .accessibilityHint(Text("Opens entry policy details"))
 
             HStack(spacing: 0) {
                 Menu {

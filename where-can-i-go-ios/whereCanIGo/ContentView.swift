@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var diceIncludesAllEntryRequirements = false
     @State private var isMapLoading = true
     @State private var wishlistCountry: Country?
+    @State private var policyCountry: Country?
     /// Live drag delta while the user is dragging the iPad panel handle.
     /// Positive = drag down (panel shrinks). Reset to 0 on release.
     @State private var dragOffset: CGFloat = 0
@@ -83,6 +84,13 @@ struct ContentView: View {
         .sheet(item: $wishlistCountry) { country in
             CountryPlansSheet(country: country)
         }
+        .sheet(item: $policyCountry) { country in
+            EntryPolicySheet(
+                country: country,
+                existingEntry: appState.data.defaultVisas.first { $0.countryCode == country.code },
+                existingPersonalVisa: appState.data.personalVisas.first { $0.countryCode == country.code }
+            )
+        }
     }
 
     /// The system sheet is only presented in compact width. When the window
@@ -128,7 +136,8 @@ struct ContentView: View {
                        let country = appState.country(for: code) {
                         CountryDetailCard(
                             countryCode: code, selectedTab: $selectedTab, panelState: $panelState,
-                            onReviewWishlist: { wishlistCountry = country }
+                            onReviewWishlist: { wishlistCountry = country },
+                            onShowPolicy: { policyCountry = country }
                         )
                             .padding(.bottom, 310)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -193,7 +202,8 @@ struct ContentView: View {
                let country = appState.country(for: code) {
                 CountryDetailCard(
                     countryCode: code, selectedTab: $selectedTab, panelState: $panelState,
-                    onReviewWishlist: { wishlistCountry = country }
+                    onReviewWishlist: { wishlistCountry = country },
+                    onShowPolicy: { policyCountry = country }
                 )
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }

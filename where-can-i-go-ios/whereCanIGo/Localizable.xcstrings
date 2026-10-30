@@ -4,6 +4,22 @@
     "" : {
 
     },
+    "Opens entry policy details" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开入境政策详情"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟入境政策詳情"
+          }
+        }
+      }
+    },
     "· %lld %@" : {
       "localizations" : {
         "en" : {
