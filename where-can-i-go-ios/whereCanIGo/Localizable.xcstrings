@@ -4652,38 +4652,6 @@
         }
       }
     },
-    "IMPORT EXCEL FILE (Coming Soon)" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导入 EXCEL 文件（即将推出）"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "匯入 EXCEL 檔案（即將推出）"
-          }
-        }
-      }
-    },
-    "Import from Excel" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从 Excel 导入"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "從 Excel 匯入"
-          }
-        }
-      }
-    },
     "import.action" : {
       "localizations" : {
         "en" : {
@@ -5482,22 +5450,6 @@
         }
       }
     },
-    "Load visa records from the MyVisa sheet of an .xlsx file.\nColumns: Country, Visa Type, Duration, Expire Date (dd-mm-yyyy), Notes." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从 .xlsx 文件的 MyVisa 工作表加载签证记录。\n列：国家或地区、签证类型、停留期限、到期日期（dd-mm-yyyy）、备注。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "從 .xlsx 檔案的 MyVisa 工作表匯入簽證記錄。\n欄位：國家或地區、簽證類型、停留期限、到期日期（dd-mm-yyyy）、備註。"
-          }
-        }
-      }
-    },
     "Loading photo" : {
       "localizations" : {
         "zh-Hans" : {
@@ -5759,18 +5711,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "我的簽證及附件"
-          }
-        }
-      }
-    },
-    "MyVisas.ShowExcelImport" : {
-      "comment" : "Feature toggle, not display text. Set the English value to True to show the Excel import section, or False to hide it. Do not translate; all languages use the English fallback.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "False"
           }
         }
       }

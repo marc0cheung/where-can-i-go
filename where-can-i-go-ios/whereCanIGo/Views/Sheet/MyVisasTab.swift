@@ -87,28 +87,6 @@ struct MyVisasTab: View {
                 }
             }
 
-            if String(localized: "MyVisas.ShowExcelImport").lowercased() == "true" {
-                VStack(alignment: .leading, spacing: 16) {
-                    Divider().padding(.vertical, 8)
-
-                    // MARK: Excel import
-                    Text("Import from Excel").font(.headline)
-                    Text(
-                        "Load visa records from the MyVisa sheet of an .xlsx file.\nColumns: Country, Visa Type, Duration, Expire Date (dd-mm-yyyy), Notes."
-                    )
-                    .font(.caption).foregroundStyle(.secondary)
-                    Button {
-                        // TODO: implement Excel import
-                    } label: {
-                        Text("IMPORT EXCEL FILE (Coming Soon)")
-                            .font(.subheadline.bold())
-                            .frame(maxWidth: .infinity).padding()
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    }
-                    .disabled(true)
-                }
-                .cardListRow()
-            }
         }
         .cardListStyle()
         .recordDeletionConfirmation($visaPendingDeletion)
