@@ -2,9 +2,11 @@
 
 See which countries your passport can enter, keep track of your own visas, and log the places you have been and want to go. Your records stay on your iPhone or iPad.
 
-| Main View | My Visas | Manage Data |
+| World Map | Entry Overview | My Visas |
 |:---:|:---:|:---:|
-| ![Main view](assets/MainApp.png) | ![My Visas](assets/MyVisas.png) | ![Manage Data](assets/ManageData.png) |
+| ![World map with passport entry requirements and visited countries](assets/MainApp.png) | ![Entry overview with visa categories, search and country filters](assets/Overview.png) | ![Saved personal visas and their validity dates](assets/MyVisas.png) |
+| **Travels** | **Wishlist** | **Travel Passport** |
+| ![Travel history with country, trip, continent and day totals](assets/Travels.png) | ![Wishlist with planned destinations](assets/Wishlist.png) | ![Shareable travel passport with visited countries highlighted](assets/TravelPassport.png) |
 
 ## For Users
 
