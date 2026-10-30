@@ -1,9 +1,12 @@
 import Foundation
+import OSLog
 
 enum CountryRepository {
+    private static let logger = Logger(subsystem: "com.marcocheung.whereCanIGo", category: "CountryRepository")
+
     static func loadAllCountries() throws -> [Country] {
         guard let url = Bundle.main.url(forResource: "countries", withExtension: "json") else {
-            print("[WhereCanIGo] countries.json not found in main bundle.")
+            logger.error("countries.json not found in main bundle.")
             return []
         }
         let data = try Data(contentsOf: url)
@@ -18,7 +21,7 @@ enum CountryRepository {
     static func loadDefaultVisas(passport code: String) throws -> [DefaultVisaEntry] {
         let resource = "default_visas_\(code.uppercased())"
         guard let url = Bundle.main.url(forResource: resource, withExtension: "json") else {
-            print("[WhereCanIGo] \(resource).json not bundled - returning empty default list.")
+            logger.error("Bundled entry-policy data not found: \(resource, privacy: .public).json")
             return []
         }
         let data = try Data(contentsOf: url)

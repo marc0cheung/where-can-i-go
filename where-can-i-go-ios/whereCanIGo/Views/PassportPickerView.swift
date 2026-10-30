@@ -87,6 +87,8 @@ struct PassportPickerView: View {
                         .frame(maxWidth: .infinity).padding()
                         .background(Color.black, in: RoundedRectangle(cornerRadius: 12))
                 }
+                .disabled(!supportedPassportCodes.contains(selectedCode))
+                .opacity(supportedPassportCodes.contains(selectedCode) ? 1 : 0.45)
                 .padding()
             }
             .navigationTitle(isFirstLaunch ? "" : "Change Passport")
@@ -103,16 +105,25 @@ struct PassportPickerView: View {
     }
 
     private func passportRow(_ country: Country) -> some View {
-        HStack {
-            Text(country.flag)
-            Text(country.localizedName())
-            Spacer()
-            if country.code == selectedCode {
-                Image(systemName: "checkmark.circle.fill").foregroundStyle(.primary)
+        let isSupported = supportedPassportCodes.contains(country.code)
+        return Button {
+            selectedCode = country.code
+        } label: {
+            HStack {
+                Text(country.flag)
+                Text(country.localizedName())
+                Spacer()
+                if country.code == selectedCode {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.primary)
+                }
             }
+            .contentShape(Rectangle())
         }
-        .contentShape(Rectangle())
-        .onTapGesture { selectedCode = country.code }
+        .buttonStyle(.plain)
+        .disabled(!isSupported)
+        .opacity(isSupported ? 1 : 0.45)
+        .accessibilityHint(isSupported ? Text("") : Text("Entry-policy data is not available for this passport."))
     }
 
     private var supportedPassports: [Country] {

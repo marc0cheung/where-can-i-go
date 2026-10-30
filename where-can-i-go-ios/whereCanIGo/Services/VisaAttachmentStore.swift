@@ -18,10 +18,27 @@ struct VisaAttachmentStore {
 
     static func save(data: Data, fileExtension ext: String, for visaID: UUID) throws -> String {
         let folder = folderURL(for: visaID)
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: folder, withIntermediateDirectories: true,
+            attributes: [.protectionKey: FileProtectionType.complete]
+        )
         let name = "\(UUID().uuidString).\(ext.lowercased())"
-        try data.write(to: folder.appendingPathComponent(name), options: .atomic)
+        try data.write(to: folder.appendingPathComponent(name), options: [.atomic, .completeFileProtection])
         return name
+    }
+
+    static func protectExistingFiles() throws {
+        guard FileManager.default.fileExists(atPath: rootURL.path) else { return }
+        try protect(rootURL)
+    }
+
+    private static func protect(_ url: URL) throws {
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: url.path)
+        if try url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+            for child in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
+                try protect(child)
+            }
+        }
     }
 
     static func delete(fileName: String, for visaID: UUID) {
@@ -53,8 +70,14 @@ struct VisaAttachmentStore {
         let staging = workspace.appendingPathComponent("staging", isDirectory: true)
         let backup = workspace.appendingPathComponent("backup", isDirectory: true)
         do {
-            try FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
-            try FileManager.default.createDirectory(at: backup, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(
+                at: staging, withIntermediateDirectories: true,
+                attributes: [.protectionKey: FileProtectionType.complete]
+            )
+            try FileManager.default.createDirectory(
+                at: backup, withIntermediateDirectories: true,
+                attributes: [.protectionKey: FileProtectionType.complete]
+            )
             return (staging, backup)
         } catch {
             cleanup(workspace)
@@ -64,7 +87,10 @@ struct VisaAttachmentStore {
 
     static func stage(_ media: [BackupMedia], for visaID: UUID, in stagingRoot: URL) throws {
         let folder = stagingRoot.appendingPathComponent(visaID.uuidString, isDirectory: true)
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: folder, withIntermediateDirectories: true,
+            attributes: [.protectionKey: FileProtectionType.complete]
+        )
         var fileNames: Set<String> = []
         for file in media {
             try file.validateIntegrity()
@@ -75,7 +101,7 @@ struct VisaAttachmentStore {
             guard fileNames.insert(file.fileName).inserted else {
                 throw RestoreError.duplicateFileName
             }
-            try file.data.write(to: folder.appendingPathComponent(file.fileName), options: .atomic)
+            try file.data.write(to: folder.appendingPathComponent(file.fileName), options: [.atomic, .completeFileProtection])
         }
     }
 

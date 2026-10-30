@@ -4,1266 +4,6 @@
     "" : {
 
     },
-    "About" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关于"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "關於"
-          }
-        }
-      }
-    },
-    "about.disclaimer" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entry policies are maintained by hand and can be out of date. Use them for planning only, and always confirm the current rules with the destination's authorities and your airline before you travel."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "入境信息由人工维护，可能并非最新，仅供规划参考。出发前请务必向目的地政府部门及航空公司确认最新规定。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "入境資料由人手維護，可能並非最新，僅供規劃參考。出發前請務必向目的地政府部門及航空公司確認最新規定。"
-          }
-        }
-      }
-    },
-    "about.mission" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Where Can I Go shows where your passport can take you, keeps track of your visas, and remembers the places you've been and want to go."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「跟住去边度」帮你看清楚自己的护照可以去哪里、记录你的签证，以及你去过和想去的地方。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「跟住去邊度」幫你看清楚自己的護照可以去哪裡、記錄你的簽證，以及你去過和想去的地方。"
-          }
-        }
-      }
-    },
-    "acknowledgements.sources.footer" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entry policies are compiled by hand from these public sources and may be out of date."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "入境信息根据以上公开来源人工整理，可能并非最新。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "入境資料根據以上公開來源人手整理，可能並非最新。"
-          }
-        }
-      }
-    },
-    "Can't find your answer? Let us know." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "找不到答案？欢迎告诉我们。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "找不到答案？歡迎告訴我們。"
-          }
-        }
-      }
-    },
-    "China: source summary" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "中国：资料来源摘要"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "中國：資料來源摘要"
-          }
-        }
-      }
-    },
-    "Copy Email Address" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "复制邮箱地址"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "複製電郵地址"
-          }
-        }
-      }
-    },
-    "easteregg.message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "May everyone be free to explore this planet."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "愿大家都可自由探索这地球"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "願大家都可自由探索這地球"
-          }
-        }
-      }
-    },
-    "easteregg.subtitle" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "One day, may no one need this app anymore."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "希望有朝一日，大家都无需再用到这个 App"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "希望有朝一日，大家都無需再用到呢隻 App"
-          }
-        }
-      }
-    },
-    "Email Us" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "发送邮件给我们"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "以電郵聯絡我們"
-          }
-        }
-      }
-    },
-    "Entry Policy Sources" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "入境信息来源"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "入境資料來源"
-          }
-        }
-      }
-    },
-    "FAQ" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "常见问题"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "常見問題"
-          }
-        }
-      }
-    },
-    "faq.accuracy.a" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not always. The rules are maintained by hand and can change without notice. Always check with the destination's authorities and your airline before you travel. If a rule is wrong, you can edit it for your passport in the Manage Data tab, and please tell us so we can fix it for everyone."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不一定。信息由人工维护，规定可能随时更改。出发前请务必向目的地政府部门及航空公司确认。如发现信息有误，你可以在「管理数据」标签页为你的护照修改，也欢迎告诉我们，让大家都能用上正确信息。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不一定。資料由人手維護，規定可能隨時更改。出發前請務必向目的地政府部門及航空公司確認。如發現資料有誤，你可以在「管理資料」分頁為你的護照修改，也歡迎告訴我們，讓大家都能用上正確資料。"
-          }
-        }
-      }
-    },
-    "faq.accuracy.q" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Is the entry information always correct?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "入境信息一定准确吗？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "入境資料一定準確嗎？"
-          }
-        }
-      }
-    },
-    "faq.colors.a" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Each country is coloured by what your passport needs to enter: Visa Free, Visa on Arrival, ETA or Visa Required. If you saved a valid visa that covers a country, it shows as My Visa instead."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每个国家会按你的护照入境所需而上色：免签、落地签、电子旅行授权（eTA）或需要签证。如果你保存了有效且适用的签证，该国家会显示为「我的签证」。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每個國家會按你的護照入境所需而上色：免簽、落地簽、電子旅行授權（eTA）或需要簽證。如果你儲存了有效且適用的簽證，該國家會顯示為「我的簽證」。"
-          }
-        }
-      }
-    },
-    "faq.colors.q" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What do the map colours mean?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "地图上的颜色代表什么？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "地圖上的顏色代表甚麼？"
-          }
-        }
-      }
-    },
-    "faq.contact.a" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use Settings → Send Feedback to email us or open an issue on GitHub. You can also find us on Instagram at @wherecanigo_app."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "前往「设置 → 发送反馈」通过邮件联系我们，或在 GitHub 提交 Issue。你也可以在 Instagram 找到我们：@wherecanigo_app。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "前往「設定 → 傳送意見」以電郵聯絡我們，或在 GitHub 提交 Issue。你也可以在 Instagram 找到我們：@wherecanigo_app。"
-          }
-        }
-      }
-    },
-    "faq.contact.q" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How can I report a problem or suggest an idea?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如何反馈问题或提出建议？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如何回報問題或提出建議？"
-          }
-        }
-      }
-    },
-    "faq.data.a" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Only on your iPhone. There's no account and no server, so we can't see or recover your data. Export a backup from time to time to keep it safe."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "只会存储在你的 iPhone 上。App 没有账号，也没有服务器，所以我们看不到也无法帮你恢复数据。建议定期导出备份。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "只會儲存在你的 iPhone 上。App 沒有帳號，也沒有伺服器，所以我們看不到也無法幫你還原資料。建議定期匯出備份。"
-          }
-        }
-      }
-    },
-    "faq.data.q" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Where is my data stored?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我的数据存储在哪里？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我的資料儲存在哪裡？"
-          }
-        }
-      }
-    },
-    "faq.dice.a" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap it to pick a random destination. Long-press it to limit the pick by continent, airline or entry requirement."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "轻点可随机选出一个目的地。长按可按大洲、航空公司或入境要求筛选。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "輕點可隨機選出一個目的地。長按可按大洲、航空公司或入境要求篩選。"
-          }
-        }
-      }
-    },
-    "faq.dice.q" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What does the dice do?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "骰子有什么用？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "骰子有甚麼用？"
-          }
-        }
-      }
-    },
-    "faq.friends.a" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Send your travel card over AirDrop, Messages or any app from the Friends section in Travels. Choose what the card includes in Settings → Sharing. When a friend shares again, their card updates."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在「旅程」的「朋友」部分，通过 AirDrop、信息或任何 App 发送你的旅行卡。你可以在「设置 → 分享设置」选择卡片包含的内容。朋友再次分享时，他们的卡片会自动更新。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在「旅程」的「朋友」部分，透過 AirDrop、訊息或任何 App 傳送你的旅行卡。你可以在「設定 → 分享設定」選擇卡片包含的內容。朋友再次分享時，他們的卡片會自動更新。"
-          }
-        }
-      }
-    },
-    "faq.friends.q" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How do I share my travels with friends?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如何与朋友分享旅程？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如何與朋友分享旅程？"
-          }
-        }
-      }
-    },
-    "faq.myvisa.a" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add a visa in My Visas with its validity dates. While it's valid, the country shows as My Visa. A Schengen visa can cover the whole Schengen area."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在「我的签证」添加签证及有效日期。签证有效期间，该国家会显示为「我的签证」。申根签证可覆盖整个申根区。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在「我的簽證」加入簽證及有效日期。簽證有效期間，該國家會顯示為「我的簽證」。申根簽證可涵蓋整個申根區。"
-          }
-        }
-      }
-    },
-    "faq.myvisa.q" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How do my own visas change the map?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我的签证会如何影响地图？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我的簽證會如何影響地圖？"
-          }
-        }
-      }
-    },
-    "faq.passports.a" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hong Kong SAR, Macao SAR, China and Taiwan for now. Want another one? Open an issue on GitHub. Contributions with reliable sources are welcome."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "目前支持香港特区、澳门特区、中国及台湾护照。想加入其他护照？欢迎在 GitHub 提交 Issue，也欢迎附上可靠来源一起贡献。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "目前支援香港特區、澳門特區、中國及台灣護照。想加入其他護照？歡迎在 GitHub 提交 Issue，也歡迎附上可靠來源一起貢獻。"
-          }
-        }
-      }
-    },
-    "faq.passports.q" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Which passports are supported?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "支持哪些护照？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "支援哪些護照？"
-          }
-        }
-      }
-    },
-    "faq.transfer.a" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Go to Settings → Export Data and save the backup file. On the new device, use Settings → Import Data. You can replace everything or merge in new records only."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "前往「设置 → 导出数据」保存备份文件，然后在新设备使用「设置 → 导入数据」。你可以选择全部替换，或只合并新记录。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "前往「設定 → 匯出資料」儲存備份檔案，然後在新裝置使用「設定 → 匯入資料」。你可以選擇全部取代，或只合併新紀錄。"
-          }
-        }
-      }
-    },
-    "faq.transfer.q" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How do I move my data to a new iPhone?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如何把数据迁移到新 iPhone？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如何把資料轉移到新 iPhone？"
-          }
-        }
-      }
-    },
-    "feedback.email.footer" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens your mail app with a new message. Your app version, iOS version and device model are added at the end to help us look into problems. You can delete them before sending."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "将在邮件 App 中新建邮件，并在末尾附上 App 版本、iOS 版本和设备型号，方便我们排查问题。你可以在发送前删除。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "會在郵件 App 開啟新郵件，並在結尾附上 App 版本、iOS 版本及裝置型號，方便我們排查問題。你可以在傳送前刪除。"
-          }
-        }
-      }
-    },
-    "feedback.github.footer" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Report a bug, an out-of-date entry policy or an idea on GitHub. Issues are public and need a GitHub account."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在 GitHub 反馈错误、过时的入境信息或提出建议。Issue 会公开显示，需要 GitHub 账号。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在 GitHub 回報錯誤、過時的入境資料或提出建議。Issue 會公開顯示，需要 GitHub 帳號。"
-          }
-        }
-      }
-    },
-    "feedback.mail.subject" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Where Can I Go Feedback"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「跟住去边度」意见反馈"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「跟住去邊度」意見回饋"
-          }
-        }
-      }
-    },
-    "Follow Us" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关注我们"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "關注我們"
-          }
-        }
-      }
-    },
-    "Hong Kong: Immigration Department" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "香港：入境事务处"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "香港：入境事務處"
-          }
-        }
-      }
-    },
-    "Instagram" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Instagram"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Instagram"
-          }
-        }
-      }
-    },
-    "Last updated: %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最后更新：%@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最後更新：%@"
-          }
-        }
-      }
-    },
-    "License" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "许可协议"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "授權條款"
-          }
-        }
-      }
-    },
-    "Macao: Identification Services Bureau" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "澳门：身份证明局"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "澳門：身份證明局"
-          }
-        }
-      }
-    },
-    "No Mail App Found" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "找不到邮件 App"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "找不到郵件 App"
-          }
-        }
-      }
-    },
-    "Open a GitHub Issue" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在 GitHub 提交 Issue"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在 GitHub 提交 Issue"
-          }
-        }
-      }
-    },
-    "Please send your feedback to %@." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请将反馈发送至 %@。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "請將意見傳送至 %@。"
-          }
-        }
-      }
-    },
-    "Privacy Policy" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "隐私政策"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "私隱政策"
-          }
-        }
-      }
-    },
-    "privacy.apple.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The map uses Apple Maps (MapKit), which may load map tiles from Apple. Apple's privacy policy applies to that. The app doesn't ask for your location."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "地图使用 Apple 地图（MapKit），可能会从 Apple 加载地图图块，相关处理受 Apple 隐私政策约束。App 不会请求获取你的位置。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "地圖使用 Apple 地圖（MapKit），可能會從 Apple 載入地圖圖塊，相關處理受 Apple 私隱政策規管。App 不會要求取得你的位置。"
-          }
-        }
-      }
-    },
-    "privacy.apple.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apple services"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apple 服务"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apple 服務"
-          }
-        }
-      }
-    },
-    "privacy.changes.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "If this policy changes, the new version will be shown here and published on GitHub."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如本政策有所更改，新版本会在此处显示并在 GitHub 发布。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如本政策有所更改，新版本會在此處顯示並於 GitHub 公佈。"
-          }
-        }
-      }
-    },
-    "privacy.changes.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Changes to this policy"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "政策更新"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "政策更新"
-          }
-        }
-      }
-    },
-    "privacy.collect.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The app has no account, no server, no analytics, no ads and no tracking. We never receive your travel records, visas, photos or any other personal information."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App 没有账号、没有服务器、没有分析工具、没有广告，也不会追踪你。我们不会收到你的旅行记录、签证、照片或任何其他个人信息。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App 沒有帳號、沒有伺服器、沒有分析工具、沒有廣告，也不會追蹤你。我們不會收到你的旅行紀錄、簽證、相片或任何其他個人資料。"
-          }
-        }
-      }
-    },
-    "privacy.collect.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "We don't collect your data"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我们不收集你的数据"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我們不收集你的資料"
-          }
-        }
-      }
-    },
-    "privacy.contact.body %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Questions about privacy? Email %@ or open an issue on GitHub."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "对隐私有疑问？请发送邮件至 %@ 或在 GitHub 提交 Issue。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "對私隱有疑問？請電郵至 %@ 或在 GitHub 提交 Issue。"
-          }
-        }
-      }
-    },
-    "privacy.contact.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contact"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "联系我们"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "聯絡我們"
-          }
-        }
-      }
-    },
-    "privacy.delete.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete any record in the app at any time. Deleting the app removes all of its data from your device. Backup files you exported are not affected."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "你可以随时在 App 内删除任何记录。删除 App 会移除它在设备上的所有数据，但不会影响你已导出的备份文件。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "你可以隨時在 App 內刪除任何紀錄。刪除 App 會移除它在裝置上的所有資料，但不會影響你已匯出的備份檔案。"
-          }
-        }
-      }
-    },
-    "privacy.delete.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deleting your data"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "删除你的数据"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刪除你的資料"
-          }
-        }
-      }
-    },
-    "privacy.device.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your passport, trips, wishlist, visas and attachments, profile, friends' travel cards and settings are stored only in the app's own folder on your iPhone. They may be included in your iCloud or computer backups, depending on your device settings."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "你的护照、旅程、心愿清单、签证及附件、个人资料、朋友的旅行卡和设置，只会存储在 iPhone 上这个 App 的专属文件夹内。根据你的设备设置，它们可能会包含在 iCloud 或电脑备份中。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "你的護照、旅程、願望清單、簽證及附件、個人資料、朋友的旅行卡和設定，只會儲存在 iPhone 上這個 App 的專屬資料夾內。視乎你的裝置設定，它們可能會包含在 iCloud 或電腦備份中。"
-          }
-        }
-      }
-    },
-    "privacy.device.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What stays on your device"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "哪些数据保留在你的设备上"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "哪些資料留在你的裝置上"
-          }
-        }
-      }
-    },
-    "privacy.intro" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Where Can I Go is built so that your travel records stay yours. This policy explains what that means."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「跟住去边度」的设计原则是：你的旅行记录只属于你。以下说明这意味着什么。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「跟住去邊度」的設計原則是：你的旅行紀錄只屬於你。以下說明這代表甚麼。"
-          }
-        }
-      }
-    },
-    "privacy.leave.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Only when you choose to:\n• **Export a backup.** The file goes wherever you save or send it.\n• **Share a travel card or image.** It contains only what you chose in Settings → Sharing. Notes, passport, My Visas and visa attachments are never included.\n• **Search the web for a country.** Your chosen search engine receives the search.\n• **Open a link or send feedback.** The website or your mail app handles it under its own policy."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "只有在你主动选择时：\n• **导出备份**。文件会去到你保存或发送的地方。\n• **分享旅行卡或图片**。只包含你在「设置 → 分享设置」中选择的内容，绝不包含备注、护照、我的签证及签证附件。\n• **在网上搜索国家**。你选择的搜索引擎会收到搜索内容。\n• **打开链接或发送反馈**。由相关网站或你的邮件 App 按其自身政策处理。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "只有在你主動選擇時：\n• **匯出備份**。檔案會去到你儲存或傳送的地方。\n• **分享旅行卡或圖片**。只包含你在「設定 → 分享設定」中選擇的內容，絕不包含備註、護照、我的簽證及簽證附件。\n• **在網上搜尋國家**。你選擇的搜尋引擎會收到搜尋內容。\n• **開啟連結或傳送意見**。由相關網站或你的郵件 App 按其自身政策處理。"
-          }
-        }
-      }
-    },
-    "privacy.leave.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When data leaves your device"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "数据何时会离开你的设备"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "資料何時會離開你的裝置"
-          }
-        }
-      }
-    },
-    "Send Feedback" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "发送反馈"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "傳送意見"
-          }
-        }
-      }
-    },
-    "Source Code on GitHub" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub 源代码"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub 原始碼"
-          }
-        }
-      }
-    },
-    "Support" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "支持"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "支援"
-          }
-        }
-      }
-    },
-    "Taiwan: source summary" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "台湾：资料来源摘要"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "台灣：資料來源摘要"
-          }
-        }
-      }
-    },
-    "Version %@ (%@)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version %1$@ (%2$@)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "版本 %1$@ (%2$@)"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "版本 %1$@ (%2$@)"
-          }
-        }
-      }
-    },
     "· %lld %@" : {
       "localizations" : {
         "en" : {
@@ -1460,23 +200,6 @@
         }
       }
     },
-    "%@, %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@，%2$@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@，%2$@"
-          }
-        }
-      }
-    },
     "%@%@" : {
       "localizations" : {
         "en" : {
@@ -1515,29 +238,6 @@
         }
       }
     },
-    "%lld %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld %2$@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld %2$@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld %2$@"
-          }
-        }
-      }
-    },
     "%lld %@ · %lld %@" : {
       "localizations" : {
         "en" : {
@@ -1556,41 +256,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$lld %2$@ · %3$lld %4$@"
-          }
-        }
-      }
-    },
-    "%lld countries added" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld country added"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld countries added"
-                }
-              }
-            }
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已加入 %lld 个国家"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已加入 %lld 個國家"
           }
         }
       }
@@ -1679,41 +344,6 @@
         }
       }
     },
-    "%lld places" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld place"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld places"
-                }
-              }
-            }
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 个地点"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 個地點"
-          }
-        }
-      }
-    },
     "%lld trips" : {
       "localizations" : {
         "en" : {
@@ -1782,41 +412,6 @@
         }
       }
     },
-    "%lld trips without duration" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld trip without duration"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld trips without duration"
-                }
-              }
-            }
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "有 %lld 个行程未设置时长"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "有 %lld 個行程未設定時長"
-          }
-        }
-      }
-    },
     "+%lld" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1849,6 +444,66 @@
         }
       }
     },
+    "About" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關於"
+          }
+        }
+      }
+    },
+    "about.disclaimer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entry policies are maintained by hand and can be out of date. Use them for planning only, and always confirm the current rules with the destination's authorities and your airline before you travel."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境信息由人工维护，可能并非最新，仅供规划参考。出发前请务必向目的地政府部门及航空公司确认最新规定。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境資料由人手維護，可能並非最新，僅供規劃參考。出發前請務必向目的地政府部門及航空公司確認最新規定。"
+          }
+        }
+      }
+    },
+    "about.mission" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where Can I Go shows where your passport can take you, keeps track of your visas, and remembers the places you've been and want to go."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「跟住去边度」帮你看清楚自己的护照可以去哪里、记录你的签证，以及你去过和想去的地方。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「跟住去邊度」幫你看清楚自己的護照可以去哪裡、記錄你的簽證，以及你去過和想去的地方。"
+          }
+        }
+      }
+    },
     "Accessible Countries Only" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1861,6 +516,264 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "僅限可前往的國家"
+          }
+        }
+      }
+    },
+    "Acknowledgements & Sources" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "致谢与数据来源"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鳴謝與資料來源"
+          }
+        }
+      }
+    },
+    "acknowledgements.adapted.source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adapted data & source files"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "改编数据与源文件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "改編資料與來源檔案"
+          }
+        }
+      }
+    },
+    "acknowledgements.map.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Made with Natural Earth. Bundled country borders come from Natural Earth's public-domain 1:10m Admin-0 Countries, distributed as GeoJSON by datasets/geo-countries under PDDL 1.0. Credit also to Lexman and the Open Knowledge Foundation. The app simplifies geometry for display. Boundaries do not imply endorsement of territorial claims. The underlying map is provided by Apple Maps via MapKit."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "采用 Natural Earth 地图数据。内置国家及地区边界来自 Natural Earth 公有领域的 1:10m Admin-0 Countries 数据，经 datasets/geo-countries 以 GeoJSON 格式及 PDDL 1.0 许可发布。同时感谢 Lexman 与 Open Knowledge Foundation。本应用会简化几何形状以便显示；边界不代表对领土主张的认可。底层地图由 Apple 地图通过 MapKit 提供。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "採用 Natural Earth 地圖資料。內置國家及地區邊界來自 Natural Earth 公有領域的 1:10m Admin-0 Countries 資料，經 datasets/geo-countries 以 GeoJSON 格式及 PDDL 1.0 授權發佈。同時感謝 Lexman 與 Open Knowledge Foundation。本應用程式會簡化幾何形狀以便顯示；邊界不代表對領土主張的認可。底層地圖由 Apple 地圖透過 MapKit 提供。"
+          }
+        }
+      }
+    },
+    "acknowledgements.map.terms" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Natural Earth: public-domain terms"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Natural Earth：公有领域条款"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Natural Earth：公有領域條款"
+          }
+        }
+      }
+    },
+    "acknowledgements.map.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map Borders"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地图边界"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地圖邊界"
+          }
+        }
+      }
+    },
+    "acknowledgements.sources.footer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entry policies are compiled by hand from these public sources and may be out of date."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境信息根据以上公开来源人工整理，可能并非最新。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境資料根據以上公開來源人手整理，可能並非最新。"
+          }
+        }
+      }
+    },
+    "acknowledgements.wikipedia.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "China and Taiwan entry-policy presets draw on the articles below by Wikipedia contributors, licensed under Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0). We adapted selected information into entry categories and shortened stay/condition remarks, supplemented by official sources. Adapted Wikipedia material in these presets is shared under the same licence, separately from the MIT-licensed app code; its source is publicly available. Wikipedia and its contributors do not endorse this app."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中国及台湾护照的预设入境政策参考了以下由维基百科贡献者编写的条目，内容采用知识共享署名—相同方式共享 4.0（CC BY-SA 4.0）许可。我们将部分信息整理为入境类别，并缩写停留期限及条件备注，另以官方来源补充。预设数据中改编自维基百科的内容以相同许可共享，源文件公开提供；此许可与应用代码的 MIT 许可分开。维基百科及其贡献者并未为本应用背书。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中國及台灣護照的預設入境政策參考了以下由維基百科貢獻者編寫的條目，內容採用創用 CC 姓名標示—相同方式分享 4.0（CC BY-SA 4.0）授權。我們將部分資料整理為入境類別，並縮寫停留期限及條件備註，另以官方來源補充。預設資料中改編自維基百科的內容以相同授權分享，來源檔案公開提供；此授權與應用程式碼的 MIT 授權分開。維基百科及其貢獻者並未為本應用程式背書。"
+          }
+        }
+      }
+    },
+    "acknowledgements.wikipedia.chn" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa requirements for Chinese citizens"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中国公民签证要求（维基百科英文条目）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中國公民簽證要求（維基百科英文條目）"
+          }
+        }
+      }
+    },
+    "acknowledgements.wikipedia.chn.history" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chinese citizens article: history & contributors"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中国公民条目：历史与贡献者"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中國公民條目：歷史與貢獻者"
+          }
+        }
+      }
+    },
+    "acknowledgements.wikipedia.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wikipedia Credits & Licence"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "维基百科致谢与许可"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "維基百科致謝與授權"
+          }
+        }
+      }
+    },
+    "acknowledgements.wikipedia.twn" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa requirements for Taiwanese citizens"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "台湾公民签证要求（维基百科英文条目）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "台灣公民簽證要求（維基百科英文條目）"
+          }
+        }
+      }
+    },
+    "acknowledgements.wikipedia.twn.history" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taiwanese citizens article: history & contributors"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "台湾公民条目：历史与贡献者"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "台灣公民條目：歷史與貢獻者"
           }
         }
       }
@@ -2520,6 +1433,22 @@
         }
       }
     },
+    "Can't find your answer? Let us know." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到答案？欢迎告诉我们。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到答案？歡迎告訴我們。"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2569,8 +1498,11 @@
         }
       }
     },
-    "Change passport" : {
-      "extractionState" : "stale",
+    "CC BY-SA 4.0" : {
+      "comment" : "A license that allows others to share and modify the content of the page.",
+      "isCommentAutoGenerated" : true
+    },
+    "Change Passport" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2586,18 +1518,18 @@
         }
       }
     },
-    "Change Passport" : {
+    "China: source summary" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "更改护照"
+            "value" : "中国：资料来源摘要"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "更改護照"
+            "value" : "中國：資料來源摘要"
           }
         }
       }
@@ -2886,6 +1818,22 @@
         }
       }
     },
+    "Copy Email Address" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制邮箱地址"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複製電郵地址"
+          }
+        }
+      }
+    },
     "Couldn't Create Travel Card" : {
       "localizations" : {
         "zh-Hans" : {
@@ -3068,23 +2016,6 @@
         }
       }
     },
-    "Country" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "国家或地区"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "國家或地區"
-          }
-        }
-      }
-    },
     "COUNTRY" : {
       "localizations" : {
         "zh-Hans" : {
@@ -3165,22 +2096,9 @@
         }
       }
     },
-    "Data import and export are not available yet." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "数据导入和导出功能尚未开放。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "資料匯入和匯出功能尚未開放。"
-          }
-        }
-      }
+    "datasets/geo-countries" : {
+      "comment" : "A link to the Natural Earth dataset.",
+      "isCommentAutoGenerated" : true
     },
     "Dates" : {
       "localizations" : {
@@ -3416,23 +2334,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "刪除所有到訪紀錄？"
-          }
-        }
-      }
-    },
-    "Delete Personal Visa" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "删除个人签证"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刪除個人簽證"
           }
         }
       }
@@ -3731,19 +2632,46 @@
         }
       }
     },
-    "Edit" : {
-      "extractionState" : "stale",
+    "easteregg.message" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "May everyone be free to explore this planet."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "编辑"
+            "value" : "愿大家都可自由探索这地球"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "編輯"
+            "value" : "願大家都可自由探索這地球"
+          }
+        }
+      }
+    },
+    "easteregg.subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One day, may no one need this app anymore."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "希望有朝一日，大家都无需再用到这个 App"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "希望有朝一日，大家都無需再用到呢隻 App"
           }
         }
       }
@@ -3856,19 +2784,18 @@
         }
       }
     },
-    "End" : {
-      "extractionState" : "stale",
+    "Email Us" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "结束"
+            "value" : "发送邮件给我们"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "結束"
+            "value" : "以電郵聯絡我們"
           }
         }
       }
@@ -3937,6 +2864,22 @@
         }
       }
     },
+    "Entry Policy Sources" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境信息来源"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境資料來源"
+          }
+        }
+      }
+    },
     "Entry policy type" : {
       "localizations" : {
         "zh-Hans" : {
@@ -3981,6 +2924,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "入境要求"
+          }
+        }
+      }
+    },
+    "Entry-policy data is not available for this passport." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此护照尚未提供入境政策数据。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此護照尚未提供入境政策資料。"
           }
         }
       }
@@ -4128,23 +3087,6 @@
             "value" : "Expiry date"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "到期日期"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "到期日期"
-          }
-        }
-      }
-    },
-    "EXPIRY DATE" : {
-      "extractionState" : "stale",
-      "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4367,6 +3309,484 @@
         }
       }
     },
+    "FAQ" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "常见问题"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "常見問題"
+          }
+        }
+      }
+    },
+    "faq.accuracy.a" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not always. The rules are maintained by hand and can change without notice. Always check with the destination's authorities and your airline before you travel. If a rule is wrong, you can edit it for your passport in the Manage Data tab, and please tell us so we can fix it for everyone."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不一定。信息由人工维护，规定可能随时更改。出发前请务必向目的地政府部门及航空公司确认。如发现信息有误，你可以在「管理数据」标签页为你的护照修改，也欢迎告诉我们，让大家都能用上正确信息。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不一定。資料由人手維護，規定可能隨時更改。出發前請務必向目的地政府部門及航空公司確認。如發現資料有誤，你可以在「管理資料」分頁為你的護照修改，也歡迎告訴我們，讓大家都能用上正確資料。"
+          }
+        }
+      }
+    },
+    "faq.accuracy.q" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is the entry information always correct?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境信息一定准确吗？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入境資料一定準確嗎？"
+          }
+        }
+      }
+    },
+    "faq.colors.a" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each country is coloured by what your passport needs to enter: Visa Free, Visa on Arrival, ETA or Visa Required. If you saved a valid visa that covers a country, it shows as My Visa instead."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每个国家会按你的护照入境所需而上色：免签、落地签、电子旅行授权（eTA）或需要签证。如果你保存了有效且适用的签证，该国家会显示为「我的签证」。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每個國家會按你的護照入境所需而上色：免簽、落地簽、電子旅行授權（eTA）或需要簽證。如果你儲存了有效且適用的簽證，該國家會顯示為「我的簽證」。"
+          }
+        }
+      }
+    },
+    "faq.colors.q" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What do the map colours mean?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地图上的颜色代表什么？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地圖上的顏色代表甚麼？"
+          }
+        }
+      }
+    },
+    "faq.contact.a" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Settings → Send Feedback to email us or open an issue on GitHub. You can also find us on Instagram at @wherecanigo_app."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往「设置 → 发送反馈」通过邮件联系我们，或在 GitHub 提交 Issue。你也可以在 Instagram 找到我们：@wherecanigo_app。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往「設定 → 傳送意見」以電郵聯絡我們，或在 GitHub 提交 Issue。你也可以在 Instagram 找到我們：@wherecanigo_app。"
+          }
+        }
+      }
+    },
+    "faq.contact.q" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How can I report a problem or suggest an idea?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如何反馈问题或提出建议？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如何回報問題或提出建議？"
+          }
+        }
+      }
+    },
+    "faq.data.a" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only on your iPhone. There's no account and no server, so we can't see or recover your data. Export a backup from time to time to keep it safe."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只会存储在你的 iPhone 上。App 没有账号，也没有服务器，所以我们看不到也无法帮你恢复数据。建议定期导出备份。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只會儲存在你的 iPhone 上。App 沒有帳號，也沒有伺服器，所以我們看不到也無法幫你還原資料。建議定期匯出備份。"
+          }
+        }
+      }
+    },
+    "faq.data.q" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where is my data stored?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的数据存储在哪里？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的資料儲存在哪裡？"
+          }
+        }
+      }
+    },
+    "faq.dice.a" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap it to pick a random destination. Long-press it to limit the pick by continent, airline or entry requirement."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "轻点可随机选出一个目的地。长按可按大洲、航空公司或入境要求筛选。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輕點可隨機選出一個目的地。長按可按大洲、航空公司或入境要求篩選。"
+          }
+        }
+      }
+    },
+    "faq.dice.q" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What does the dice do?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "骰子有什么用？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "骰子有甚麼用？"
+          }
+        }
+      }
+    },
+    "faq.friends.a" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send your travel card over AirDrop, Messages or any app from the Friends section in Travels. Choose what the card includes in Settings → Sharing. When a friend shares again, their card updates."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在「旅程」的「朋友」部分，通过 AirDrop、信息或任何 App 发送你的旅行卡。你可以在「设置 → 分享设置」选择卡片包含的内容。朋友再次分享时，他们的卡片会自动更新。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在「旅程」的「朋友」部分，透過 AirDrop、訊息或任何 App 傳送你的旅行卡。你可以在「設定 → 分享設定」選擇卡片包含的內容。朋友再次分享時，他們的卡片會自動更新。"
+          }
+        }
+      }
+    },
+    "faq.friends.q" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How do I share my travels with friends?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如何与朋友分享旅程？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如何與朋友分享旅程？"
+          }
+        }
+      }
+    },
+    "faq.myvisa.a" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a visa in My Visas with its validity dates. While it's valid, the country shows as My Visa. A Schengen visa can cover the whole Schengen area."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在「我的签证」添加签证及有效日期。签证有效期间，该国家会显示为「我的签证」。申根签证可覆盖整个申根区。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在「我的簽證」加入簽證及有效日期。簽證有效期間，該國家會顯示為「我的簽證」。申根簽證可涵蓋整個申根區。"
+          }
+        }
+      }
+    },
+    "faq.myvisa.q" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How do my own visas change the map?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的签证会如何影响地图？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的簽證會如何影響地圖？"
+          }
+        }
+      }
+    },
+    "faq.passports.a" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hong Kong SAR, Macao SAR, China and Taiwan for now. Want another one? Open an issue on GitHub. Contributions with reliable sources are welcome."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前支持香港特区、澳门特区、中国及台湾护照。想加入其他护照？欢迎在 GitHub 提交 Issue，也欢迎附上可靠来源一起贡献。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前支援香港特區、澳門特區、中國及台灣護照。想加入其他護照？歡迎在 GitHub 提交 Issue，也歡迎附上可靠來源一起貢獻。"
+          }
+        }
+      }
+    },
+    "faq.passports.q" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which passports are supported?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支持哪些护照？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支援哪些護照？"
+          }
+        }
+      }
+    },
+    "faq.transfer.a" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go to Settings → Export Data and save the backup file. On the new device, use Settings → Import Data. You can replace everything or merge in new records only."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往「设置 → 导出数据」保存备份文件，然后在新设备使用「设置 → 导入数据」。你可以选择全部替换，或只合并新记录。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往「設定 → 匯出資料」儲存備份檔案，然後在新裝置使用「設定 → 匯入資料」。你可以選擇全部取代，或只合併新紀錄。"
+          }
+        }
+      }
+    },
+    "faq.transfer.q" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How do I move my data to a new iPhone?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如何把数据迁移到新 iPhone？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如何把資料轉移到新 iPhone？"
+          }
+        }
+      }
+    },
+    "feedback.email.footer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens your mail app with a new message. Your app version, iOS version and device model are added at the end to help us look into problems. You can delete them before sending."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将在邮件 App 中新建邮件，并在末尾附上 App 版本、iOS 版本和设备型号，方便我们排查问题。你可以在发送前删除。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "會在郵件 App 開啟新郵件，並在結尾附上 App 版本、iOS 版本及裝置型號，方便我們排查問題。你可以在傳送前刪除。"
+          }
+        }
+      }
+    },
+    "feedback.github.footer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report a bug, an out-of-date entry policy or an idea on GitHub. Issues are public and need a GitHub account."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 GitHub 反馈错误、过时的入境信息或提出建议。Issue 会公开显示，需要 GitHub 账号。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 GitHub 回報錯誤、過時的入境資料或提出建議。Issue 會公開顯示，需要 GitHub 帳號。"
+          }
+        }
+      }
+    },
+    "feedback.mail.subject" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where Can I Go Feedback"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「跟住去边度」意见反馈"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「跟住去邊度」意見回饋"
+          }
+        }
+      }
+    },
     "First trip" : {
       "localizations" : {
         "zh-Hans" : {
@@ -4411,6 +3831,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "旗幟無法使用"
+          }
+        }
+      }
+    },
+    "Follow Us" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关注我们"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關注我們"
           }
         }
       }
@@ -4632,6 +4068,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "香港快運"
+          }
+        }
+      }
+    },
+    "Hong Kong: Immigration Department" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "香港：入境事务处"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "香港：入境事務處"
           }
         }
       }
@@ -5310,6 +4762,22 @@
         }
       }
     },
+    "Instagram" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instagram"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instagram"
+          }
+        }
+      }
+    },
     "Issuing Country" : {
       "localizations" : {
         "en" : {
@@ -5402,6 +4870,22 @@
         }
       }
     },
+    "Last updated: %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最后更新：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最後更新：%@"
+          }
+        }
+      }
+    },
     "Latest trip" : {
       "localizations" : {
         "zh-Hans" : {
@@ -5446,6 +4930,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "停留天數"
+          }
+        }
+      }
+    },
+    "License" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "许可协议"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "授權條款"
           }
         }
       }
@@ -5552,6 +5052,22 @@
         }
       }
     },
+    "Macao: Identification Services Bureau" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "澳门：身份证明局"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "澳門：身份證明局"
+          }
+        }
+      }
+    },
     "Manage Data" : {
       "localizations" : {
         "zh-Hans" : {
@@ -5580,23 +5096,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "管理預設入境政策"
-          }
-        }
-      }
-    },
-    "Mark as visited" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "标记为已到访"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "標記為已到訪"
           }
         }
       }
@@ -5731,6 +5230,10 @@
         }
       }
     },
+    "Natural Earth" : {
+      "comment" : "A website that provides free geographic data.",
+      "isCommentAutoGenerated" : true
+    },
     "Nickname" : {
       "localizations" : {
         "zh-Hans" : {
@@ -5795,23 +5298,6 @@
         }
       }
     },
-    "No dates" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无日期"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無日期"
-          }
-        }
-      }
-    },
     "No duration set" : {
       "localizations" : {
         "zh-Hans" : {
@@ -5844,19 +5330,18 @@
         }
       }
     },
-    "No locations added" : {
-      "extractionState" : "stale",
+    "No Mail App Found" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "尚未添加地点"
+            "value" : "找不到邮件 App"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "尚未新增地點"
+            "value" : "找不到郵件 App"
           }
         }
       }
@@ -5893,23 +5378,6 @@
         }
       }
     },
-    "No selection means no airline restriction." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未选择时不限航空公司。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未選擇時不限航空公司。"
-          }
-        }
-      }
-    },
     "No trips on this card" : {
       "localizations" : {
         "zh-Hans" : {
@@ -5938,23 +5406,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "北美洲"
-          }
-        }
-      }
-    },
-    "Not Available Yet" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "功能尚未开放"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "功能尚未開放"
           }
         }
       }
@@ -6135,6 +5586,22 @@
         }
       }
     },
+    "Open a GitHub Issue" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 GitHub 提交 Issue"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 GitHub 提交 Issue"
+          }
+        }
+      }
+    },
     "Open photo options" : {
       "localizations" : {
         "zh-Hans" : {
@@ -6214,6 +5681,10 @@
           }
         }
       }
+    },
+    "PDDL 1.0" : {
+      "comment" : "A license for the map data.",
+      "isCommentAutoGenerated" : true
     },
     "PDF" : {
       "localizations" : {
@@ -6361,6 +5832,368 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "請選擇國家或地區。"
+          }
+        }
+      }
+    },
+    "Please send your feedback to %@." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请将反馈发送至 %@。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請將意見傳送至 %@。"
+          }
+        }
+      }
+    },
+    "Privacy Policy" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐私政策"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "私隱政策"
+          }
+        }
+      }
+    },
+    "privacy.apple.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The map uses Apple Maps (MapKit), which may load map tiles from Apple. Apple's privacy policy applies to that. The app doesn't ask for your location.\n\nWhen you first share a travel card, the app creates a signing key and revision counter in Apple's Keychain to identify your later cards as coming from the same sharer. If iCloud Keychain is available and enabled, Apple may sync them to your devices. This does not sync your travel records, visas or attachments, and we do not receive the key."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地图使用 Apple 地图（MapKit），可能会从 Apple 加载地图图块，相关处理受 Apple 隐私政策约束。App 不会请求获取你的位置。\n\n首次分享旅行卡时，App 会在 Apple 钥匙串中创建签名密钥和版本计数器，用于识别后续旅行卡是否来自同一分享者。如 iCloud 钥匙串可用且已启用，Apple 可能会将它们同步到你的设备。这不会同步旅行记录、签证或附件，我们也不会收到密钥。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地圖使用 Apple 地圖（MapKit），可能會從 Apple 載入地圖圖塊，相關處理受 Apple 私隱政策規管。App 不會要求取得你的位置。\n\n首次分享旅行卡時，App 會在 Apple 鑰匙圈中建立簽署密鑰及版本計數器，用以識別後續旅行卡是否來自同一分享者。如 iCloud 鑰匙圈可用且已啟用，Apple 可能會將它們同步至你的裝置。這不會同步旅遊紀錄、簽證或附件，我們亦不會收到密鑰。"
+          }
+        }
+      }
+    },
+    "privacy.apple.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple services"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple 服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple 服務"
+          }
+        }
+      }
+    },
+    "privacy.changes.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If this policy changes, the new version will be shown here and published on GitHub."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如本政策有所更改，新版本会在此处显示并在 GitHub 发布。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如本政策有所更改，新版本會在此處顯示並於 GitHub 公佈。"
+          }
+        }
+      }
+    },
+    "privacy.changes.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changes to this policy"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "政策更新"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "政策更新"
+          }
+        }
+      }
+    },
+    "privacy.collect.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app has no account, no server, no analytics, no ads and no tracking. We never receive your travel records, visas, photos or any other personal information."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App 没有账号、没有服务器、没有分析工具、没有广告，也不会追踪你。我们不会收到你的旅行记录、签证、照片或任何其他个人信息。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App 沒有帳號、沒有伺服器、沒有分析工具、沒有廣告，也不會追蹤你。我們不會收到你的旅行紀錄、簽證、相片或任何其他個人資料。"
+          }
+        }
+      }
+    },
+    "privacy.collect.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We don't collect your data"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我们不收集你的数据"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我們不收集你的資料"
+          }
+        }
+      }
+    },
+    "privacy.contact.body %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questions about privacy? Email %@ or open an issue on GitHub."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对隐私有疑问？请发送邮件至 %@ 或在 GitHub 提交 Issue。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "對私隱有疑問？請電郵至 %@ 或在 GitHub 提交 Issue。"
+          }
+        }
+      }
+    },
+    "privacy.contact.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "联系我们"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聯絡我們"
+          }
+        }
+      }
+    },
+    "privacy.delete.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete travel, visa and friend records in the app at any time. Deleting the app removes its private files from your device, but Keychain items, iCloud or computer backups, exported files and copies of cards held by recipients are not removed. The sharing identity may remain in Keychain through reinstallations. The app does not currently provide a control to reset that identity."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你可以随时在 App 内删除旅行、签证及朋友记录。删除 App 会移除设备上的 App 私有文件，但不会移除钥匙串项目、iCloud 或电脑备份、已导出文件及接收者持有的旅行卡副本。分享身份可能在重新安装后仍保留于钥匙串。App 目前未提供重置此身份的功能。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你可以隨時在 App 內刪除旅遊、簽證及朋友紀錄。刪除 App 會移除裝置上的 App 私有檔案，但不會移除鑰匙圈項目、iCloud 或電腦備份、已匯出檔案及接收者持有的旅行卡副本。分享身份可能在重新安裝後仍保留於鑰匙圈。App 目前未提供重設此身份的功能。"
+          }
+        }
+      }
+    },
+    "privacy.delete.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleting your data"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除你的数据"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刪除你的資料"
+          }
+        }
+      }
+    },
+    "privacy.device.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your passport, trips, wishlist, visas and attachments, profile, friends' travel cards and settings are kept in the app's private storage on your iPhone or iPad. They may be included in your iCloud or computer backups, depending on your device settings."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的护照、旅程、心愿清单、签证及附件、个人资料、朋友的旅行卡和设置，保存在 iPhone 或 iPad 上这个 App 的私有存储空间内。根据你的设备设置，它们可能会包含在 iCloud 或电脑备份中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的護照、旅程、願望清單、簽證及附件、個人資料、朋友的旅行卡和設定，保存在 iPhone 或 iPad 上這個 App 的私有儲存空間內。視乎你的裝置設定，它們可能會包含在 iCloud 或電腦備份中。"
+          }
+        }
+      }
+    },
+    "privacy.device.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What stays on your device"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "哪些数据保留在你的设备上"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "哪些資料留在你的裝置上"
+          }
+        }
+      }
+    },
+    "privacy.intro" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where Can I Go is built so that your travel records stay yours. This policy explains what that means."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「跟住去边度」的设计原则是：你的旅行记录只属于你。以下说明这意味着什么。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「跟住去邊度」的設計原則是：你的旅行紀錄只屬於你。以下說明這代表甚麼。"
+          }
+        }
+      }
+    },
+    "privacy.leave.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apart from the Apple services described below, data leaves the app only when you choose to:\n• **Export a backup.** The file goes wherever you save or send it.\n• **Share a travel card or image.** It contains only what you chose in Settings → Sharing. Notes, passport, My Visas and visa attachments are never included.\n• **Search the web for a country.** Your chosen search engine receives the search.\n• **Open a link or send feedback.** The website or your mail app handles it under its own policy."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "除下文所述的 Apple 服务外，数据仅在你主动选择以下操作时离开 App：\n• **导出备份**。文件会去到你保存或发送的地方。\n• **分享旅行卡或图片**。只包含你在「设置 → 分享设置」中选择的内容，绝不包含备注、护照、我的签证及签证附件。\n• **在网上搜索国家**。你选择的搜索引擎会收到搜索内容。\n• **打开链接或发送反馈**。由相关网站或你的邮件 App 按其自身政策处理。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "除下文所述的 Apple 服務外，資料僅在你主動選擇以下操作時離開 App：\n• **匯出備份**。檔案會去到你儲存或傳送的地方。\n• **分享旅行卡或圖片**。只包含你在「設定 → 分享設定」中選擇的內容，絕不包含備註、護照、我的簽證及簽證附件。\n• **在網上搜尋國家**。你選擇的搜尋引擎會收到搜尋內容。\n• **開啟連結或傳送意見**。由相關網站或你的郵件 App 按其自身政策處理。"
+          }
+        }
+      }
+    },
+    "privacy.leave.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When data leaves your device"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "数据何时会离开你的设备"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "資料何時會離開你的裝置"
           }
         }
       }
@@ -7082,19 +6915,18 @@
         }
       }
     },
-    "Set expiry date" : {
-      "extractionState" : "stale",
+    "Send Feedback" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "设置到期日期"
+            "value" : "发送反馈"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "設定到期日期"
+            "value" : "傳送意見"
           }
         }
       }
@@ -7329,6 +7161,22 @@
         }
       }
     },
+    "Source Code on GitHub" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub 源代码"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub 原始碼"
+          }
+        }
+      }
+    },
     "South America" : {
       "localizations" : {
         "zh-Hans" : {
@@ -7341,23 +7189,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "南美洲"
-          }
-        }
-      }
-    },
-    "Start" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开始"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "開始"
           }
         }
       }
@@ -7410,6 +7241,22 @@
         }
       }
     },
+    "Support" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支持"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支援"
+          }
+        }
+      }
+    },
     "Supported Passports" : {
       "comment" : "A section of the passport picker for countries that are supported by the app.",
       "isCommentAutoGenerated" : true,
@@ -7424,6 +7271,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已支援的護照"
+          }
+        }
+      }
+    },
+    "Taiwan: source summary" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "台湾：资料来源摘要"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "台灣：資料來源摘要"
           }
         }
       }
@@ -8084,23 +7947,6 @@
         }
       }
     },
-    "Trip actions" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程操作"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程操作"
-          }
-        }
-      }
-    },
     "trip planned" : {
       "localizations" : {
         "zh-Hans" : {
@@ -8129,23 +7975,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "次旅程"
-          }
-        }
-      }
-    },
-    "Trips" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "旅程"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "旅程"
           }
         }
       }
@@ -8226,6 +8055,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法載入個人資料"
+          }
+        }
+      }
+    },
+    "Unable to Protect Visa Attachments" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法保护签证附件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法保護簽證附件"
           }
         }
       }
@@ -8404,6 +8249,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "有效日期"
+          }
+        }
+      }
+    },
+    "Version %@ (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %1$@ (%2$@)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本 %1$@ (%2$@)"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本 %1$@ (%2$@)"
           }
         }
       }
@@ -8912,22 +8779,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "願望清單目前是空的"
-          }
-        }
-      }
-    },
-    "Acknowledgements & Sources" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "致谢与数据来源"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "鳴謝與資料來源"
           }
         }
       }

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PrivacyPolicyView: View {
     /// Update this whenever the policy text changes, together with PRIVACY.md.
-    static let lastUpdated = DateComponents(calendar: .init(identifier: .gregorian), year: 2026, month: 10, day: 29).date!
+    static let lastUpdated = DateComponents(calendar: .init(identifier: .gregorian), year: 2026, month: 10, day: 30).date!
 
     var body: some View {
         DocumentView(

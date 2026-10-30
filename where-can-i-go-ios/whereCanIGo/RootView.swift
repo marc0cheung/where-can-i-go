@@ -14,5 +14,14 @@ struct RootView: View {
                 ContentView()
             }
         }
+        .alert("Unable to Protect Visa Attachments", isPresented: Binding(
+            get: { appState.attachmentProtectionError != nil },
+            set: { if !$0 { appState.attachmentProtectionError = nil } }
+        )) {
+            Button("Retry") { appState.protectVisaAttachments() }
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(appState.attachmentProtectionError ?? "")
+        }
     }
 }

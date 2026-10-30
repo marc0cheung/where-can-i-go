@@ -110,6 +110,37 @@ struct AcknowledgementsView: View {
             } footer: {
                 Text("acknowledgements.sources.footer")
             }
+
+            Section {
+                Text("acknowledgements.wikipedia.body")
+                Link("acknowledgements.wikipedia.chn",
+                     destination: URL(string: "https://en.wikipedia.org/wiki/Visa_requirements_for_Chinese_citizens")!)
+                Link("acknowledgements.wikipedia.chn.history",
+                     destination: URL(string: "https://en.wikipedia.org/w/index.php?title=Visa_requirements_for_Chinese_citizens&action=history")!)
+                Link("acknowledgements.wikipedia.twn",
+                     destination: URL(string: "https://en.wikipedia.org/wiki/Visa_requirements_for_Taiwanese_citizens")!)
+                Link("acknowledgements.wikipedia.twn.history",
+                     destination: URL(string: "https://en.wikipedia.org/w/index.php?title=Visa_requirements_for_Taiwanese_citizens&action=history")!)
+                Link("CC BY-SA 4.0",
+                     destination: URL(string: "https://creativecommons.org/licenses/by-sa/4.0/")!)
+                Link("acknowledgements.adapted.source", destination: AppInfo.repositoryURL)
+            } header: {
+                Text("acknowledgements.wikipedia.title")
+            }
+
+            Section {
+                Text("acknowledgements.map.body")
+                Link("Natural Earth",
+                     destination: URL(string: "https://www.naturalearthdata.com/")!)
+                Link("acknowledgements.map.terms",
+                     destination: URL(string: "https://www.naturalearthdata.com/about/terms-of-use/")!)
+                Link("datasets/geo-countries",
+                     destination: URL(string: "https://github.com/datasets/geo-countries")!)
+                Link("PDDL 1.0",
+                     destination: URL(string: "https://opendatacommons.org/licenses/pddl/1.0/")!)
+            } header: {
+                Text("acknowledgements.map.title")
+            }
         }
         .navigationTitle("Acknowledgements & Sources")
         .navigationBarTitleDisplayMode(.inline)

@@ -1,6 +1,6 @@
 # where-can-i-go | 跟住去邊度
 
-See which countries your passport can enter, keep track of your own visas, and log the places you have been and want to go. Everything stays on your iPhone.
+See which countries your passport can enter, keep track of your own visas, and log the places you have been and want to go. Your records stay on your iPhone or iPad.
 
 | Main View | My Visas | Manage Data |
 |:---:|:---:|:---:|
@@ -29,13 +29,13 @@ Hong Kong SAR (HKG), Macao SAR (MAC), China (CHN) and Taiwan (TWN).
 
 ### Requirements
 
-iOS 26.2 or later. iPhone is the main target; iPad works but some layouts still need work.
+iOS / iPadOS 26.2 or later. Supports iPhone and iPad.
 
 ### Your data
 
 See the full [Privacy Policy](PRIVACY.md).
 
-The app has no account and no server. Your records, profile and attachments are stored in the app's own folder on your device. They only leave the device when you export a backup, share an image, or send a travel card yourself. A travel card holds only what you chose to include. Notes, passport, My Visas and visa attachments stay on your device.
+The app has no account and no server. Your records, profile and attachments are kept in private app storage. Device backups may include them. A travel card holds only what you chose to include; notes, passport, My Visas and visa attachments are not included. The signing identity is stored separately in Keychain and may sync through iCloud Keychain or survive reinstallations. See the privacy policy for Apple services and user-directed exports.
 
 ### Important
 
@@ -72,7 +72,7 @@ Architecture, data formats and design decisions are described in [tech_notes.md]
 
 - **Fix an entry policy.** Edit `Resources/default_visas_<ISO3>.json` and add the source to the section below.
 - **Add a passport.** Add `default_visas_<ISO3>.json`, add the code to `supportedPassportCodes` in `Views/PassportPickerView.swift`, and list the source below.
-- **Add an airline.** Add a record to `Resources/airline_destinations.json` and a logo image set with the matching `logoAssetName`. Add the name to `Localizable.xcstrings` if it needs translating.
+- **Add an airline.** Add a record to `Resources/airline_destinations.json`. Add the name to `Localizable.xcstrings` if it needs translating.
 - **Translations.** All UI strings are in `Localizable.xcstrings`.
 
 ### Pull requests
@@ -91,13 +91,18 @@ Architecture, data formats and design decisions are described in [tech_notes.md]
 
 Duration remarks are shortened. eVisas that need an application are listed as visa required. If you add another data source, note its licence and add it here.
 
+### Credits and licences
+
+- **Wikipedia contributors:** [Visa requirements for Chinese citizens](https://en.wikipedia.org/wiki/Visa_requirements_for_Chinese_citizens) ([history](https://en.wikipedia.org/w/index.php?title=Visa_requirements_for_Chinese_citizens&action=history)) and [Visa requirements for Taiwanese citizens](https://en.wikipedia.org/wiki/Visa_requirements_for_Taiwanese_citizens) ([history](https://en.wikipedia.org/w/index.php?title=Visa_requirements_for_Taiwanese_citizens&action=history)). Article content is available under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The app adapts selected policy information into entry categories and shortened stay/condition remarks, supplemented by official sources. Adapted Wikipedia material in the CHN and TWN presets is distributed under CC BY-SA 4.0, separately from the MIT-licensed app code. Public source files remain available in this repository for reuse under those terms. No endorsement is implied.
+- **Map borders:** Made with [Natural Earth](https://www.naturalearthdata.com/), 1:10m Admin-0 Countries, distributed as GeoJSON by [datasets/geo-countries](https://github.com/datasets/geo-countries). Natural Earth data is [public domain](https://www.naturalearthdata.com/about/terms-of-use/); the GeoJSON package is offered under [PDDL 1.0](https://opendatacommons.org/licenses/pddl/1.0/). Credit also to Lexman and the Open Knowledge Foundation. The app simplifies geometry at runtime for rendering; boundaries are not an endorsement of territorial claims.
+- **Base map:** Apple Maps via MapKit, separate from the bundled border overlays.
+
 ## Known Issues
 
 - iOS only.
 - Some entry policies may be inaccurate or out of date.
 - Country borders are simplified for map performance, so small areas may be imprecise.
 - The selected country's outline can look thicker in some places than others.
-- iPad layouts may have problems.
 
 ## Roadmap
 

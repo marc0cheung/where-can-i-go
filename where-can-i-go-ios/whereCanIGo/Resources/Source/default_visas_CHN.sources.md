@@ -12,6 +12,12 @@ Source summary recorded on 2026-10-02 for ordinary Chinese passports.
 - [US Customs and Border Protection](https://www.cbp.gov/travel/international-visitors/guam-cnmi-visa-waiver-program): Guam-CNMI travel rules. The preset's Northern Mariana Islands entry is CNMI-specific, not a general US or Guam exemption; confirm current pre-travel requirements.
 - [Djibouti eVisa](https://www.evisa.gouv.dj/), [Guinea visa information](https://www.paf.gov.gn/visa), and [Guyana visitor visa services](https://eservices.iss.gov.gy/visitor-visa): references consulted for advance visa applications rather than unconditional visa-free access.
 
+## Wikipedia Attribution and Licence
+
+Credit: Wikipedia contributors, [Visa requirements for Chinese citizens](https://en.wikipedia.org/wiki/Visa_requirements_for_Chinese_citizens), [article history and contributors](https://en.wikipedia.org/w/index.php?title=Visa_requirements_for_Chinese_citizens&action=history), under [Creative Commons Attribution-ShareAlike 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+
+Changes: selected policy information has been categorized into the app's entry requirements, with shortened stay limits and condition remarks, and supplemented or corrected using the official sources above. Adapted Wikipedia material in `default_visas_CHN.json` is distributed under CC BY-SA 4.0. This data notice is separate from the app code's MIT licence. No endorsement by Wikipedia or its contributors is implied.
+
 ## Representation and Limits
 
 - eVisas requiring an application remain `visa_required`, with an eVisa note in `duration`. This includes Djibouti, Guinea, and Guyana.

@@ -1,5 +1,6 @@
 import SwiftUI
 import MapKit
+import OSLog
 
 /// MapKit-backed choropleth of the world. Each country polygon is filled with the
 /// color of the matching `VisaCategory` for the currently-selected passport.
@@ -66,6 +67,7 @@ struct CountryMapView: UIViewRepresentable {
     // MARK: - Coordinator
 
     final class Coordinator: NSObject, MKMapViewDelegate {
+        private static let logger = Logger(subsystem: "com.marcocheung.whereCanIGo", category: "CountryMap")
         var appState: AppState
         var onGeometryLoaded: () -> Void
         private var geometryTask: Task<Void, Never>?
@@ -361,7 +363,7 @@ struct CountryMapView: UIViewRepresentable {
                 } catch {
                     guard !Task.isCancelled, let self, let map else { return }
                     isLoadingGeometry = false
-                    print("[WhereCanIGo] GeoJSON load error: \(error)")
+                    Self.logger.error("GeoJSON load error: \(error.localizedDescription)")
                     handleDiceSpinTargetIfNeeded(appState.diceSpinTarget, in: map)
                     onGeometryLoaded()
                 }

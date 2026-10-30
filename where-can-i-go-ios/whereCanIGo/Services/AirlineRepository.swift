@@ -1,9 +1,9 @@
 import Foundation
+import OSLog
 
 struct Airline: Decodable, Identifiable {
     let id: String
     let name: String
-    let logoAssetName: String
     let destinationCountryCodes: Set<String>
 
     var localizedName: String {
@@ -12,6 +12,8 @@ struct Airline: Decodable, Identifiable {
 }
 
 enum AirlineRepository {
+    private static let logger = Logger(subsystem: "com.marcocheung.whereCanIGo", category: "AirlineRepository")
+
     static let catalog: Result<[Airline], Error> = Result {
         do {
             guard let url = Bundle.main.url(forResource: "airline_destinations", withExtension: "json") else {
@@ -19,7 +21,7 @@ enum AirlineRepository {
             }
             return try decode(Data(contentsOf: url))
         } catch {
-            print("[WhereCanIGo] Unable to load airline_destinations.json: \(error)")
+            logger.error("Unable to load airline_destinations.json: \(error.localizedDescription)")
             throw error
         }
     }
@@ -29,7 +31,7 @@ enum AirlineRepository {
         guard !airlines.isEmpty,
               Set(airlines.map(\.id)).count == airlines.count,
               airlines.allSatisfy({ airline in
-                  !airline.id.isEmpty && !airline.name.isEmpty && !airline.logoAssetName.isEmpty &&
+                  !airline.id.isEmpty && !airline.name.isEmpty &&
                   !airline.destinationCountryCodes.isEmpty &&
                   airline.destinationCountryCodes.allSatisfy { code in
                       code.utf8.count == 3 && code.utf8.allSatisfy { (65...90).contains($0) }
@@ -37,7 +39,7 @@ enum AirlineRepository {
               }) else {
             throw DecodingError.dataCorrupted(.init(
                 codingPath: [],
-                debugDescription: "Airlines must have unique IDs, names, logo assets, and ISO3 destinations."
+                debugDescription: "Airlines must have unique IDs, names, and ISO3 destinations."
             ))
         }
         return airlines

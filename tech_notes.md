@@ -27,6 +27,7 @@ How the app is built, how its data is stored, and the rules behind the main feat
 - State uses `ObservableObject` / `@Published` / `@EnvironmentObject`. The project uses no `@Observable` and no SwiftData.
 - Info.plist values are generated from build settings (`INFOPLIST_KEY_*`) and merged with `whereCanIGo-Info.plist`, which holds what build settings can't express: the travel card document type and exported UTType. The only privacy usage string is the camera description.
 - CryptoKit is used for travel card signing. Files that read `.publicKey` or `.rawRepresentation` need their own `import CryptoKit`.
+- `PrivacyInfo.xcprivacy` declares app-only UserDefaults access (`CA92.1`), no tracking and no developer-collected data. `ITSAppUsesNonExemptEncryption = NO` covers the current OS-provided cryptography.
 
 ## Project layout
 
@@ -106,6 +107,7 @@ All files live in the app's Documents directory.
 | Keychain service `com.marcocheung.whereCanIGo.sharing` | Signing key and last card revision | `SharingIdentity` |
 
 - `app_data.json` uses ISO 8601 dates, sorted keys, and atomic writes.
+- Visa attachment writes and restore staging use `.completeFileProtection`; restore directories use `FileProtectionType.complete`. At launch, existing attachment and recovery files are upgraded in place. Failures are logged and surfaced with a retry action. OS file protection does not password-encrypt exported backup files or copies a user shares.
 - `AppData` decodes `visits` and `plannedTrips` with `decodeIfPresent` so files from older versions still load. Follow the same pattern for any new field.
 - `AppData.defaultVisas` holds the full list for the current passport (bundled entries plus user edits). Changing passport reloads the bundled list.
 - Two save styles exist in `AppState`:
@@ -139,8 +141,8 @@ All in `Resources/`:
 
 - `countries.json`: `[{ code, iso2, name, flag }]`.
 - `default_visas_<ISO3>.json`: `[{ countryCode, category, duration, remark }]` for one passport. A missing file gives an empty list.
-- `airline_destinations.json`: `[{ id, name, logoAssetName, destinationCountryCodes }]`. `AirlineRepository` rejects the whole file if IDs repeat, a field is empty, or a code is not three uppercase letters.
-- `world-countries.geojson`: country outlines. The ISO3 code is read from the feature properties by `CountryMapView.Coordinator.extractISO3`.
+- `airline_destinations.json`: `[{ id, name, destinationCountryCodes }]`. `AirlineRepository` rejects the whole file if IDs repeat, a field is empty, or a code is not three uppercase letters. Filters display text labels without airline logos.
+- `world-countries.geojson`: Natural Earth public-domain 1:10m Admin-0 Countries, distributed through `datasets/geo-countries` (PDDL 1.0). The bundled file identifies `ne_10m_admin_0_countries`; the ISO3 code is read from the feature properties by `CountryMapView.Coordinator.extractISO3`. See `GEOJSON_INSTRUCTIONS.txt` and the in-app acknowledgements.
 - `Source/*.sources.md`: where each passport's data came from.
 
 Adding a passport needs the JSON file, the code in `PassportPickerView.supportedPassportCodes`, and a source entry in the README.
@@ -174,7 +176,7 @@ When the camera changes, the coordinator picks the coarsest level whose error is
 - Tabs (`PanelTab`): Overview, My Visas, Travels. A Manage Data tab exists behind `showsManageDataTab` (currently `false`); its features are reached from the Overview tab.
 - **Travels** (`MyTravelsTab`) has a segmented control for Been, Wishlist and Friends. Been uses `TravelSummaryCard`, `TravelCountryRow`, `CountryTripsSheet` and `TripEditorSheet`. Wishlist uses `WishlistSection`, `CountryPlansSheet` and `PlannedTripEditorSheet`. Friends uses `FriendsSection`, see [Friends](#friends).
 - **Settings** (`SettingsView`, inside `UserProfileView.swift`) holds the search engine choice (`@AppStorage("searchEngine")`), Sharing settings for travel cards, and backup export/import.
-- **Excel import** in My Visas is hidden. It is shown only when the localized string `MyVisas.ShowExcelImport` is `"true"`, and the button does nothing yet.
+- **Excel import** is not included in the release branch. The unfinished prototype and its feature-toggle strings are preserved on `feature/excel-import`.
 
 ## Random destination (dice)
 

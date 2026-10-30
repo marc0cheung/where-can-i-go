@@ -216,14 +216,7 @@ struct SheetHeader: View {
                     Toggle("All Airlines", isOn: allDiceAirlinesBinding)
                     Divider()
                     ForEach(diceAirlines) { airline in
-                        Toggle(isOn: diceAirlineBinding(airline.id)) {
-                            Label {
-                                Text(airline.localizedName)
-                            } icon: {
-                                Image(airline.logoAssetName)
-                                    .renderingMode(.original)
-                            }
-                        }
+                        Toggle(airline.localizedName, isOn: diceAirlineBinding(airline.id))
                     }
                 } else {
                     Button("Airline Data Unavailable") {

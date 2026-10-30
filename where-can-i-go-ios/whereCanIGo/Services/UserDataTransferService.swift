@@ -123,7 +123,7 @@ final class UserDataTransferService: ObservableObject {
         try DataStore(directory: workspace.backup).saveAppData(oldData)
         try JSONEncoder().encode(oldProfile).write(
             to: workspace.backup.appendingPathComponent("user_profile.json"),
-            options: .atomic
+            options: [.atomic, .completeFileProtection]
         )
         let stagedIDs = Set(plan.attachmentsToStage.keys)
         for (id, media) in plan.attachmentsToStage.sorted(by: { $0.key.uuidString < $1.key.uuidString }) {

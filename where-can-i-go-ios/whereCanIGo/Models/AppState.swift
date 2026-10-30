@@ -1,11 +1,13 @@
 import Foundation
 import SwiftUI
 import Combine
+import OSLog
 
 @MainActor
 final class AppState: ObservableObject {
     @Published var isLoading: Bool = true
     @Published var needsPassportSelection: Bool = false
+    @Published var attachmentProtectionError: String?
     @Published var data: AppData = AppData(passportCode: "HKG", defaultVisas: [], personalVisas: [])
     @Published var countries: [Country] = []
     @Published var selectedCountryCode: String? = nil
@@ -33,6 +35,7 @@ final class AppState: ObservableObject {
     // MARK: - Lifecycle
 
     func bootstrap() async {
+        protectVisaAttachments()
         // 1. Load static country list
         self.countries = (try? CountryRepository.loadAllCountries()) ?? []
 
@@ -47,6 +50,17 @@ final class AppState: ObservableObject {
             self.needsPassportSelection = true
         }
         self.isLoading = false
+    }
+
+    func protectVisaAttachments() {
+        do {
+            try VisaAttachmentStore.protectExistingFiles()
+            attachmentProtectionError = nil
+        } catch {
+            Logger(subsystem: "com.marcocheung.whereCanIGo", category: "AttachmentProtection")
+                .error("Unable to protect existing visa attachments: \(error.localizedDescription)")
+            attachmentProtectionError = error.localizedDescription
+        }
     }
 
     func completePassportSelection(_ code: String) {

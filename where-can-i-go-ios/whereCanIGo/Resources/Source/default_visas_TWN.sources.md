@@ -16,6 +16,12 @@ The data uses the existing `DefaultVisaEntry` fields and categories. Taiwan is t
 - [Saudi official eVisa portal](https://visa.visitsaudi.com/): Taiwan is not explicitly included in the ordinary eVisa nationality list. The preset conservatively retains `visa_required`; conditional visa on arrival is noted from the reference table rather than presented as general eligibility.
 - [K-ETA notices](https://www.k-eta.go.kr/portal/board/viewboardlist.do?tmpltNm=notice): extension notice dated 2025-12-23. The reference table records the Taiwan exemption through 2026-12-31.
 
+## Wikipedia Attribution and Licence
+
+Credit: Wikipedia contributors, [Visa requirements for Taiwanese citizens](https://en.wikipedia.org/wiki/Visa_requirements_for_Taiwanese_citizens), [article history and contributors](https://en.wikipedia.org/w/index.php?title=Visa_requirements_for_Taiwanese_citizens&action=history), under [Creative Commons Attribution-ShareAlike 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+
+Changes: selected policy information has been categorized into the app's entry requirements, with shortened stay limits and condition remarks, and supplemented or corrected using the official sources above. Adapted Wikipedia material in `default_visas_TWN.json` is distributed under CC BY-SA 4.0. This data notice is separate from the app code's MIT licence. No endorsement by Wikipedia or its contributors is implied.
+
 ## Representation and Limits
 
 - eVisas and online visa applications remain `visa_required`, with an eVisa or online-visa note in `duration`.

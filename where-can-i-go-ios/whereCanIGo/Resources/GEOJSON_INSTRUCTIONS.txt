@@ -1,3 +1,28 @@
+Bundled map border provenance
+
+The bundled FeatureCollection is named "ne_10m_admin_0_countries".
+It contains Natural Earth's 1:10m Admin-0 Countries, distributed as GeoJSON by
+datasets/geo-countries:
+
+  https://github.com/datasets/geo-countries
+  https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/
+
+Natural Earth data is public domain:
+  https://www.naturalearthdata.com/about/terms-of-use/
+
+The GeoJSON package is offered under PDDL 1.0:
+  https://opendatacommons.org/licenses/pddl/1.0/
+
+Credit: Natural Earth, Lexman and the Open Knowledge Foundation.
+The exact downloaded upstream revision was not recorded. Do not infer a release
+version from the filename. CountryMapView and WorldMapView simplify the geometry
+at runtime; no replacement dataset is downloaded by the app.
+
+Apple Maps supplies the underlying MapKit map, not the bundled border polygons.
+Credits and licence links also appear in Settings > About > Acknowledgements & Sources.
+
+Updating the data
+
 Download the world countries GeoJSON file and place it in this Resources folder.
 
 URL:
@@ -6,8 +31,9 @@ URL:
 Save as:
   Resources/world-countries.geojson
 
-The file is ~24 MB and contains ISO 3166-1 alpha-3 codes under the "ISO_A3" property
-of each feature, which is what CountryMapView matches against.
+The current bundled file is about 14.6 MB and contains ISO 3166-1 alpha-3 codes
+under "ISO3166-1-Alpha-3". CountryMapView also accepts legacy "ISO_A3" keys.
+Check the source schema, licence and attribution when replacing the snapshot.
 
 Quick download (macOS Terminal):
   curl -L -o world-countries.geojson \
