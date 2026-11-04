@@ -82,7 +82,7 @@ struct VisaAttachmentPreviewSheet: View {
         NavigationStack {
             previewContent
                 .navigationTitle(displayTitle)
-                .navigationBarTitleDisplayMode(.inline)
+                .centeredNavigationTitle(verbatim: displayTitle)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button("Done") { dismiss() }

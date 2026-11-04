@@ -312,6 +312,10 @@ struct PlannedTripEditorSheet: View {
         country != nil && (durationMode != .estimatedDays || (Int(estimatedDays) ?? 0) > 0)
     }
 
+    private var titleKey: LocalizedStringKey {
+        existingTrip == nil ? "Add to Wishlist" : "Edit Planned Trip"
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -397,8 +401,8 @@ struct PlannedTripEditorSheet: View {
                 .padding()
             }
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle(existingTrip == nil ? "Add to Wishlist" : "Edit Planned Trip")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(titleKey)
+            .centeredNavigationTitle(titleKey)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .topBarTrailing) { Button("Save") { save() }.disabled(!canSave) }

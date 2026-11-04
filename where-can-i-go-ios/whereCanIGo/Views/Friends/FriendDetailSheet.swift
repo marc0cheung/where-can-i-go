@@ -28,7 +28,7 @@ struct FriendDetailSheet: View {
                 }
             }
             .navigationTitle(friend?.name ?? "")
-            .navigationBarTitleDisplayMode(.inline)
+            .centeredNavigationTitle(verbatim: friend?.name ?? "")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if friend != nil { menu }

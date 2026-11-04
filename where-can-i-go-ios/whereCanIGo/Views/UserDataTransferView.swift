@@ -61,7 +61,7 @@ struct ExportDataView: View {
             }
             .disabled(isBusy)
             .navigationTitle("Export Data")
-            .navigationBarTitleDisplayMode(.inline)
+            .centeredNavigationTitle("Export Data")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
@@ -219,7 +219,7 @@ struct ImportPreviewView: View {
             }
             .disabled(isBusy || didImport)
             .navigationTitle("Import Data")
-            .navigationBarTitleDisplayMode(.inline)
+            .centeredNavigationTitle("Import Data")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
@@ -254,8 +254,7 @@ struct ImportPreviewView: View {
                 showReplaceConfirmation = false
                 refreshPreview()
             }
-            .confirmationDialog("import.replace.confirm.title", isPresented: $showReplaceConfirmation,
-                                titleVisibility: .visible) {
+            .alert("import.replace.confirm.title", isPresented: $showReplaceConfirmation) {
                 Button("import.mode.replace", role: .destructive) { isImporting = true }
                 Button("Cancel", role: .cancel) { }
             } message: {

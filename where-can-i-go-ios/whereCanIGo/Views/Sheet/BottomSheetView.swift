@@ -14,6 +14,15 @@ enum PanelTab: String, CaseIterable, Hashable {
         case .manageData: String(localized: "Manage Data")
         }
     }
+
+    var systemImage: String {
+        switch self {
+        case .overview: "globe.asia.australia.fill"
+        case .myVisas: "person.text.rectangle.fill"
+        case .myTravels: "airplane"
+        case .manageData: "slider.horizontal.3"
+        }
+    }
 }
 
 /// Height state shared by the compact-width system sheet (iPhone / narrow iPad
@@ -25,16 +34,27 @@ enum PanelState: Hashable, CaseIterable {
     case high
 
     /// Detent used when the compact-width `.sheet` is presented.
-    var presentationDetent: PresentationDetent {
+    /// With a trailing side strip (iPhone Duo outer display) the screen is
+    /// short, so `.low` sits lower to keep most of the globe visible and
+    /// `.medium` sits clearly above it so a small drag doesn't jump detents.
+    func presentationDetent(sideStrip: Bool = false) -> PresentationDetent {
         switch self {
-        case .low:    return .height(290)
-        case .medium: return .medium
+        case .low:    return sideStrip ? .height(Self.sideStripLowHeight) : .height(290)
+        case .medium: return sideStrip ? Self.sideStripMediumDetent : .medium
         case .high:   return .large
         }
     }
 
+    static func detents(sideStrip: Bool = false) -> Set<PresentationDetent> {
+        Set(allCases.map { $0.presentationDetent(sideStrip: sideStrip) })
+    }
+
+    /// Height of the side-strip `.low` detent: the header plus the top of the tab content.
+    static let sideStripLowHeight: CGFloat = 240
+    private static let sideStripMediumDetent = PresentationDetent.fraction(0.6)
+
     static func from(detent: PresentationDetent) -> PanelState {
-        if detent == .medium { return .medium }
+        if detent == .medium || detent == sideStripMediumDetent { return .medium }
         if detent == .large  { return .high }
         return .low
     }
@@ -66,6 +86,7 @@ struct SheetHeader: View {
     @State private var showSettings = false
     @State private var showNoMatchingCountries = false
     @State private var showAirlineDataError = false
+    @Environment(\.sideStripWidth) private var sideStripWidth
 
     var body: some View {
         VStack(spacing: 0) {
@@ -88,6 +109,7 @@ struct SheetHeader: View {
             .padding(.bottom, 14)
 
             Divider()
+                .ignoresSafeArea(.container, edges: sideStripWidth > 0 ? [] : .horizontal)
         }
         .sheet(isPresented: $showProfile) {
             UserProfileView(profileStore: profileStore, passportCode: appState.data.passportCode)

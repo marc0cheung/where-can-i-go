@@ -439,9 +439,6 @@ struct TravelSummaryView: View {
             .navigationTitle("Where I've Been")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Close") { dismiss() }
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     if let image = shareImage() {
                         ShareLink(
@@ -451,6 +448,10 @@ struct TravelSummaryView: View {
                             Image(systemName: "square.and.arrow.up")
                         }
                     }
+                }
+                ToolbarSpacer(.fixed, placement: .topBarTrailing)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(role: .close) { dismiss() }
                 }
             }
         }
@@ -784,6 +785,10 @@ struct TripEditorSheet: View {
 
     private var canSave: Bool { country != nil }
 
+    private var titleKey: LocalizedStringKey {
+        existingVisit != nil ? "Edit Visit" : completingTrip != nil ? "Complete Trip" : "Log a Visit"
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -858,8 +863,8 @@ struct TripEditorSheet: View {
                 .padding()
             }
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle(existingVisit != nil ? "Edit Visit" : completingTrip != nil ? "Complete Trip" : "Log a Visit")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(titleKey)
+            .centeredNavigationTitle(titleKey)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }

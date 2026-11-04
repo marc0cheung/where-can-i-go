@@ -130,7 +130,7 @@ struct UserProfileView: View {
             }
             .padding(.horizontal, 20)
             .navigationTitle("Edit Profile")
-            .navigationBarTitleDisplayMode(.inline)
+            .centeredNavigationTitle("Edit Profile")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel", systemImage: "xmark") { dismiss() }

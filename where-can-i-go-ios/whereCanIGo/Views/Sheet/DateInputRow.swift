@@ -113,7 +113,7 @@ private struct DateInputSheet: View {
             .clipped()
             .padding(.horizontal)
             .navigationTitle(Text(title))
-            .navigationBarTitleDisplayMode(.inline)
+            .centeredNavigationTitle(Text(title))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }

@@ -9,6 +9,7 @@ extension View {
             .contentMargins(.top, 8, for: .scrollContent)
             .contentMargins(.bottom, 24, for: .scrollContent)
             .environment(\.defaultMinListRowHeight, 0)
+            .modifier(ExtendsUnderSideStrip())
     }
 
     func cardListRow() -> some View {
@@ -17,6 +18,32 @@ extension View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
     }
+}
+
+/// On windows with a trailing side strip (iPhone Duo outer display), drops the
+/// strip's safe-area inset from the list cells, which UIKit would otherwise
+/// add to swipe actions as a large gap. Content margins keep the rows clear of
+/// the strip. No-op unless `ContentView` sets `sideStripWidth`.
+private struct ExtendsUnderSideStrip: ViewModifier {
+    @Environment(\.sideStripWidth) private var sideStripWidth
+
+    func body(content: Content) -> some View {
+        GeometryReader { _ in
+            if sideStripWidth > 0 {
+                content
+                    .contentMargins(.trailing, sideStripWidth, for: .scrollContent)
+                    .contentMargins(.trailing, sideStripWidth, for: .scrollIndicators)
+            } else {
+                content
+            }
+        }
+        .ignoresSafeArea(.container, edges: sideStripWidth > 0 ? .trailing : [])
+    }
+}
+
+extension EnvironmentValues {
+    /// Set by `ContentView` to the width of a trailing system strip, if any.
+    @Entry var sideStripWidth: CGFloat = 0
 }
 
 struct RecordDeletion {

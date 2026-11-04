@@ -810,7 +810,7 @@ struct EntryPolicySheet: View {
                 .padding()
             }
             .navigationTitle("Entry Policy")
-            .navigationBarTitleDisplayMode(.inline)
+            .centeredNavigationTitle("Entry Policy")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
@@ -822,7 +822,7 @@ struct EntryPolicySheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .sheet(isPresented: $showCountryPicker) {
             CountryPickerSheet(selected: $selectedCountry)

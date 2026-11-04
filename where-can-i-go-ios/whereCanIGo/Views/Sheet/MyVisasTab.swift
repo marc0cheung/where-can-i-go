@@ -552,7 +552,7 @@ private struct VisaDetailsSheet: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Visa Details")
-            .navigationBarTitleDisplayMode(.inline)
+            .centeredNavigationTitle("Visa Details")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     // Same result as swiping the sheet down.
@@ -577,7 +577,7 @@ private struct VisaDetailsSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .onChange(of: draftCountry) { _, newCountry in
             if !VisaCoverage.schengenCountryCodes.contains(newCountry?.code ?? "") {

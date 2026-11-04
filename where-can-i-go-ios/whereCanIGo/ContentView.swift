@@ -17,6 +17,10 @@ struct ContentView: View {
     /// Live drag delta while the user is dragging the iPad panel handle.
     /// Positive = drag down (panel shrinks). Reset to 0 on release.
     @State private var dragOffset: CGFloat = 0
+    /// Width of the trailing system strip inside the compact sheet (0 when absent).
+    @State private var sideStripWidth: CGFloat = 0
+    /// Height of the sheet header in side-strip mode, where it overlays the tab view.
+    @State private var sideStripHeaderHeight: CGFloat = 0
 
     // Set to true to compare the original Manage Data tab with the integrated flow.
     private let showsManageDataTab = false
@@ -30,6 +34,16 @@ struct ContentView: View {
 
     private var isRegularWidth: Bool { horizontalSizeClass == .regular }
 
+    /// Compact windows with a large trailing safe-area inset reserve a side
+    /// strip for system UI (e.g. iPhone Duo outer display). The sheet body
+    /// respects that inset, leaving the strip transparent over the map, and the
+    /// system tab bar lays itself out vertically inside the strip.
+    /// Landscape iPhones are excluded: their horizontal insets are symmetric.
+    private func hasSideStrip(_ proxy: GeometryProxy) -> Bool {
+        let insets = proxy.safeAreaInsets
+        return !isRegularWidth && insets.trailing > 20 && insets.leading < 1
+    }
+
     private var sheetSolidBackground: Color {
         Color(.systemBackground)
     }
@@ -37,50 +51,139 @@ struct ContentView: View {
     /// Shared content used both inside the compact-width system sheet and the
     /// regular-width floating panel, so behavior stays identical across modes.
     @ViewBuilder
-    private var panelContent: some View {
-        VStack(spacing: 0) {
-            SheetHeader(
-                panelState: $panelState,
-                selectedDiceContinents: $selectedDiceContinents,
-                selectedDiceAirlines: $selectedDiceAirlines,
-                diceIncludesAllEntryRequirements: $diceIncludesAllEntryRequirements
-            )
+    private func panelContent(sideStrip: Bool = false) -> some View {
+        if sideStrip {
+            sideStripPanel
+        } else {
+            panelBody(sideStrip: false)
+                .background(sheetSolidBackground)
+        }
+    }
 
-            TabView(selection: $selectedTab) {
-                Tab(PanelTab.overview.localizedTitle,
-                    systemImage: "globe.asia.australia.fill",
-                    value: PanelTab.overview) {
-                    OverviewTab { code in
-                        appState.selectCountry(code: code)
-                        appState.diceSpinTarget = code
-                        withAnimation(.smooth(duration: 0.25)) { panelState = .low }
-                    }
-                }
+    /// Side-strip layout: the sheet itself is clear, and its body draws its
+    /// background only inside the safe area, left of the strip.
+    private var sideStripPanel: some View {
+        panelBody(sideStrip: true)
+            .background {
+                RoundedRectangle(cornerRadius: sheetCornerRadius, style: .continuous)
+                    .fill(sheetSolidBackground)
+                    .ignoresSafeArea(.container, edges: .bottom)
+            }
+            .overlay(alignment: .top) { sideStripDragIndicator }
+            .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.trailing } action: {
+                sideStripWidth = $0
+            }
+            .environment(\.sideStripWidth, sideStripWidth)
+    }
 
-                Tab(PanelTab.myVisas.localizedTitle,
-                    systemImage: "person.text.rectangle.fill",
-                    value: PanelTab.myVisas) {
-                    MyVisasTab()
-                }
-
-                Tab(PanelTab.myTravels.localizedTitle,
-                    systemImage: "airplane",
-                    value: PanelTab.myTravels) {
-                    MyTravelsTab()
-                }
-
-                if showsManageDataTab {
-                    Tab(PanelTab.manageData.localizedTitle,
-                        systemImage: "slider.horizontal.3",
-                        value: PanelTab.manageData) {
-                        ManageDataTab()
-                    }
+    /// Replaces the system indicator, which centres on the full sheet width.
+    private var sideStripDragIndicator: some View {
+        Capsule()
+            .fill(Color(.tertiaryLabel))
+            .frame(width: 36, height: 5)
+            .padding(.top, 5)
+            .accessibilityElement()
+            .accessibilityLabel("Resize panel")
+            .accessibilityAdjustableAction { direction in
+                let states = PanelState.allCases
+                guard let index = states.firstIndex(of: panelState) else { return }
+                switch direction {
+                case .increment: panelState = states[min(index + 1, states.count - 1)]
+                case .decrement: panelState = states[max(index - 1, 0)]
+                @unknown default: break
                 }
             }
-            .toolbarBackground(sheetSolidBackground, for: .tabBar)
-            .toolbarBackground(.visible, for: .tabBar)
+    }
+
+    private let sheetCornerRadius: CGFloat = 55
+
+    private func tabContent(_ tab: PanelTab, sideStrip: Bool) -> some View {
+        tabRoot(tab)
+            .modifier(SideStripTabContentLayout(
+                isEnabled: sideStrip, topInset: sideStripHeaderHeight, cornerRadius: sheetCornerRadius))
+    }
+
+    @ViewBuilder
+    private func tabRoot(_ tab: PanelTab) -> some View {
+        switch tab {
+        case .overview:
+            OverviewTab { code in
+                appState.selectCountry(code: code)
+                appState.diceSpinTarget = code
+                withAnimation(.smooth(duration: 0.25)) { panelState = .low }
+            }
+        case .myVisas:
+            MyVisasTab()
+        case .myTravels:
+            MyTravelsTab()
+        case .manageData:
+            ManageDataTab()
         }
-        .background(sheetSolidBackground)
+    }
+
+    private var sheetHeader: some View {
+        SheetHeader(
+            panelState: $panelState,
+            selectedDiceContinents: $selectedDiceContinents,
+            selectedDiceAirlines: $selectedDiceAirlines,
+            diceIncludesAllEntryRequirements: $diceIncludesAllEntryRequirements
+        )
+    }
+
+    private func panelTabs(sideStrip: Bool) -> some View {
+        TabView(selection: $selectedTab) {
+            Tab(PanelTab.overview.localizedTitle,
+                systemImage: PanelTab.overview.systemImage,
+                value: PanelTab.overview) {
+                tabContent(.overview, sideStrip: sideStrip)
+            }
+
+            Tab(PanelTab.myVisas.localizedTitle,
+                systemImage: PanelTab.myVisas.systemImage,
+                value: PanelTab.myVisas) {
+                tabContent(.myVisas, sideStrip: sideStrip)
+            }
+
+            Tab(PanelTab.myTravels.localizedTitle,
+                systemImage: PanelTab.myTravels.systemImage,
+                value: PanelTab.myTravels) {
+                tabContent(.myTravels, sideStrip: sideStrip)
+            }
+
+            if showsManageDataTab {
+                Tab(PanelTab.manageData.localizedTitle,
+                    systemImage: PanelTab.manageData.systemImage,
+                    value: PanelTab.manageData) {
+                    tabContent(.manageData, sideStrip: sideStrip)
+                }
+            }
+        }
+        .toolbarBackground(sheetSolidBackground, for: .tabBar)
+        // In the side strip the tab bar floats as Liquid Glass over the map.
+        .toolbarBackground(sideStrip ? .hidden : .visible, for: .tabBar)
+    }
+
+    @ViewBuilder
+    private func panelBody(sideStrip: Bool) -> some View {
+        Group {
+            if sideStrip {
+                // The TabView spans the full sheet height so the vertical tab bar
+                // in the strip keeps room for all its buttons at the low detent;
+                // the tab content starts below the overlaid header.
+                panelTabs(sideStrip: true)
+                    .overlay(alignment: .top) {
+                        sheetHeader
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                                sideStripHeaderHeight = $0
+                            }
+                    }
+            } else {
+                VStack(spacing: 0) {
+                    sheetHeader
+                    panelTabs(sideStrip: false)
+                }
+            }
+        }
         .sheet(item: $wishlistCountry) { country in
             CountryPlansSheet(country: country)
         }
@@ -105,9 +208,9 @@ struct ContentView: View {
 
     /// Bridge `PanelState` to the system sheet's `PresentationDetent` binding
     /// so the compact-width sheet keeps its native drag-to-resize behavior.
-    private var detentBinding: Binding<PresentationDetent> {
+    private func detentBinding(sideStrip: Bool) -> Binding<PresentationDetent> {
         Binding(
-            get: { panelState.presentationDetent },
+            get: { panelState.presentationDetent(sideStrip: sideStrip) },
             set: { panelState = PanelState.from(detent: $0) }
         )
     }
@@ -139,7 +242,7 @@ struct ContentView: View {
                             onReviewWishlist: { wishlistCountry = country },
                             onShowPolicy: { policyCountry = country }
                         )
-                            .padding(.bottom, 310)
+                            .padding(.bottom, hasSideStrip(proxy) ? PanelState.sideStripLowHeight + 20 : 310)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
@@ -152,13 +255,16 @@ struct ContentView: View {
                     }
                 }
                 .sheet(isPresented: systemSheetPresented) {
-                    panelContent
-                        .presentationDetents([.height(290), .medium, .large], selection: detentBinding)
-                        .presentationBackgroundInteraction(.enabled(upThrough: .medium))
-                        .presentationCornerRadius(55)
-                        .presentationDragIndicator(.visible)
+                    let sideStrip = hasSideStrip(proxy)
+                    panelContent(sideStrip: sideStrip)
+                        .presentationDetents(PanelState.detents(sideStrip: sideStrip), selection: detentBinding(sideStrip: sideStrip))
+                        .presentationBackgroundInteraction(
+                            .enabled(upThrough: PanelState.medium.presentationDetent(sideStrip: sideStrip)))
+                        .presentationCornerRadius(sheetCornerRadius)
+                        .presentationDragIndicator(sideStrip ? .hidden : .visible)
                         .interactiveDismissDisabled()
-                        .presentationBackground(sheetSolidBackground)
+                        .presentationBackground(sideStrip ? Color.clear : sheetSolidBackground)
+                        .background(ClearSheetBackgroundEffect(isEnabled: sideStrip))
                 }
         }
         .onAppear {
@@ -224,7 +330,7 @@ struct ContentView: View {
     private func iPadFloatingPanel(currentHeight: CGFloat, availableHeight: CGFloat) -> some View {
         VStack(spacing: 0) {
             iPadDragHandle(availableHeight: availableHeight)
-            panelContent
+            panelContent()
         }
         .frame(width: regularPanelWidth, height: currentHeight)
         .background(sheetSolidBackground)
