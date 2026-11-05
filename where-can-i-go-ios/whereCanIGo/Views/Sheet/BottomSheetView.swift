@@ -50,7 +50,7 @@ enum PanelState: Hashable, CaseIterable {
     }
 
     /// Height of the side-strip `.low` detent: the header plus the top of the tab content.
-    static let sideStripLowHeight: CGFloat = 240
+    static let sideStripLowHeight: CGFloat = 200
     private static let sideStripMediumDetent = PresentationDetent.fraction(0.6)
 
     static func from(detent: PresentationDetent) -> PanelState {
@@ -79,6 +79,7 @@ struct SheetHeader: View {
     @Binding var selectedDiceContinents: Set<Continent>
     @Binding var selectedDiceAirlines: Set<String>
     @Binding var diceIncludesAllEntryRequirements: Bool
+    var isFloatingPanel = false
     @EnvironmentObject private var profileStore: UserProfileStore
     @EnvironmentObject private var friendStore: FriendStore
     @State private var showProfileMenu = false
@@ -94,7 +95,7 @@ struct SheetHeader: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Where Can I Go?")
                         .font(.title2.bold())
-                        .padding(.top, 10)
+                        .padding(.top, isFloatingPanel ? 0 : 10)
                         .padding(.leading, 6)
                     Text(passportLabel)
                         .font(.caption).foregroundStyle(.secondary)
@@ -105,7 +106,7 @@ struct SheetHeader: View {
                 profileMenu
             }
             .padding(.horizontal, 20)
-            .padding(.top, 16)
+            .padding(.top, isFloatingPanel ? 0 : 16)
             .padding(.bottom, 14)
 
             Divider()

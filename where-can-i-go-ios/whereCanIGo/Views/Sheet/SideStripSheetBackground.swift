@@ -15,9 +15,17 @@ struct ClearSheetBackgroundEffect: UIViewRepresentable {
 
     final class ProbeView: UIView {
         var isEnabled = false
+        private let clearEffect = UIColorEffect(color: .clear)
 
         override func didMoveToWindow() {
             super.didMoveToWindow()
+            apply()
+        }
+
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            // Fold transitions can replace the presentation's detents/effects
+            // after updateUIView and didMoveToWindow have already run.
             apply()
         }
 
@@ -26,9 +34,13 @@ struct ClearSheetBackgroundEffect: UIViewRepresentable {
             var responder: UIResponder? = self
             while let current = responder {
                 if let sheet = (current as? UIViewController)?.sheetPresentationController {
-                    let effect: UIVisualEffect? = isEnabled ? UIColorEffect(color: .clear) : nil
-                    sheet.backgroundEffect = effect
-                    for detent in sheet.detents { detent.backgroundEffect = effect }
+                    let effect: UIVisualEffect? = isEnabled ? clearEffect : nil
+                    if sheet.backgroundEffect !== effect {
+                        sheet.backgroundEffect = effect
+                    }
+                    for detent in sheet.detents where detent.backgroundEffect !== effect {
+                        detent.backgroundEffect = effect
+                    }
                     return
                 }
                 responder = current.next
@@ -90,6 +102,11 @@ struct ClearTabContainerBackground: UIViewRepresentable {
             apply()
         }
 
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            apply()
+        }
+
         func apply() {
             guard window != nil, isEnabled || hasCleared else { return }
             var responder: UIResponder? = self
@@ -99,8 +116,12 @@ struct ClearTabContainerBackground: UIViewRepresentable {
             guard let tabContent = responder as? UIViewController,
                   let tabBarController = tabContent.tabBarController else { return }
             let color: UIColor = isEnabled ? .clear : .systemBackground
-            tabContent.view.backgroundColor = color
-            tabBarController.view.backgroundColor = color
+            if tabContent.view.backgroundColor != color {
+                tabContent.view.backgroundColor = color
+            }
+            if tabBarController.view.backgroundColor != color {
+                tabBarController.view.backgroundColor = color
+            }
             hasCleared = isEnabled
         }
     }

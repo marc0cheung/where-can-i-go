@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct whereCanIGoApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var appState = AppState()
     @StateObject private var profileStore = UserProfileStore()
     @StateObject private var friendStore = FriendStore()
@@ -9,6 +10,7 @@ struct whereCanIGoApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .background(HingeObserver())
                 .environmentObject(appState)
                 .environmentObject(profileStore)
                 .environmentObject(friendStore)

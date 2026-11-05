@@ -173,6 +173,10 @@ When the camera changes, the coordinator picks the coarsest level whose error is
   - Compact width (iPhone, narrow iPad window): a system `.sheet` with three detents: 290 pt, medium, large.
   - Regular width: a custom floating panel, 390 pt wide, with its own drag handle and the same three states (`PanelState`).
   - Both use the same `panelContent`: `SheetHeader` (passport, dice, profile) and a `TabView`.
+  - Compact-sheet visibility is derived from the size class so folding back from the regular-width panel cannot leave it dismissed. The floating panel uses tighter header spacing and clips tab content above the native tab bar.
+  - Orientation (`OrientationPolicy.swift`): on iOS 27.1+, `HingeObserver` reports the hinge state to its owning `OrientationSceneDelegate`. The outer screen is portrait-only; the unfolded inner screen allows all four orientations. Both transitions replace the scene's geometry preference. Devices without a hinge keep their existing orientations; transient nil/unknown hinge updates do not change the policy.
+  - Side-strip background probes reapply transparency during layout as well as attachment/update, including detent effects recreated during a fold transition.
+  - Known limitation: the Duo simulator can still rotate the outer screen after folding despite the requested portrait mask. Inner-screen rotation and side-strip transparency were confirmed interactively; further outer-screen rotation investigation is deferred.
 - Tabs (`PanelTab`): Overview, My Visas, Travels. A Manage Data tab exists behind `showsManageDataTab` (currently `false`); its features are reached from the Overview tab.
 - **Travels** (`MyTravelsTab`) has a segmented control for Been, Wishlist and Friends. Been uses `TravelSummaryCard`, `TravelCountryRow`, `CountryTripsSheet` and `TripEditorSheet`. Wishlist uses `WishlistSection`, `CountryPlansSheet` and `PlannedTripEditorSheet`. Friends uses `FriendsSection`, see [Friends](#friends).
 - **Settings** (`SettingsView`, inside `UserProfileView.swift`) holds the search engine choice (`@AppStorage("searchEngine")`), Sharing settings for travel cards, and backup export/import.

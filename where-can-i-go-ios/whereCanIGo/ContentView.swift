@@ -5,7 +5,6 @@ struct ContentView: View {
     @EnvironmentObject private var friendStore: FriendStore
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.scenePhase) private var scenePhase
-    @State private var sheetPresented: Bool = true
     @State private var selectedTab: PanelTab = .overview
     @State private var panelState: PanelState = .low
     @State private var selectedDiceContinents: Set<Continent> = []
@@ -97,10 +96,17 @@ struct ContentView: View {
 
     private let sheetCornerRadius: CGFloat = 55
 
+    @ViewBuilder
     private func tabContent(_ tab: PanelTab, sideStrip: Bool) -> some View {
-        tabRoot(tab)
-            .modifier(SideStripTabContentLayout(
-                isEnabled: sideStrip, topInset: sideStripHeaderHeight, cornerRadius: sheetCornerRadius))
+        if isRegularWidth {
+            // Lists extend beneath the native glass bar unless clipped to their safe-area layout.
+            tabRoot(tab)
+                .clipped()
+        } else {
+            tabRoot(tab)
+                .modifier(SideStripTabContentLayout(
+                    isEnabled: sideStrip, topInset: sideStripHeaderHeight, cornerRadius: sheetCornerRadius))
+        }
     }
 
     @ViewBuilder
@@ -126,7 +132,8 @@ struct ContentView: View {
             panelState: $panelState,
             selectedDiceContinents: $selectedDiceContinents,
             selectedDiceAirlines: $selectedDiceAirlines,
-            diceIncludesAllEntryRequirements: $diceIncludesAllEntryRequirements
+            diceIncludesAllEntryRequirements: $diceIncludesAllEntryRequirements,
+            isFloatingPanel: isRegularWidth
         )
     }
 
@@ -196,16 +203,6 @@ struct ContentView: View {
         }
     }
 
-    /// The system sheet is only presented in compact width. When the window
-    /// widens to a regular size class (e.g. iPad full/large multitasking) the
-    /// binding flips to `false` and the sheet is dismissed automatically.
-    private var systemSheetPresented: Binding<Bool> {
-        Binding(
-            get: { !isRegularWidth && sheetPresented },
-            set: { sheetPresented = $0 }
-        )
-    }
-
     /// Bridge `PanelState` to the system sheet's `PresentationDetent` binding
     /// so the compact-width sheet keeps its native drag-to-resize behavior.
     private func detentBinding(sideStrip: Bool) -> Binding<PresentationDetent> {
@@ -254,7 +251,9 @@ struct ContentView: View {
                         withAnimation(.smooth(duration: 0.25)) { panelState = .low }
                     }
                 }
-                .sheet(isPresented: systemSheetPresented) {
+                // Visibility is derived from layout, not UIKit's dismissal write-back
+                // when a fold transition replaces the sheet with the floating panel.
+                .sheet(isPresented: .constant(!isRegularWidth)) {
                     let sideStrip = hasSideStrip(proxy)
                     panelContent(sideStrip: sideStrip)
                         .presentationDetents(PanelState.detents(sideStrip: sideStrip), selection: detentBinding(sideStrip: sideStrip))
@@ -290,7 +289,6 @@ struct ContentView: View {
         guard url != nil else { return }
         selectedTab = .myTravels
         appState.selectedCountryCode = nil
-        sheetPresented = true
         withAnimation(.smooth(duration: 0.25)) { panelState = .high }
     }
 
