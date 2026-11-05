@@ -1,4 +1,6 @@
-[
+{
+  "updatedAt": "2026-10-02",
+  "entries": [
   {"countryCode":"TWN","category":"visa_free","duration":null,"remark":"Home Sweet Home"},
   {"countryCode":"AFG","category":"visa_required","duration":"30 days","remark":"eVisa"},
   {"countryCode":"ALB","category":"visa_free","duration":"90 days","remark":null},
@@ -175,3 +177,4 @@
   {"countryCode":"MNP","category":"eta","duration":"45 days or 90 days","remark":"45 days under Guam-CNMI waiver with prior authorization and direct Taiwan flight; or 90 days with ESTA"},
   {"countryCode":"TCA","category":"visa_free","duration":"90 days","remark":null}
 ]
+}

@@ -1,4 +1,6 @@
-[
+{
+  "updatedAt": "2026-10-02",
+  "entries": [
   {"countryCode":"CHN","category":"visa_free","duration":null,"remark":"Home Sweet Home"},
   {"countryCode":"ALB","category":"visa_free","duration":"90 days within 180 days","remark":null},
   {"countryCode":"ATG","category":"visa_free","duration":"30 days","remark":null},
@@ -84,3 +86,4 @@
   {"countryCode":"ZMB","category":"visa_free","duration":"30 days","remark":null},
   {"countryCode":"ZWE","category":"visa_on_arrival","duration":"1 month","remark":null}
 ]
+}

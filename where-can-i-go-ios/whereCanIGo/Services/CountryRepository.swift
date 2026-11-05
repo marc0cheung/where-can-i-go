@@ -16,15 +16,19 @@ enum CountryRepository {
         }
     }
 
-    /// Loads bundled defaults named `default_visas_<ISO3>.json`.
-    /// Returns an empty array when the file is missing.
-    static func loadDefaultVisas(passport code: String) throws -> [DefaultVisaEntry] {
+    /// Loads the bundled policy named `default_visas_<ISO3>.json`.
+    /// Returns nil when the file is missing.
+    static func loadBundledEntryPolicy(passport code: String) throws -> BundledEntryPolicy? {
         let resource = "default_visas_\(code.uppercased())"
         guard let url = Bundle.main.url(forResource: resource, withExtension: "json") else {
             logger.error("Bundled entry-policy data not found: \(resource, privacy: .public).json")
-            return []
+            return nil
         }
         let data = try Data(contentsOf: url)
-        return try JSONDecoder().decode([DefaultVisaEntry].self, from: data)
+        return try JSONDecoder().decode(BundledEntryPolicy.self, from: data)
+    }
+
+    static func loadDefaultVisas(passport code: String) throws -> [DefaultVisaEntry] {
+        try loadBundledEntryPolicy(passport: code)?.entries ?? []
     }
 }

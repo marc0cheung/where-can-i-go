@@ -1,4 +1,6 @@
-[
+{
+  "updatedAt": "2026-10-02",
+  "entries": [
   {"countryCode":"HKG","category":"visa_free","duration":null,"remark":"Home Sweet Home"},
   {"countryCode":"ALB","category":"visa_free","duration":"90 days within 180 days","remark":"180-day period counted from the date of first entry."},
   {"countryCode":"DZA","category":"visa_free","duration":"14 days","remark":null},
@@ -180,3 +182,4 @@
   {"countryCode":"ZMB","category":"visa_on_arrival","duration":"varies","remark":"Duration of stay determined by the competent authorities upon arrival."},
   {"countryCode":"ZWE","category":"visa_free","duration":"6 months (holiday); 1 month (business)","remark":"Business stays beyond one month require a work permit."}
 ]
+}

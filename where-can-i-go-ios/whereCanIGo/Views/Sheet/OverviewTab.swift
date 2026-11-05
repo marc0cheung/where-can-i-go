@@ -149,6 +149,9 @@ struct OverviewTab: View {
                 }
 
                 if search.isEmpty && !hasActiveFilters {
+                    BundledPolicyUpdatedNote(style: .centered)
+                        .cardListRow()
+
                     Button {
                         confirmReset = true
                     } label: {
@@ -684,7 +687,10 @@ struct EntryPolicySheet: View {
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                     if isUsingBundledPolicy {
-                        TravelConfirmationNotice()
+                        VStack(alignment: .leading, spacing: 6) {
+                            BundledPolicyUpdatedNote(style: .leading)
+                            TravelConfirmationNotice()
+                        }
                     }
 
                     if hasExistingPolicy {

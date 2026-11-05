@@ -387,9 +387,12 @@ struct SettingsView: View {
                     Text("About")
                         .foregroundStyle(.primary)
                 } footer: {
-                    Text("Version \(AppInfo.version) (\(AppInfo.build))")
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 8)
+                    VStack(spacing: 2) {
+                        Text("Version \(AppInfo.version) (\(AppInfo.build))")
+                        BundledPolicyUpdatedNote(style: .footer)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
                 }
             }
             .disabled(isBusy)

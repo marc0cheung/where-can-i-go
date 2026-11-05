@@ -16,6 +16,7 @@ final class AppState: ObservableObject {
     @Published var pendingAddWishlistCountryCode: String? = nil
     @Published var diceSpinTarget: String? = nil
     @Published private(set) var visaReferenceDate: Date = Date()
+    @Published private(set) var bundledEntryPolicyUpdatedAt: Date?
 
     // MARK: Backup & restore state
     /// True while an import is being applied; UI should disable import/export and edits.
@@ -42,11 +43,12 @@ final class AppState: ObservableObject {
         // 2. Try to load persisted state
         if let saved = try? store.loadAppData() {
             self.data = saved
+            refreshBundledPolicyDate(for: saved.passportCode)
             self.needsPassportSelection = false
         } else {
             // First launch -> show passport picker, pre-load HKG defaults so map renders something behind it.
             self.data.passportCode = "HKG"
-            self.data.defaultVisas = (try? CountryRepository.loadDefaultVisas(passport: "HKG")) ?? []
+            self.data.defaultVisas = loadBundledDefaultVisas(for: "HKG")
             self.needsPassportSelection = true
         }
         self.isLoading = false
@@ -65,7 +67,7 @@ final class AppState: ObservableObject {
 
     func completePassportSelection(_ code: String) {
         data.passportCode = code
-        data.defaultVisas = (try? CountryRepository.loadDefaultVisas(passport: code)) ?? []
+        data.defaultVisas = loadBundledDefaultVisas(for: code)
         needsPassportSelection = false
         save()
     }
@@ -98,8 +100,18 @@ final class AppState: ObservableObject {
     }
 
     func resetDefaultsToBundled() {
-        data.defaultVisas = (try? CountryRepository.loadDefaultVisas(passport: data.passportCode)) ?? []
+        data.defaultVisas = loadBundledDefaultVisas(for: data.passportCode)
         save()
+    }
+
+    private func loadBundledDefaultVisas(for passportCode: String) -> [DefaultVisaEntry] {
+        let policy = try? CountryRepository.loadBundledEntryPolicy(passport: passportCode)
+        bundledEntryPolicyUpdatedAt = policy?.updatedAt
+        return policy?.entries ?? []
+    }
+
+    private func refreshBundledPolicyDate(for passportCode: String) {
+        bundledEntryPolicyUpdatedAt = (try? CountryRepository.loadBundledEntryPolicy(passport: passportCode))?.updatedAt
     }
 
     // MARK: - Visits
@@ -230,6 +242,7 @@ final class AppState: ObservableObject {
 
         // 4. Publish the new state.
         data = candidate
+        refreshBundledPolicyDate(for: passport)
         needsPassportSelection = false
         visaReferenceDate = Date()
         dataRevision &+= 1

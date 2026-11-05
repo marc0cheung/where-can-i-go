@@ -1,4 +1,6 @@
-[
+{
+  "updatedAt": "2026-10-02",
+  "entries": [
   {"countryCode":"MAC","category":"visa_free","duration":null,"remark":"Home Sweet Home"},
   {"countryCode":"ARM","category":"visa_free","duration":"90 days","remark":null},
   {"countryCode":"AZE","category":"visa_free","duration":"30 days","remark":"up to 3 entries from 2026-02-02 to 2027-02-02"},
@@ -148,3 +150,4 @@
   {"countryCode":"SXM","category":"visa_free","duration":"3 months","remark":null},
   {"countryCode":"URY","category":"visa_free","duration":"90 days","remark":null}
 ]
+}
