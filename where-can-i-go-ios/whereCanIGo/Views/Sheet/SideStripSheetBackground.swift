@@ -29,17 +29,30 @@ struct ClearSheetBackgroundEffect: UIViewRepresentable {
             apply()
         }
 
+        private var hasApplied = false
+
         func apply() {
-            guard window != nil else { return }
+            guard window != nil, isEnabled || hasApplied else { return }
             var responder: UIResponder? = self
             while let current = responder {
                 if let sheet = (current as? UIViewController)?.sheetPresentationController {
-                    let effect: UIVisualEffect? = isEnabled ? clearEffect : nil
-                    if sheet.backgroundEffect !== effect {
-                        sheet.backgroundEffect = effect
-                    }
-                    for detent in sheet.detents where detent.backgroundEffect !== effect {
-                        detent.backgroundEffect = effect
+                    if isEnabled {
+                        hasApplied = true
+                        if sheet.backgroundEffect !== clearEffect {
+                            sheet.backgroundEffect = clearEffect
+                        }
+                        for detent in sheet.detents where detent.backgroundEffect !== clearEffect {
+                            detent.backgroundEffect = clearEffect
+                        }
+                    } else {
+                        // Undo only what we set; leave SwiftUI's effects alone.
+                        hasApplied = false
+                        if sheet.backgroundEffect === clearEffect {
+                            sheet.backgroundEffect = nil
+                        }
+                        for detent in sheet.detents where detent.backgroundEffect === clearEffect {
+                            detent.backgroundEffect = nil
+                        }
                     }
                     return
                 }
