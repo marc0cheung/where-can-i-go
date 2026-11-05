@@ -7,7 +7,7 @@ struct FAQView: View {
         let answer: LocalizedStringKey
     }
 
-    private let items: [Item] = [
+    private static let items: [Item] = [
         Item(id: 1, question: "faq.colors.q", answer: "faq.colors.a"),
         Item(id: 2, question: "faq.accuracy.q", answer: "faq.accuracy.a"),
         Item(id: 3, question: "faq.passports.q", answer: "faq.passports.a"),
@@ -23,7 +23,7 @@ struct FAQView: View {
 
     var body: some View {
         List {
-            ForEach(items) { item in
+            ForEach(Self.items) { item in
                 DisclosureGroup(isExpanded: Binding {
                     expanded.contains(item.id)
                 } set: { isOpen in

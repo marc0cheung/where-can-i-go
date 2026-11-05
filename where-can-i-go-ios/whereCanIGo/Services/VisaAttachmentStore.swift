@@ -1,9 +1,13 @@
 import Foundation
 import OSLog
 
-struct VisaAttachmentStore {
+enum VisaAttachmentStore {
     private static var rootURL: URL {
         URL.documentsDirectory.appendingPathComponent("visa_attachments", isDirectory: true)
+    }
+
+    private static var restoreRoot: URL {
+        rootURL.appendingPathComponent(".restore-tmp", isDirectory: true)
     }
 
     private static let logger = Logger(subsystem: "com.marcocheung.whereCanIGo", category: "AttachmentRestore")
@@ -16,12 +20,16 @@ struct VisaAttachmentStore {
         folderURL(for: visaID).appendingPathComponent(fileName)
     }
 
-    static func save(data: Data, fileExtension ext: String, for visaID: UUID) throws -> String {
-        let folder = folderURL(for: visaID)
+    private static func createProtectedDirectory(at url: URL) throws {
         try FileManager.default.createDirectory(
-            at: folder, withIntermediateDirectories: true,
+            at: url, withIntermediateDirectories: true,
             attributes: [.protectionKey: FileProtectionType.complete]
         )
+    }
+
+    static func save(data: Data, fileExtension ext: String, for visaID: UUID) throws -> String {
+        let folder = folderURL(for: visaID)
+        try createProtectedDirectory(at: folder)
         let name = "\(UUID().uuidString).\(ext.lowercased())"
         try data.write(to: folder.appendingPathComponent(name), options: [.atomic, .completeFileProtection])
         return name
@@ -64,20 +72,12 @@ struct VisaAttachmentStore {
     }
 
     static func makeRestoreWorkspace() throws -> (staging: URL, backup: URL) {
-        let workspace = rootURL
-            .appendingPathComponent(".restore-tmp", isDirectory: true)
-            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let workspace = restoreRoot.appendingPathComponent(UUID().uuidString, isDirectory: true)
         let staging = workspace.appendingPathComponent("staging", isDirectory: true)
         let backup = workspace.appendingPathComponent("backup", isDirectory: true)
         do {
-            try FileManager.default.createDirectory(
-                at: staging, withIntermediateDirectories: true,
-                attributes: [.protectionKey: FileProtectionType.complete]
-            )
-            try FileManager.default.createDirectory(
-                at: backup, withIntermediateDirectories: true,
-                attributes: [.protectionKey: FileProtectionType.complete]
-            )
+            try createProtectedDirectory(at: staging)
+            try createProtectedDirectory(at: backup)
             return (staging, backup)
         } catch {
             cleanup(workspace)
@@ -87,10 +87,7 @@ struct VisaAttachmentStore {
 
     static func stage(_ media: [BackupMedia], for visaID: UUID, in stagingRoot: URL) throws {
         let folder = stagingRoot.appendingPathComponent(visaID.uuidString, isDirectory: true)
-        try FileManager.default.createDirectory(
-            at: folder, withIntermediateDirectories: true,
-            attributes: [.protectionKey: FileProtectionType.complete]
-        )
+        try createProtectedDirectory(at: folder)
         var fileNames: Set<String> = []
         for file in media {
             try file.validateIntegrity()
@@ -172,7 +169,6 @@ struct VisaAttachmentStore {
     static func cleanup(_ url: URL) {
         let workspace = ["staging", "backup"].contains(url.lastPathComponent)
             ? url.deletingLastPathComponent() : url
-        let restoreRoot = rootURL.appendingPathComponent(".restore-tmp", isDirectory: true)
         guard UUID(uuidString: workspace.lastPathComponent) != nil,
               workspace.deletingLastPathComponent().standardizedFileURL == restoreRoot.standardizedFileURL else {
             logger.error("Refusing to clean an invalid attachment restore workspace.")

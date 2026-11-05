@@ -149,18 +149,10 @@ struct MyVisasTab: View {
                 coverage = .issuingCountry
             }
         }
-        .onChange(of: appState.pendingAddVisaCountryCode) { _, newCode in
-            if let code = newCode {
-                country = appState.country(for: code)
-                appState.pendingAddVisaCountryCode = nil
-            }
+        .onChange(of: appState.pendingAddVisaCountryCode) { _, _ in
+            consumePendingAddVisaCountry()
         }
-        .onAppear {
-            if let code = appState.pendingAddVisaCountryCode {
-                country = appState.country(for: code)
-                appState.pendingAddVisaCountryCode = nil
-            }
-        }
+        .onAppear(perform: consumePendingAddVisaCountry)
         .onDisappear {
             // Clear the draft when the user leaves this tab.
             resetDraft()
@@ -172,7 +164,7 @@ struct MyVisasTab: View {
     @ViewBuilder
     private var countryCard: some View {
         if let country {
-            VStack(spacing: 4) {
+            filledCard {
                 Text(country.flag)
                     .font(.system(size: 28))
                 Text(country.localizedName())
@@ -181,13 +173,6 @@ struct MyVisasTab: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
-            .frame(maxWidth: .infinity, minHeight: 72)
-            .padding(.vertical, 12)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-            )
         } else {
             ButtonCard(label: "Issuing Country", remark: "Tap to edit", color: .gray)
         }
@@ -198,7 +183,7 @@ struct MyVisasTab: View {
     @ViewBuilder
     private var visaDetailsCard: some View {
         if isVisaDetailsFilled, let expiry {
-            VStack(spacing: 4) {
+            filledCard {
                 Text(duration)
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(.primary)
@@ -209,6 +194,13 @@ struct MyVisasTab: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
+        } else {
+            ButtonCard(label: "Visa Details", remark: "Tap to edit", color: .gray)
+        }
+    }
+
+    private func filledCard(@ViewBuilder content: () -> some View) -> some View {
+        VStack(spacing: 4, content: content)
             .frame(maxWidth: .infinity, minHeight: 72)
             .padding(.vertical, 12)
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
@@ -216,9 +208,6 @@ struct MyVisasTab: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color.gray.opacity(0.4), lineWidth: 1)
             )
-        } else {
-            ButtonCard(label: "Visa Details", remark: "Tap to edit", color: .gray)
-        }
     }
 
     /// Card only shows filled state when both duration and expiry are set.
@@ -241,13 +230,12 @@ struct MyVisasTab: View {
             withAnimation { errorMessage = String(localized: "Please select a country.") }
             return
         }
-        if visaType.isEmpty || duration.isEmpty || expiry == nil {
+        guard !visaType.isEmpty, !duration.isEmpty, let expiryDate = expiry else {
             withAnimation {
                 errorMessage = String(localized: "Please fill in Visa Type, Duration and Expiry Date.")
             }
             return
         }
-        guard let expiryDate = expiry else { return }
         guard DateInputPolicy.isValidVisaPeriod(
             expiryDate: expiryDate, effectiveDate: effectiveDate, requiresEffectiveDate: effectiveDate != nil
         ) else {
@@ -272,6 +260,12 @@ struct MyVisasTab: View {
         resetDraft()
     }
 
+    private func consumePendingAddVisaCountry() {
+        guard let code = appState.pendingAddVisaCountryCode else { return }
+        country = appState.country(for: code)
+        appState.pendingAddVisaCountryCode = nil
+    }
+
     private func resetDraft() {
         country = nil
         visaType = ""
@@ -283,21 +277,6 @@ struct MyVisasTab: View {
         attachmentFileNames = []
         draftVisaID = UUID()
         errorMessage = nil
-    }
-
-    private func expiryReminderColor(for expiryDate: Date) -> Color {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let expiryDay = calendar.startOfDay(for: expiryDate)
-
-        if today > expiryDay {
-            return .red
-        }
-        if let warningStart = calendar.date(byAdding: .day, value: -31, to: expiryDay),
-           today >= warningStart {
-            return .orange
-        }
-        return .secondary
     }
 
     // MARK: - Saved visa row
@@ -329,7 +308,7 @@ struct MyVisasTab: View {
                     }
                     Text("Expires \(v.expiryDate.formatted(date: .abbreviated, time: .omitted))")
                         .font(.caption2)
-                        .foregroundStyle(expiryReminderColor(for: v.expiryDate))
+                        .foregroundStyle(v.expiryReminderColor)
                     if let notes = v.notes, !notes.isEmpty {
                         Text(notes).font(.caption2).foregroundStyle(.secondary)
                     }
@@ -466,32 +445,10 @@ private struct VisaDetailsSheet: View {
                     }
 
                     formLabel("VISA TYPE")
-                    HStack {
-                        TextField("e.g., Single / Multiple / Student / Work", text: $draftVisaType)
-                            .focused($focusedField, equals: .visaType)
-                        if !draftVisaType.isEmpty {
-                            Button { draftVisaType = "" } label: {
-                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding()
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    clearableTextField("e.g., Single / Multiple / Student / Work", text: $draftVisaType, field: .visaType)
 
                     formLabel("DURATION PER VISIT")
-                    HStack {
-                        TextField("e.g., 90 days", text: $draftDuration)
-                            .focused($focusedField, equals: .duration)
-                        if !draftDuration.isEmpty {
-                            Button { draftDuration = "" } label: {
-                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding()
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    clearableTextField("e.g., 90 days", text: $draftDuration, field: .duration)
 
                     formLabel("VALIDITY DATES")
                     VisaValidityFields(
@@ -640,6 +597,21 @@ private struct VisaDetailsSheet: View {
         }
     }
 
+    private func clearableTextField(_ placeholder: LocalizedStringKey, text: Binding<String>, field: Field) -> some View {
+        HStack {
+            TextField(placeholder, text: text)
+                .focused($focusedField, equals: field)
+            if !text.wrappedValue.isEmpty {
+                Button { text.wrappedValue = "" } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding()
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+    }
+
     private func formLabel(_ text: LocalizedStringResource) -> some View {
         Text(text)
             .font(.caption.weight(.semibold))
@@ -672,5 +644,22 @@ private struct ButtonCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(color.opacity(0.4), lineWidth: 1)
         )
+    }
+}
+
+extension PersonalVisa {
+    var expiryReminderColor: Color {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let expiryDay = calendar.startOfDay(for: expiryDate)
+
+        if today > expiryDay {
+            return .red
+        }
+        if let warningStart = calendar.date(byAdding: .day, value: -31, to: expiryDay),
+           today >= warningStart {
+            return .orange
+        }
+        return .secondary
     }
 }

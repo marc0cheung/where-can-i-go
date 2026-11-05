@@ -1,21 +1,12 @@
 import Foundation
 
 final class DataStore {
-    private let fileName = "app_data.json"
-    private let storageURL: URL?
+    private static let fileName = "app_data.json"
+    private let fileURL: URL
 
     init(directory: URL? = nil) {
-        storageURL = directory?.appendingPathComponent("app_data.json")
-    }
-
-    init(fileURL: URL?) {
-        storageURL = fileURL
-    }
-
-    private var fileURL: URL {
-        if let storageURL { return storageURL }
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        return docs.appendingPathComponent(fileName)
+        let directory = directory ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        fileURL = directory.appendingPathComponent(Self.fileName)
     }
 
     func loadAppData() throws -> AppData {

@@ -12,22 +12,25 @@ struct CountryDetailCard: View {
     let onReviewWishlist: () -> Void
     let onShowPolicy: () -> Void
 
-    private var country: Country? { appState.country(for: countryCode) }
     private var hasPlans: Bool {
         appState.data.plannedTrips.contains { $0.countryCode == countryCode }
     }
 
-    private var eligibility: VisaEligibility { appState.visaEligibility(for: countryCode) }
-    private var category: VisaCategory { eligibility.category }
-
-    private var duration: String? {
+    private func duration(for eligibility: VisaEligibility) -> String? {
         if let personal = eligibility.sourceVisa {
             return personal.duration
         }
         return appState.data.defaultVisas.first(where: { $0.countryCode == countryCode })?.duration
     }
 
-    private var summary: some View {
+    private func startAdding(_ pendingCode: ReferenceWritableKeyPath<AppState, String?>, in tab: PanelTab) {
+        appState[keyPath: pendingCode] = countryCode
+        selectedTab = tab
+        withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
+        appState.selectCountry(code: nil)
+    }
+
+    private func summary(_ eligibility: VisaEligibility, country: Country?) -> some View {
         HStack(spacing: 14) {
             Text(country?.flag ?? "🏳️")
                 .font(.system(size: 44))
@@ -44,12 +47,12 @@ struct CountryDetailCard: View {
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.8))
                 } else {
-                    Text(category.localizedDisplayName)
+                    Text(eligibility.category.localizedDisplayName)
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.8))
                 }
 
-                if let dur = duration, !dur.isEmpty {
+                if let dur = duration(for: eligibility), !dur.isEmpty {
                     Text(dur)
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.6))
@@ -67,8 +70,10 @@ struct CountryDetailCard: View {
     }
 
     var body: some View {
+        let country = appState.country(for: countryCode)
+        let eligibility = appState.visaEligibility(for: countryCode)
         HStack(spacing: 14) {
-            Button(action: onShowPolicy) { summary }
+            Button(action: onShowPolicy) { summary(eligibility, country: country) }
                 .buttonStyle(.plain)
                 .accessibilityHint(Text("Opens entry policy details"))
 
@@ -80,30 +85,21 @@ struct CountryDetailCard: View {
                         }
                     } else {
                         Button {
-                            appState.pendingAddWishlistCountryCode = countryCode
-                            selectedTab = .myTravels
-                            withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
-                            appState.selectCountry(code: nil)
+                            startAdding(\.pendingAddWishlistCountryCode, in: .myTravels)
                         } label: {
                             Label("Add to Wishlist", systemImage: "heart")
                         }
                     }
 
                     Button {
-                        appState.pendingAddVisitCountryCode = countryCode
-                        selectedTab = .myTravels
-                        withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
-                        appState.selectCountry(code: nil)
+                        startAdding(\.pendingAddVisitCountryCode, in: .myTravels)
                     } label: {
                         Label("Log a Visit", systemImage: "mappin.and.ellipse")
                     }
 
-                    if category == .visaRequired {
+                    if eligibility.category == .visaRequired {
                         Button {
-                            appState.pendingAddVisaCountryCode = countryCode
-                            selectedTab = .myVisas
-                            withAnimation(.smooth(duration: 0.25)) { panelState = .medium }
-                            appState.selectCountry(code: nil)
+                            startAdding(\.pendingAddVisaCountryCode, in: .myVisas)
                         } label: {
                             Label("Add Visa", systemImage: "doc.badge.plus")
                         }

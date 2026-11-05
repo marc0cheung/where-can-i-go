@@ -38,7 +38,59 @@ enum WorldShapeStore {
     private static func simplified(_ polygon: MKPolygon) -> [CLLocationCoordinate2D] {
         var coords = [CLLocationCoordinate2D](repeating: .init(), count: polygon.pointCount)
         polygon.getCoordinates(&coords, range: NSRange(location: 0, length: polygon.pointCount))
-        return CountryMapView.Coordinator.simplifiedRing(coords, tolerance: 0.6)
+        return simplifiedRing(coords, tolerance: 0.6)
+    }
+
+    private static func simplifiedRing(_ coordinates: [CLLocationCoordinate2D], tolerance: CLLocationDegrees) -> [CLLocationCoordinate2D] {
+        guard let first = coordinates.first, let last = coordinates.last, coordinates.count > 4 else { return coordinates }
+
+        let isClosed = first.latitude == last.latitude && first.longitude == last.longitude
+        var simplified = ramerDouglasPeucker(isClosed ? Array(coordinates.dropLast()) : coordinates, epsilon: tolerance)
+        if isClosed, let first = simplified.first {
+            simplified.append(first)
+        }
+        return simplified.count >= 4 ? simplified : coordinates
+    }
+
+    private static func ramerDouglasPeucker(_ points: [CLLocationCoordinate2D], epsilon: CLLocationDegrees) -> [CLLocationCoordinate2D] {
+        guard points.count > 2 else { return points }
+
+        var keep = [Bool](repeating: false, count: points.count)
+        keep[0] = true
+        keep[points.count - 1] = true
+        var ranges = [(start: 0, end: points.count - 1)]
+        while let range = ranges.popLast() {
+            guard range.end - range.start > 1 else { continue }
+            var maxDistance: CLLocationDegrees = 0
+            var index = range.start
+            for i in (range.start + 1)..<range.end {
+                let distance = perpendicularDistance(points[i], from: points[range.start], to: points[range.end])
+                if distance > maxDistance {
+                    maxDistance = distance
+                    index = i
+                }
+            }
+            if maxDistance > epsilon {
+                keep[index] = true
+                ranges.append((range.start, index))
+                ranges.append((index, range.end))
+            }
+        }
+        return zip(points, keep).compactMap { $1 ? $0 : nil }
+    }
+
+    private static func perpendicularDistance(_ point: CLLocationCoordinate2D,
+                                              from start: CLLocationCoordinate2D,
+                                              to end: CLLocationCoordinate2D) -> CLLocationDegrees {
+        let dx = end.longitude - start.longitude
+        let dy = end.latitude - start.latitude
+
+        if dx == 0 && dy == 0 {
+            return hypot(point.longitude - start.longitude, point.latitude - start.latitude)
+        }
+
+        let numerator = abs(dy * point.longitude - dx * point.latitude + end.longitude * start.latitude - end.latitude * start.longitude)
+        return numerator / hypot(dx, dy)
     }
 }
 

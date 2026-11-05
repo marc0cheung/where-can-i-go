@@ -146,7 +146,7 @@ struct FriendsSection: View {
             let card = try await TravelCardReader.read(from: url)
             let ownID = try? SharingIdentity.currentSharerID()
             incoming = IncomingTravelCard(card: card,
-                                          receipt: friendStore.receipt(for: card, ownSharerID: ownID ?? nil))
+                                          receipt: friendStore.receipt(for: card, ownSharerID: ownID))
         } catch {
             showError(error)
         }

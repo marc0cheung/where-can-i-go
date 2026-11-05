@@ -329,7 +329,6 @@ private struct TransferNotice: Identifiable {
 private func restoreSummaryRows(
     _ summary: UserDataRestoreSummary, completed: Bool
 ) -> [(title: LocalizedStringResource, value: String)] {
-    let counts = summary.previewCounts
     func countText(_ added: Int, _ skipped: Int) -> String {
         switch summary.mode {
         case .replace:
@@ -345,9 +344,9 @@ private func restoreSummaryRows(
         }
     }
     var rows: [(title: LocalizedStringResource, value: String)] = [
-        ("My Visas", countText(counts.personalVisasAdded, counts.personalVisasSkipped)),
-        ("transfer.visits", countText(counts.visitsAdded, counts.visitsSkipped)),
-        ("Wishlist", countText(counts.wishlistAdded, counts.wishlistSkipped))
+        ("My Visas", countText(summary.personalVisasAdded, summary.personalVisasSkipped)),
+        ("transfer.visits", countText(summary.visitsAdded, summary.visitsSkipped)),
+        ("Wishlist", countText(summary.wishlistAdded, summary.wishlistSkipped))
     ]
     if summary.mediaSkipped > 0 {
         rows.append(("import.summary.mediaSkipped", summary.mediaSkipped.formatted()))

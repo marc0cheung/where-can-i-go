@@ -19,7 +19,7 @@ struct CountryPickerSheet: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
 
-                List(filtered) { country in
+                List(appState.countries.filtered(matching: search)) { country in
                     Button {
                         selected = country
                         dismiss()
@@ -42,10 +42,12 @@ struct CountryPickerSheet: View {
             }
         }
     }
+}
 
-    private var filtered: [Country] {
-        if search.isEmpty { return appState.countries }
-        return appState.countries.filter {
+extension Array where Element == Country {
+    func filtered(matching search: String) -> [Country] {
+        if search.isEmpty { return self }
+        return filter {
             $0.localizedName().localizedCaseInsensitiveContains(search) ||
             $0.name.localizedCaseInsensitiveContains(search)
         }

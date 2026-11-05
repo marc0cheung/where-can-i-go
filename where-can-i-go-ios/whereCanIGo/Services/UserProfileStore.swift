@@ -116,20 +116,11 @@ final class UserProfileStore: ObservableObject {
     func restore(_ importedProfile: UserDataBackup.Profile?, mode: UserDataImportMode) throws -> Bool {
         guard let importedProfile else { return false }
         var updated = profile
-        switch mode {
-        case .replace:
+        if mode == .replace || exportDisplayName == nil {
             updated.name = importedProfile.displayName ?? ""
-        case .merge:
-            if exportDisplayName == nil {
-                updated.name = importedProfile.displayName ?? ""
-            }
         }
         updated.name = updated.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let shouldRestorePhoto: Bool
-        switch mode {
-        case .replace: shouldRestorePhoto = true
-        case .merge: shouldRestorePhoto = profile.photoData == nil
-        }
+        let shouldRestorePhoto = mode == .replace || profile.photoData == nil
         if shouldRestorePhoto, let photo = importedProfile.photo {
             try photo.validateIntegrity()
             guard photo.isSupported(for: .profilePhoto),

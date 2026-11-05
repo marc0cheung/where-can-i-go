@@ -7,16 +7,6 @@ enum VisaCategory: String, Codable, CaseIterable, Hashable {
     case myVisa         = "my_visa"
     case visaRequired   = "visa_required"
 
-    var displayName: String {
-        switch self {
-        case .visaFree:      return "Visa Free"
-        case .visaOnArrival: return "Visa on Arrival"
-        case .eta:           return "ETA"
-        case .myVisa:        return "My Visa"
-        case .visaRequired:  return "Visa Required"
-        }
-    }
-
     /// Palette matched to the web prototype.
     var color: Color {
         switch self {

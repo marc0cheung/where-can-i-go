@@ -1,10 +1,7 @@
 import SwiftUI
 
-enum PanelTab: String, CaseIterable, Hashable {
-    case overview   = "Overview"
-    case myVisas    = "My Visas"
-    case myTravels  = "Travels"
-    case manageData = "Manage Data"
+enum PanelTab: Hashable {
+    case overview, myVisas, myTravels, manageData
 
     var localizedTitle: String {
         switch self {

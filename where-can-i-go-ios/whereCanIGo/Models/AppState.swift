@@ -9,7 +9,10 @@ final class AppState: ObservableObject {
     @Published var needsPassportSelection: Bool = false
     @Published var attachmentProtectionError: String?
     @Published var data: AppData = AppData(passportCode: "HKG", defaultVisas: [], personalVisas: [])
-    @Published var countries: [Country] = []
+    @Published var countries: [Country] = [] {
+        didSet { countriesByCode = Dictionary(countries.map { ($0.code, $0) }, uniquingKeysWith: { first, _ in first }) }
+    }
+    private var countriesByCode: [String: Country] = [:]
     @Published var selectedCountryCode: String? = nil
     @Published var pendingAddVisaCountryCode: String? = nil
     @Published var pendingAddVisitCountryCode: String? = nil
@@ -24,8 +27,6 @@ final class AppState: ObservableObject {
     /// Increments every time restored data is committed (including rollbacks).
     /// Views can use `.onChange(of: appState.dataRevision)` or `.id(appState.dataRevision)` to rebuild caches.
     @Published private(set) var dataRevision: Int = 0
-    /// Result of the last fully successful restore, for a success banner/alert.
-    @Published private(set) var lastRestoreSummary: UserDataRestoreSummary? = nil
 
     private let store: DataStore
 
@@ -250,21 +251,6 @@ final class AppState: ObservableObject {
         return removedVisaIDs
     }
 
-    /// Call once, only after data, attachments and profile have all been restored successfully.
-    func publishRestoreSummary(_ summary: UserDataRestoreSummary) {
-        lastRestoreSummary = summary
-        NotificationCenter.default.post(
-            name: .userDataDidRestore,
-            object: self,
-            userInfo: ["summary": summary]
-        )
-    }
-
-    /// Call after the success banner/alert is dismissed.
-    func clearLastRestoreSummary() {
-        lastRestoreSummary = nil
-    }
-
     // MARK: - Helpers
 
     func visaCategory(for code: String) -> VisaCategory {
@@ -285,7 +271,7 @@ final class AppState: ObservableObject {
     }
 
     func country(for code: String) -> Country? {
-        countries.first(where: { $0.code == code })
+        countriesByCode[code]
     }
 
     func save() {

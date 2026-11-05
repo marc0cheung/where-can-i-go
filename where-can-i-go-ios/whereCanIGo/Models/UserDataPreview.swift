@@ -41,27 +41,3 @@ extension UserDataBackup {
         )
     }
 }
-
-/// Added / skipped counts for the import preview and result screens.
-/// For `.replace`, "added" means "imported" and "skipped" is always 0.
-struct UserDataRestorePreviewCounts: Equatable {
-    var personalVisasAdded: Int
-    var personalVisasSkipped: Int
-    var visitsAdded: Int
-    var visitsSkipped: Int
-    var wishlistAdded: Int
-    var wishlistSkipped: Int
-}
-
-extension UserDataRestoreSummary {
-    var previewCounts: UserDataRestorePreviewCounts {
-        UserDataRestorePreviewCounts(
-            personalVisasAdded: personalVisasAdded,
-            personalVisasSkipped: personalVisasSkipped,
-            visitsAdded: visitsAdded,
-            visitsSkipped: visitsSkipped,
-            wishlistAdded: wishlistAdded,
-            wishlistSkipped: wishlistSkipped
-        )
-    }
-}

@@ -77,35 +77,11 @@ struct PassportPickerView: View {
             .padding(.horizontal)
 
             List {
-                if !supportedPassports.isEmpty {
-                    Section {
-                        Text("Supported Passports")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .padding(.top, 16)
-                            .listRowSeparator(.hidden)
-                            .accessibilityAddTraits(.isHeader)
-
-                        ForEach(supportedPassports, id: \.code) { country in
-                            passportRow(country)
-                        }
-                    }
-                }
-
-                if !unsupportedPassports.isEmpty {
-                    Section {
-                        Text("More to come…")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .padding(.top, 16)
-                            .listRowSeparator(.hidden)
-                            .accessibilityAddTraits(.isHeader)
-
-                        ForEach(unsupportedPassports, id: \.code) { country in
-                            passportRow(country)
-                        }
-                    }
-                }
+                let countries = appState.countries.filtered(matching: search)
+                passportSection("Supported Passports",
+                                countries: countries.filter { supportedPassportCodes.contains($0.code) })
+                passportSection("More to come…",
+                                countries: countries.filter { !supportedPassportCodes.contains($0.code) })
             }
             .listStyle(.plain)
 
@@ -168,6 +144,24 @@ struct PassportPickerView: View {
         .background(Color(.systemBackground))
     }
 
+    @ViewBuilder
+    private func passportSection(_ title: LocalizedStringKey, countries: [Country]) -> some View {
+        if !countries.isEmpty {
+            Section {
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 16)
+                    .listRowSeparator(.hidden)
+                    .accessibilityAddTraits(.isHeader)
+
+                ForEach(countries, id: \.code) { country in
+                    passportRow(country)
+                }
+            }
+        }
+    }
+
     private func passportRow(_ country: Country) -> some View {
         let isSupported = supportedPassportCodes.contains(country.code)
         return Button {
@@ -188,21 +182,5 @@ struct PassportPickerView: View {
         .disabled(!isSupported)
         .opacity(isSupported ? 1 : 0.45)
         .accessibilityHint(isSupported ? Text("") : Text("Entry-policy data is not available for this passport."))
-    }
-
-    private var supportedPassports: [Country] {
-        filtered.filter { supportedPassportCodes.contains($0.code) }
-    }
-
-    private var unsupportedPassports: [Country] {
-        filtered.filter { !supportedPassportCodes.contains($0.code) }
-    }
-
-    private var filtered: [Country] {
-        if search.isEmpty { return appState.countries }
-        return appState.countries.filter {
-            $0.localizedName().localizedCaseInsensitiveContains(search) ||
-            $0.name.localizedCaseInsensitiveContains(search)
-        }
     }
 }

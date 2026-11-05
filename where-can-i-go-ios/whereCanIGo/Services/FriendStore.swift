@@ -18,6 +18,11 @@ nonisolated struct Friend: Codable, Identifiable, Equatable, Sendable {
     }
 
     var safetyCode: String { TravelCardCrypto.safetyCode(forPublicKey: publicKey) }
+
+    static func normalizedNickname(_ nickname: String?) -> String? {
+        let trimmed = nickname?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : String(trimmed.prefix(TravelCardLimits.displayNameLength))
+    }
 }
 
 /// Result of checking a received card against the saved friends.
@@ -90,15 +95,15 @@ final class FriendStore: ObservableObject {
     /// the local nickname.
     @discardableResult
     func save(_ card: VerifiedTravelCard, replacing replacedID: String? = nil, now: Date = Date()) throws -> Friend {
-        var updated = friends
-        let previous = updated.first { $0.sharerID == card.sharerID }
-            ?? replacedID.flatMap { id in updated.first { $0.sharerID == id } }
-        if let existing = updated.first(where: { $0.sharerID == card.sharerID }) {
+        let existing = friend(id: card.sharerID)
+        if let existing {
             guard existing.publicKey == card.publicKey,
                   card.payload.cardRevision > existing.card.cardRevision else {
                 return existing
             }
         }
+        let previous = existing ?? replacedID.flatMap(friend(id:))
+        var updated = friends
         updated.removeAll { $0.sharerID == card.sharerID || $0.sharerID == replacedID }
         // friends.json stores whole seconds, so the in-memory copy matches what reloads.
         let now = Date(timeIntervalSince1970: now.timeIntervalSince1970.rounded(.down))
@@ -118,8 +123,7 @@ final class FriendStore: ObservableObject {
     func setNickname(_ nickname: String?, for id: String) throws {
         guard let index = friends.firstIndex(where: { $0.sharerID == id }) else { return }
         var updated = friends
-        let trimmed = nickname?.trimmingCharacters(in: .whitespacesAndNewlines)
-        updated[index].nickname = trimmed?.isEmpty == false ? String(trimmed!.prefix(TravelCardLimits.displayNameLength)) : nil
+        updated[index].nickname = Friend.normalizedNickname(nickname)
         try persist(updated)
     }
 
@@ -165,18 +169,18 @@ final class FriendStore: ObservableObject {
         loadError = nil
     }
 
-    private static var encoder: JSONEncoder {
+    private static let encoder: JSONEncoder = {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.sortedKeys]
         return encoder
-    }
+    }()
 
-    private static var decoder: JSONDecoder {
+    private static let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return decoder
-    }
+    }()
 }
 
 // MARK: - Reading card files

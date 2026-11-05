@@ -31,14 +31,12 @@ struct WishlistSection: View {
     @State private var showAddTrip = false
     @State private var selectedCountry: Country?
 
-    private var countries: [Country] {
-        let codes = Set(appState.data.plannedTrips.map(\.countryCode))
-        return appState.countries.filter { codes.contains($0.code) }.sorted {
+    var body: some View {
+        let tripCounts = Dictionary(appState.data.plannedTrips.map { ($0.countryCode, 1) }, uniquingKeysWith: +)
+        let countries = appState.countries.filter { tripCounts[$0.code] != nil }.sorted {
             $0.localizedName().localizedStandardCompare($1.localizedName()) == .orderedAscending
         }
-    }
-
-    var body: some View {
+        let visitedCodes = appState.visitedCountryCodes
         Button {
             showAddTrip = true
         } label: {
@@ -76,7 +74,11 @@ struct WishlistSection: View {
                 Button {
                     selectedCountry = country
                 } label: {
-                    countryRow(country)
+                    TravelCountryRow(
+                        country: country,
+                        tripCount: tripCounts[country.code, default: 0],
+                        showsVisitedBefore: visitedCodes.contains(country.code)
+                    )
                 }
                 .buttonStyle(.plain)
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -99,15 +101,6 @@ struct WishlistSection: View {
                 .cardListRow()
             }
         }
-    }
-
-    private func countryRow(_ country: Country) -> some View {
-        let plans = appState.plannedTrips(for: country.code)
-        return TravelCountryRow(
-            country: country,
-            tripCount: plans.count,
-            showsVisitedBefore: appState.visitedCountryCodes.contains(country.code)
-        )
     }
 }
 
@@ -144,6 +137,7 @@ struct CountryPlansSheet: View {
     private var plans: [PlannedTrip] { appState.plannedTrips(for: country.code) }
 
     var body: some View {
+        let plans = plans
         NavigationStack {
             List {
                 VStack(alignment: .leading, spacing: 16) {

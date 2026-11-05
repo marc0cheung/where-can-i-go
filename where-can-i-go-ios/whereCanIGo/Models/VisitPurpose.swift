@@ -11,17 +11,6 @@ enum VisitPurpose: String, Codable, CaseIterable, Hashable, Identifiable {
 
     var id: String { rawValue }
 
-    var displayName: String {
-        switch self {
-        case .leisure:  return "Leisure"
-        case .business: return "Business"
-        case .family:   return "Family / Friends"
-        case .study:    return "Study"
-        case .transit:  return "Transit"
-        case .other:    return "Other"
-        }
-    }
-
     var systemImage: String {
         switch self {
         case .leisure:  return "beach.umbrella.fill"

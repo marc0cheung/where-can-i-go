@@ -16,15 +16,24 @@ struct OverviewTab: View {
     @State private var selectedVisitStatus: OverviewVisitStatus? = nil
 
     private var counts: (vf: Int, voa: Int, eta: Int, mine: Int, total: Int) {
-        let vf = appState.data.defaultVisas.filter { $0.category == .visaFree }.count
-        let voa = appState.data.defaultVisas.filter { $0.category == .visaOnArrival }.count
-        let eta = appState.data.defaultVisas.filter { $0.category == .eta }.count
+        var vf = 0, voa = 0, eta = 0
+        for entry in appState.data.defaultVisas {
+            switch entry.category {
+            case .visaFree: vf += 1
+            case .visaOnArrival: voa += 1
+            case .eta: eta += 1
+            default: break
+            }
+        }
         let mine = appState.data.personalVisas.count
         return (vf, voa, eta, mine, vf + voa + eta + mine)
     }
 
     var body: some View {
         GeometryReader { proxy in
+            let counts = self.counts
+            let countries = filteredCountries
+            let plannedCountryCodes = Set(appState.data.plannedTrips.map(\.countryCode))
             List {
                 VStack(spacing: 16) {
                     if isCompactHeight {
@@ -34,7 +43,7 @@ struct OverviewTab: View {
                                 categoryStat(value: counts.voa, label: "Visa on Arrival", category: .visaOnArrival)
                                 categoryStat(value: counts.eta, label: "ETA", category: .eta)
                                 categoryStat(value: counts.mine, label: "My Visas", category: .myVisa)
-                                accessibleStat()
+                                accessibleStat(total: counts.total)
                             }
                             .padding(.horizontal)
                             .padding(.vertical)
@@ -52,7 +61,7 @@ struct OverviewTab: View {
                             }
                             HStack(spacing: 10) {
                                 categoryStat(value: counts.mine, label: "My Visas", category: .myVisa, width: .flexible)
-                                accessibleStat(width: .flexible)
+                                accessibleStat(total: counts.total, width: .flexible)
                             }
                         }
                         .padding(.horizontal)
@@ -79,7 +88,6 @@ struct OverviewTab: View {
 
                     filterControls
 
-                    let countries = filteredCountries
                     if hasActiveFilters || !search.isEmpty {
                         Text("Countries: \(countries.count)")
                             .font(.caption)
@@ -94,8 +102,8 @@ struct OverviewTab: View {
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
 
-                let countries = filteredCountries
                 ForEach(countries) { country in
+                    let hasPlans = plannedCountryCodes.contains(country.code)
                     Button {
                         countryBeingEdited = country
                     } label: {
@@ -114,11 +122,11 @@ struct OverviewTab: View {
                         Button {
                             openWishlist(for: country)
                         } label: {
-                            Image(systemName: hasPlans(for: country) ? "heart.fill" : "heart")
+                            Image(systemName: hasPlans ? "heart.fill" : "heart")
                                 .environment(\.symbolVariants, .none)
                         }
                         .accessibilityLabel(
-                            hasPlans(for: country) ? Text("View Plans") : Text("Add to Wishlist")
+                            hasPlans ? Text("View Plans") : Text("Add to Wishlist")
                         )
                         .tint(.teal)
                     }
@@ -365,12 +373,12 @@ struct OverviewTab: View {
         .accessibilityAddTraits(selection.wrappedValue ? .isSelected : [])
     }
 
-    private func accessibleStat(width: StatCard.WidthMode = .fixed(152)) -> some View {
+    private func accessibleStat(total: Int, width: StatCard.WidthMode = .fixed(152)) -> some View {
         let isSelected = selectedCategories == accessibleCategories
         return Button {
             selectedCategories = isSelected ? [] : accessibleCategories
         } label: {
-            StatCard(value: counts.total, label: "Total Accessible", color: .primary, width: width, isSelected: isSelected)
+            StatCard(value: total, label: "Total Accessible", color: .primary, width: width, isSelected: isSelected)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
@@ -443,7 +451,7 @@ private struct StatCard: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: isFlexible ? .infinity : nil)
+        .frame(maxWidth: fixedWidth == nil ? .infinity : nil)
         .frame(width: fixedWidth)
         .padding(.vertical, 16)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
@@ -462,13 +470,6 @@ private struct StatCard: View {
         }
     }
 
-    private var isFlexible: Bool {
-        switch width {
-        case .fixed: return false
-        case .flexible: return true
-        }
-    }
-
     private var fixedWidth: CGFloat? {
         switch width {
         case .fixed(let value): return value
@@ -481,10 +482,7 @@ private struct CountryRow: View {
     @EnvironmentObject var appState: AppState
     let country: Country
 
-    private var eligibility: VisaEligibility { appState.visaEligibility(for: country.code) }
-    private var category: VisaCategory { eligibility.category }
-
-    private var subtitleText: String {
+    private func subtitleText(for eligibility: VisaEligibility) -> String {
         let entry = appState.data.defaultVisas.first { $0.countryCode == country.code }
         let hasRemark = entry?.remark?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
         let remarkIndicator = hasRemark ? " - \(String(localized: "see remark"))" : ""
@@ -506,26 +504,20 @@ private struct CountryRow: View {
         return String(localized: "Visa Required")
     }
 
-    private var subtitleColor: Color {
-        if let p = eligibility.sourceVisa {
-            return Self.expiryReminderColor(for: p.expiryDate)
-        }
-        return .secondary
-    }
-
     var body: some View {
+        let eligibility = appState.visaEligibility(for: country.code)
         HStack(spacing: 12) {
             CountryFlag(country: country)
             VStack(alignment: .leading, spacing: 2) {
                 Text(country.localizedName()).font(.subheadline.weight(.semibold))
-                Text(subtitleText)
+                Text(subtitleText(for: eligibility))
                     .font(.caption)
-                    .foregroundStyle(subtitleColor)
+                    .foregroundStyle(eligibility.sourceVisa?.expiryReminderColor ?? .secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
             Spacer()
-            Circle().fill(category.color).frame(width: 10, height: 10)
+            Circle().fill(eligibility.category.color).frame(width: 10, height: 10)
                 .accessibilityHidden(true)
         }
         .padding(.vertical, 8)
@@ -533,19 +525,6 @@ private struct CountryRow: View {
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-    }
-
-    private static func expiryReminderColor(for expiryDate: Date) -> Color {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let expiryDay = calendar.startOfDay(for: expiryDate)
-        if today > expiryDay { return .red }
-        if let warningStart = calendar.date(byAdding: .day, value: -31, to: expiryDay),
-            today >= warningStart
-        {
-            return .orange
-        }
-        return .secondary
     }
 }
 
@@ -665,18 +644,7 @@ struct EntryPolicySheet: View {
                     .pickerStyle(.segmented)
 
                     formLabel("DURATION")
-                    HStack {
-                        TextField("e.g., 30 days", text: $policyDuration)
-                            .focused($focusedField, equals: .policyDuration)
-                        if !policyDuration.isEmpty {
-                            Button { policyDuration = "" } label: {
-                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding()
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    clearableTextField("e.g., 30 days", text: $policyDuration, field: .policyDuration)
 
                     formLabel("REMARK")
                     TextField("Additional notes\u{2026}", text: $policyRemark, axis: .vertical)
@@ -718,32 +686,10 @@ struct EntryPolicySheet: View {
                         }
 
                         formLabel("VISA TYPE")
-                        HStack {
-                            TextField("e.g., Single / Multiple / Student / Work", text: $visaType)
-                                .focused($focusedField, equals: .visaType)
-                            if !visaType.isEmpty {
-                                Button { visaType = "" } label: {
-                                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        clearableTextField("e.g., Single / Multiple / Student / Work", text: $visaType, field: .visaType)
 
                         formLabel("DURATION PER VISIT")
-                        HStack {
-                            TextField("e.g., 90 days", text: $visaDuration)
-                                .focused($focusedField, equals: .visaDuration)
-                            if !visaDuration.isEmpty {
-                                Button { visaDuration = "" } label: {
-                                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        clearableTextField("e.g., 90 days", text: $visaDuration, field: .visaDuration)
 
                         formLabel("VALIDITY DATES")
                         VisaValidityFields(
@@ -1010,6 +956,21 @@ struct EntryPolicySheet: View {
         if let name = try? VisaAttachmentStore.save(data: data, fileExtension: ext, for: visaID) {
             attachmentFileNames.append(name)
         }
+    }
+
+    private func clearableTextField(_ placeholder: LocalizedStringKey, text: Binding<String>, field: Field) -> some View {
+        HStack {
+            TextField(placeholder, text: text)
+                .focused($focusedField, equals: field)
+            if !text.wrappedValue.isEmpty {
+                Button { text.wrappedValue = "" } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding()
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
     }
 
     private func formLabel(_ text: LocalizedStringResource) -> some View {

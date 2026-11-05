@@ -33,8 +33,6 @@ nonisolated struct TravelCardFields: Codable, Equatable, Hashable, Sendable {
     var length = false
     var location = false
     var purpose = false
-
-    var isCountriesOnly: Bool { !dates && !length && !location && !purpose }
 }
 
 nonisolated struct TravelCardShared: Codable, Equatable, Sendable {
@@ -241,22 +239,17 @@ nonisolated extension TravelCardPayload {
 
 // MARK: - Display helpers
 
-nonisolated extension TravelCardVisit {
-    var purposeValue: VisitPurpose? {
-        purpose.map { VisitPurpose(rawValue: $0) ?? .other }
-    }
-
-    var start: Date? { startDate.flatMap { try? BackupDay.date(from: $0) } }
-    var end: Date? { endDate.flatMap { try? BackupDay.date(from: $0) } }
-
-    var dayCount: Int? {
-        if let days { return days }
-        guard let start, let end else { return nil }
-        return TravelCardDates.inclusiveDays(from: start, to: end)
-    }
+nonisolated protocol TravelCardRecord {
+    var startDate: String? { get }
+    var endDate: String? { get }
+    var days: Int? { get }
+    var purpose: String? { get }
 }
 
-nonisolated extension TravelCardPlan {
+nonisolated extension TravelCardVisit: TravelCardRecord {}
+nonisolated extension TravelCardPlan: TravelCardRecord {}
+
+nonisolated extension TravelCardRecord {
     var purposeValue: VisitPurpose? {
         purpose.map { VisitPurpose(rawValue: $0) ?? .other }
     }

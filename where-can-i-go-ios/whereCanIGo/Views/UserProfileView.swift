@@ -266,13 +266,13 @@ struct UserProfileView: View {
             saveError = error.localizedDescription
         }
     }
+}
 
-    private func errorBinding(_ error: Binding<String?>) -> Binding<Bool> {
-        Binding {
-            error.wrappedValue != nil
-        } set: { isPresented in
-            if !isPresented { error.wrappedValue = nil }
-        }
+private func errorBinding(_ error: Binding<String?>) -> Binding<Bool> {
+    Binding {
+        error.wrappedValue != nil
+    } set: { isPresented in
+        if !isPresented { error.wrappedValue = nil }
     }
 }
 
@@ -431,11 +431,7 @@ struct SettingsView: View {
             .sheet(item: $importSelection) { selection in
                 ImportPreviewView(service: service, backup: selection.backup)
             }
-            .alert("import.error.title", isPresented: Binding {
-                importError != nil
-            } set: { presented in
-                if !presented { importError = nil }
-            }) {
+            .alert("import.error.title", isPresented: errorBinding($importError)) {
                 Button("OK", role: .cancel) { importError = nil }
             } message: {
                 Text(verbatim: importError ?? "")

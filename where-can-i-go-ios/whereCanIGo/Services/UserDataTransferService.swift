@@ -217,7 +217,6 @@ final class UserDataTransferService: ObservableObject {
         summary.friendsRestored = friendsRestored
         summary.sharingIdentityRestored = identityResult == .installed
         summary.sharingIdentityKept = identityResult == .kept
-        appState.publishRestoreSummary(summary)
         return summary
     }
 

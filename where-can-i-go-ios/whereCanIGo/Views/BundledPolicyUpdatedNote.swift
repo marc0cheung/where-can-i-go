@@ -21,10 +21,10 @@ struct BundledPolicyUpdatedNote: View {
             case .centered:
                 message
                     .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 8)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
             case .leading:
                 message
                     .font(.footnote)

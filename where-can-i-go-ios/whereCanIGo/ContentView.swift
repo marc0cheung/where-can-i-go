@@ -234,11 +234,7 @@ struct ContentView: View {
                     if !isRegularWidth,
                        let code = appState.selectedCountryCode,
                        let country = appState.country(for: code) {
-                        CountryDetailCard(
-                            countryCode: code, selectedTab: $selectedTab, panelState: $panelState,
-                            onReviewWishlist: { wishlistCountry = country },
-                            onShowPolicy: { policyCountry = country }
-                        )
+                        countryDetailCard(code: code, country: country)
                             .padding(.bottom, hasSideStrip(proxy) ? PanelState.sideStripLowHeight + 20 : 310)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -284,6 +280,14 @@ struct ContentView: View {
         }
     }
 
+    private func countryDetailCard(code: String, country: Country) -> some View {
+        CountryDetailCard(
+            countryCode: code, selectedTab: $selectedTab, panelState: $panelState,
+            onReviewWishlist: { wishlistCountry = country },
+            onShowPolicy: { policyCountry = country }
+        )
+    }
+
     /// Opens the Travels tab so the Friends screen can handle an opened card file.
     private func showIncomingCard(_ url: URL?) {
         guard url != nil else { return }
@@ -304,11 +308,7 @@ struct ContentView: View {
         VStack(spacing: 12) {
             if let code = appState.selectedCountryCode,
                let country = appState.country(for: code) {
-                CountryDetailCard(
-                    countryCode: code, selectedTab: $selectedTab, panelState: $panelState,
-                    onReviewWishlist: { wishlistCountry = country },
-                    onShowPolicy: { policyCountry = country }
-                )
+                countryDetailCard(code: code, country: country)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
 

@@ -80,7 +80,7 @@ struct AcknowledgementsView: View {
         let url: URL
     }
 
-    private let sources: [Source] = [
+    private static let sources: [Source] = [
         Source(id: "HKG", title: "Hong Kong: Immigration Department",
                url: URL(string: "https://www.immd.gov.hk/hkt/service/travel_document/visa_free_access.html")!),
         Source(id: "MAC", title: "Macao: Identification Services Bureau",
@@ -94,7 +94,7 @@ struct AcknowledgementsView: View {
     var body: some View {
         Form {
             Section {
-                ForEach(sources) { source in
+                ForEach(Self.sources) { source in
                     Link(destination: source.url) {
                         LabeledContent {
                             Image(systemName: "arrow.up.right")

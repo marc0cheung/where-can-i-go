@@ -1,8 +1,7 @@
 import SwiftUI
 
 /// A heading followed by a paragraph. The body supports Markdown via `LocalizedStringKey`.
-struct DocumentSection: Identifiable {
-    let id = UUID()
+struct DocumentSection {
     let title: LocalizedStringKey
     let body: LocalizedStringKey
 }
@@ -20,7 +19,7 @@ struct DocumentView: View {
                     Text(intro)
                         .font(.body)
                 }
-                ForEach(sections) { section in
+                ForEach(Array(sections.enumerated()), id: \.offset) { _, section in
                     VStack(alignment: .leading, spacing: 8) {
                         Text(section.title)
                             .font(.headline)

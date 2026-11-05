@@ -17,13 +17,7 @@ struct CountryMapView: UIViewRepresentable {
         map.delegate = context.coordinator
 
         // Use a globe-capable style so zooming out transitions into 3D Earth.
-        if #available(iOS 16.0, *) {
-            map.preferredConfiguration = MKHybridMapConfiguration(
-                elevationStyle: .realistic
-            )
-        } else {
-            map.mapType = .mutedStandard
-        }
+        map.preferredConfiguration = MKHybridMapConfiguration(elevationStyle: .realistic)
 
         map.pointOfInterestFilter = .excludingAll
         map.showsCompass = false
@@ -103,6 +97,9 @@ struct CountryMapView: UIViewRepresentable {
                 ring.stroke()
             }
         }()
+        private static let borderColor = UIColor.white.withAlphaComponent(0.7)
+        private static let fillColors: [VisaCategory: UIColor] = Dictionary(
+            uniqueKeysWithValues: VisaCategory.allCases.map { ($0, UIColor($0.color)) })
         private var rendererCache: [ObjectIdentifier: MKOverlayPathRenderer] = [:]
 
         // MARK: Level of detail
@@ -162,6 +159,10 @@ struct CountryMapView: UIViewRepresentable {
         }
 
         // MARK: - Country geometry lookups
+
+        private var currentLevelOverlays: [MKOverlay] {
+            detailLevels.indices.contains(currentLevel) ? detailLevels[currentLevel] : []
+        }
 
         private func overlays(for isoCode: String, in level: [MKOverlay]) -> [MKOverlay] {
             level.filter { ($0 as? MKShape)?.title == isoCode }
@@ -292,43 +293,25 @@ struct CountryMapView: UIViewRepresentable {
 
         @objc func handleTap(_ recognizer: UITapGestureRecognizer) {
             guard let mapView = recognizer.view as? MKMapView, !isSpinning else { return }
-            let touchPoint = recognizer.location(in: mapView)
-            let coordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
-            let mapPoint = MKMapPoint(coordinate)
-            let tappedISO = hitTest(mapPoint: mapPoint, in: mapView)
+            let coordinate = mapView.convert(recognizer.location(in: mapView), toCoordinateFrom: mapView)
+            let tappedISO = hitTest(mapPoint: MKMapPoint(coordinate))
 
             Task { @MainActor in
-                if let code = tappedISO, code == appState.selectedCountryCode {
-                    appState.selectCountry(code: nil)
-                } else {
-                    appState.selectCountry(code: tappedISO)
-                }
+                appState.selectCountry(code: tappedISO == appState.selectedCountryCode ? nil : tappedISO)
                 refreshOverlayColors(on: mapView)
             }
         }
 
-        private func hitTest(mapPoint: MKMapPoint, in mapView: MKMapView) -> String? {
+        private func hitTest(mapPoint: MKMapPoint) -> String? {
             var bestISO: String? = nil
             var bestArea: Double = .infinity
 
-            for overlay in detailLevels.indices.contains(currentLevel) ? detailLevels[currentLevel] : [] {
+            for overlay in currentLevelOverlays {
                 let rect = overlay.boundingMapRect
-                guard rect.contains(mapPoint) else { continue }
-                let key = ObjectIdentifier(overlay)
-                guard let renderer = rendererCache[key] else { continue }
-                let rendererPoint = renderer.point(for: mapPoint)
-
-                let hit: Bool
-                if let pr = renderer as? MKPolygonRenderer {
-                    hit = pr.path?.contains(rendererPoint) == true
-                } else if let mr = renderer as? MKMultiPolygonRenderer {
-                    hit = mr.path?.contains(rendererPoint) == true
-                } else {
-                    continue
-                }
-
-                guard hit else { continue }
-                let area = rect.size.width * rect.size.height
+                guard rect.contains(mapPoint),
+                      let renderer = rendererCache[ObjectIdentifier(overlay)],
+                      renderer.path?.contains(renderer.point(for: mapPoint)) == true else { continue }
+                let area = CountryGeometry.area(of: rect)
                 if area < bestArea {
                     bestArea = area
                     bestISO = (overlay as? MKShape)?.title ?? nil
@@ -424,9 +407,8 @@ struct CountryMapView: UIViewRepresentable {
             if !codesToRedraw.isEmpty {
                 for overlay in map.overlays {
                     guard let iso = (overlay as? MKShape)?.title,
-                          codesToRedraw.contains(iso) else { continue }
-                    let key = ObjectIdentifier(overlay)
-                    guard let renderer = rendererCache[key] else { continue }
+                          codesToRedraw.contains(iso),
+                          let renderer = rendererCache[ObjectIdentifier(overlay)] else { continue }
                     apply(renderer: renderer, for: overlay)
                     renderer.setNeedsDisplay()
                 }
@@ -451,8 +433,8 @@ struct CountryMapView: UIViewRepresentable {
             let isSelected = iso != nil && iso == appState.selectedCountryCode
             // The selection outline is a separate overlay drawn above every fill
             // (see `rebuildSelectionHighlight`), so all fills share the same thin border.
-            renderer.fillColor = UIColor(category.color).withAlphaComponent(isSelected ? 1.0 : 0.85)
-            renderer.strokeColor = UIColor.white.withAlphaComponent(0.7)
+            renderer.fillColor = Self.fillColors[category]?.withAlphaComponent(isSelected ? 1.0 : 0.85)
+            renderer.strokeColor = Self.borderColor
             renderer.lineWidth = 0.5
         }
 
@@ -537,10 +519,9 @@ struct CountryMapView: UIViewRepresentable {
                 highlightOverlays.removeAll()
             }
 
-            guard let code = appState.selectedCountryCode,
-                  detailLevels.indices.contains(currentLevel) else { return }
+            guard let code = appState.selectedCountryCode else { return }
 
-            let polygons = overlays(for: code, in: detailLevels[currentLevel]).flatMap(Self.polygons(of:))
+            let polygons = overlays(for: code, in: currentLevelOverlays).flatMap(Self.polygons(of:))
             guard !polygons.isEmpty else { return }
 
             var rings: [MKPolyline] = []
@@ -594,104 +575,38 @@ struct CountryMapView: UIViewRepresentable {
             })
         }
 
-        // MARK: - Ring simplification (degrees; used by WorldMapView)
-
-        nonisolated static func simplifiedRing(_ coordinates: [CLLocationCoordinate2D], tolerance: CLLocationDegrees) -> [CLLocationCoordinate2D] {
-            guard coordinates.count > 4 else { return coordinates }
-
-            let isClosed = {
-                guard let first = coordinates.first, let last = coordinates.last else { return false }
-                return coordinatesEqual(first, last)
-            }()
-            var ring = coordinates
-            if isClosed {
-                ring.removeLast()
-            }
-
-            var simplified = ramerDouglasPeucker(points: ring, epsilon: tolerance)
-
-            if isClosed, let first = simplified.first {
-                simplified.append(first)
-            }
-
-            return simplified.count >= 4 ? simplified : coordinates
-        }
-
-        nonisolated static func coordinatesEqual(_ lhs: CLLocationCoordinate2D, _ rhs: CLLocationCoordinate2D) -> Bool {
-            lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
-        }
-
-        nonisolated static func ramerDouglasPeucker(points: [CLLocationCoordinate2D], epsilon: CLLocationDegrees) -> [CLLocationCoordinate2D] {
-            guard points.count > 2 else { return points }
-
-            let start = points[0]
-            let end = points[points.count - 1]
-            var maxDistance: CLLocationDegrees = 0
-            var index = 0
-
-            for i in 1..<(points.count - 1) {
-                let distance = perpendicularDistance(points[i], from: start, to: end)
-                if distance > maxDistance {
-                    maxDistance = distance
-                    index = i
-                }
-            }
-
-            if maxDistance > epsilon {
-                let left = ramerDouglasPeucker(points: Array(points[0...index]), epsilon: epsilon)
-                let right = ramerDouglasPeucker(points: Array(points[index...]), epsilon: epsilon)
-                return Array(left.dropLast()) + right
-            }
-
-            return [start, end]
-        }
-
-        nonisolated static func perpendicularDistance(_ point: CLLocationCoordinate2D,
-                                          from start: CLLocationCoordinate2D,
-                                          to end: CLLocationCoordinate2D) -> CLLocationDegrees {
-            let dx = end.longitude - start.longitude
-            let dy = end.latitude - start.latitude
-
-            if dx == 0 && dy == 0 {
-                return hypot(point.longitude - start.longitude, point.latitude - start.latitude)
-            }
-
-            let numerator = abs(dy * point.longitude - dx * point.latitude + end.longitude * start.latitude - end.latitude * start.longitude)
-            let denominator = hypot(dx, dy)
-            return numerator / denominator
-        }
-
         // MARK: MKMapViewDelegate
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             switch overlay {
             case let glow as SelectionGlowOverlay:
-                let renderer = MKMultiPolylineRenderer(multiPolyline: glow)
-                renderer.strokeColor = SelectionHighlightStyle.glowColor
-                renderer.lineWidth = SelectionHighlightStyle.glowWidth
-                renderer.lineJoin = .round
-                renderer.lineCap = .round
-                return renderer
+                return Self.outlineRenderer(for: glow, color: SelectionHighlightStyle.glowColor,
+                                            width: SelectionHighlightStyle.glowWidth)
             case let line as SelectionLineOverlay:
-                let renderer = MKMultiPolylineRenderer(multiPolyline: line)
-                renderer.strokeColor = SelectionHighlightStyle.lineColor
-                renderer.lineWidth = SelectionHighlightStyle.lineWidth
-                renderer.lineJoin = .round
-                renderer.lineCap = .round
-                return renderer
+                return Self.outlineRenderer(for: line, color: SelectionHighlightStyle.lineColor,
+                                            width: SelectionHighlightStyle.lineWidth)
             case let polygon as MKPolygon:
-                let renderer = MKPolygonRenderer(polygon: polygon)
-                rendererCache[ObjectIdentifier(overlay)] = renderer
-                apply(renderer: renderer, for: overlay)
-                return renderer
+                return cachedFillRenderer(MKPolygonRenderer(polygon: polygon), for: overlay)
             case let multiPolygon as MKMultiPolygon:
-                let renderer = MKMultiPolygonRenderer(multiPolygon: multiPolygon)
-                rendererCache[ObjectIdentifier(overlay)] = renderer
-                apply(renderer: renderer, for: overlay)
-                return renderer
+                return cachedFillRenderer(MKMultiPolygonRenderer(multiPolygon: multiPolygon), for: overlay)
             default:
                 return MKOverlayRenderer(overlay: overlay)
             }
+        }
+
+        private static func outlineRenderer(for overlay: MKMultiPolyline, color: UIColor, width: CGFloat) -> MKOverlayRenderer {
+            let renderer = MKMultiPolylineRenderer(multiPolyline: overlay)
+            renderer.strokeColor = color
+            renderer.lineWidth = width
+            renderer.lineJoin = .round
+            renderer.lineCap = .round
+            return renderer
+        }
+
+        private func cachedFillRenderer(_ renderer: MKOverlayPathRenderer, for overlay: MKOverlay) -> MKOverlayRenderer {
+            rendererCache[ObjectIdentifier(overlay)] = renderer
+            apply(renderer: renderer, for: overlay)
+            return renderer
         }
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {

@@ -1,6 +1,5 @@
 import SwiftUI
 import PDFKit
-import PhotosUI
 
 // MARK: - Shared attachment model
 

@@ -19,6 +19,7 @@ struct FriendDetailSheet: View {
     private var friend: Friend? { friendStore.friend(id: friendID) }
 
     var body: some View {
+        let friend = self.friend
         NavigationStack(path: $path) {
             Group {
                 if let friend {
@@ -183,9 +184,11 @@ struct FriendDetailSheet: View {
     @ViewBuilder
     private func countryRows(codes: [String], wishlist: Bool) -> some View {
         let counts = Dictionary(codes.map { ($0, 1) }, uniquingKeysWith: +)
-        let countries = counts.keys.compactMap { appState.country(for: $0) }.sorted {
-            $0.localizedName().localizedStandardCompare($1.localizedName()) == .orderedAscending
-        }
+        let countries = counts.keys
+            .compactMap { code in appState.country(for: code).map { ($0, $0.localizedName()) } }
+            .sorted { $0.1.localizedStandardCompare($1.1) == .orderedAscending }
+            .map(\.0)
+        let visitedCodes: Set<String> = wishlist ? appState.visitedCountryCodes : []
         Text("Countries")
             .font(.subheadline.bold())
             .foregroundStyle(.secondary)
@@ -197,7 +200,7 @@ struct FriendDetailSheet: View {
                 TravelCountryRow(
                     country: country,
                     tripCount: counts[country.code] ?? 0,
-                    showsVisitedBefore: wishlist && appState.visitedCountryCodes.contains(country.code))
+                    showsVisitedBefore: visitedCodes.contains(country.code))
             }
             .buttonStyle(.plain)
             .cardListRow()
@@ -263,6 +266,7 @@ private struct FriendCountryRecordsView: View {
     }
 
     var body: some View {
+        let rows = self.rows
         List {
             HStack(spacing: 14) {
                 Text(country?.flag ?? "").font(.system(size: 44))

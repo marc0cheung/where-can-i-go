@@ -328,9 +328,8 @@ nonisolated struct FriendRecord: Codable, Sendable {
         var card = card
         do { try card.validateAndNormalize(reencodePhoto: false) }
         catch { throw UserDataBackupError.corrupted }
-        let name = nickname?.trimmingCharacters(in: .whitespacesAndNewlines)
         return Friend(sharerID: sharerID, publicKey: publicKey,
-                      nickname: name?.isEmpty == false ? String(name!.prefix(TravelCardLimits.displayNameLength)) : nil,
+                      nickname: Friend.normalizedNickname(nickname),
                       addedAt: addedAt, lastReceivedAt: lastReceivedAt, card: card)
     }
 }
@@ -459,18 +458,21 @@ nonisolated enum BackupDay {
 
 /// Exact instants (createdAt, exportedAt), UTC with milliseconds.
 nonisolated enum BackupTimestamp {
-    private static func formatter(fractional: Bool) -> ISO8601DateFormatter {
+    private nonisolated(unsafe) static let fractionalFormatter = formatter(options: [.withInternetDateTime, .withFractionalSeconds])
+    private nonisolated(unsafe) static let wholeSecondFormatter = formatter(options: [.withInternetDateTime])
+
+    private static func formatter(options: ISO8601DateFormatter.Options) -> ISO8601DateFormatter {
         let f = ISO8601DateFormatter()
-        f.formatOptions = fractional ? [.withInternetDateTime, .withFractionalSeconds] : [.withInternetDateTime]
+        f.formatOptions = options
         return f
     }
 
     static func string(from date: Date) -> String {
-        formatter(fractional: true).string(from: date)
+        fractionalFormatter.string(from: date)
     }
 
     static func date(from value: String) -> Date? {
-        formatter(fractional: true).date(from: value) ?? formatter(fractional: false).date(from: value)
+        fractionalFormatter.date(from: value) ?? wholeSecondFormatter.date(from: value)
     }
 }
 

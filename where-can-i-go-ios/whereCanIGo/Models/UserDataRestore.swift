@@ -42,7 +42,6 @@ struct UserDataRestoreSummary: Equatable {
     var sharingIdentityRestored: Bool = false
     /// Merge kept this device's sharing identity because it differs from the file's.
     var sharingIdentityKept: Bool = false
-    var restoredAt: Date = Date()
 }
 
 enum UserDataRestoreError: LocalizedError {
@@ -60,10 +59,4 @@ enum UserDataRestoreError: LocalizedError {
             return String(localized: "restore.error.saveFailed")
         }
     }
-}
-
-extension Notification.Name {
-    /// Posted on the main actor after a restore fully succeeds.
-    /// userInfo["summary"] contains the UserDataRestoreSummary.
-    static let userDataDidRestore = Notification.Name("UserDataDidRestore")
 }

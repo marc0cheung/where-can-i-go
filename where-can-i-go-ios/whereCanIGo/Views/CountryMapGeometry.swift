@@ -13,8 +13,6 @@ nonisolated struct PreparedCountryOverlays: @unchecked Sendable {
     let levels: [[MKOverlay]]
     /// Simplification tolerance (in map points) used for each entry of `levels`.
     let tolerances: [Double]
-
-    var finest: [MKOverlay] { levels.last ?? [] }
 }
 
 nonisolated enum CountryGeometry {

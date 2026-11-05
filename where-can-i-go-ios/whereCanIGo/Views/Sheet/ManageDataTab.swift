@@ -20,7 +20,6 @@ struct ManageDataTab: View {
                         HStack {
                             Text(country.map { "\($0.flag)  \($0.localizedName())" } ?? String(localized: "Select country…"))
                                 .foregroundStyle(country == nil ? .secondary : .primary)
-                                .foregroundStyle(.gray)
                             Spacer()
                             Image(systemName: "chevron.down").foregroundStyle(.gray)
                         }
@@ -82,10 +81,10 @@ struct ManageDataTab: View {
     }
 
     private var sortedDefaults: [DefaultVisaEntry] {
-        appState.data.defaultVisas.sorted { a, b in
-            (appState.country(for: a.countryCode)?.localizedName() ?? "") <
-            (appState.country(for: b.countryCode)?.localizedName() ?? "")
-        }
+        appState.data.defaultVisas
+            .map { (entry: $0, name: appState.country(for: $0.countryCode)?.localizedName() ?? "") }
+            .sorted { $0.name < $1.name }
+            .map(\.entry)
     }
 
     private func addEntry() {

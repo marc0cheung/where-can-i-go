@@ -20,9 +20,9 @@ struct MyTravelsTab: View {
 
     /// Visited countries grouped with their visits, most-recent country first.
     private var visitedGroups: [(country: Country, visits: [Visit])] {
-        appState.visitedCountryCodes.compactMap { code -> (Country, [Visit])? in
+        Dictionary(grouping: appState.data.visits, by: \.countryCode).compactMap { code, visits -> (Country, [Visit])? in
             guard let country = appState.country(for: code) else { return nil }
-            return (country, appState.visits(for: code))
+            return (country, visits.sorted { ($0.startDate ?? .distantPast) > ($1.startDate ?? .distantPast) })
         }
         .sorted { lhs, rhs in
             let l = lhs.1.first?.startDate ?? .distantPast
@@ -112,7 +112,8 @@ struct MyTravelsTab: View {
     private var showingWishlist: Bool { segment == .wishlist }
 
     private var visitedContent: some View {
-        Group {
+        let visitedGroups = visitedGroups
+        return Group {
             Button {
                 addTripInitialCountry = nil
                 showAddTrip = true
@@ -140,7 +141,7 @@ struct MyTravelsTab: View {
                     Button {
                         countryDetail = group.country
                     } label: {
-                        countryRow(group.country, visits: group.visits)
+                        TravelCountryRow(country: group.country, tripCount: group.visits.count)
                     }
                     .buttonStyle(.plain)
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -195,10 +196,6 @@ struct MyTravelsTab: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
-    }
-
-    private func countryRow(_ country: Country, visits: [Visit]) -> some View {
-        TravelCountryRow(country: country, tripCount: visits.count)
     }
 }
 
@@ -422,10 +419,11 @@ struct TravelSummaryView: View {
     @State private var showEasterEgg = false
 
     var body: some View {
+        let stats = TravelStats(appState: appState)
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    TravelPassportCard(stats: TravelStats(appState: appState))
+                    TravelPassportCard(stats: stats)
                         .frame(maxWidth: 400)
                         .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         .onTapGesture(perform: registerCardTap)
@@ -440,7 +438,7 @@ struct TravelSummaryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    if let image = shareImage() {
+                    if let image = shareImage(stats: stats) {
                         ShareLink(
                             item: image,
                             preview: SharePreview("Where I've Been", image: image)
@@ -468,9 +466,9 @@ struct TravelSummaryView: View {
     }
 
     /// Renders the passport card off-screen to a shareable image.
-    @MainActor private func shareImage() -> Image? {
+    private func shareImage(stats: TravelStats) -> Image? {
         let renderer = ImageRenderer(
-            content: TravelPassportCard(stats: TravelStats(appState: appState))
+            content: TravelPassportCard(stats: stats)
                 .frame(width: 380)
                 .padding(20)
                 .background(Color(.systemBackground))
@@ -497,29 +495,8 @@ struct TravelPassportCard: View {
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.white.opacity(0.7))
                 HStack(alignment: .top, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(stats.countryCount)")
-                            .font(.system(size: 52, weight: .bold))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.5)
-                        Text(stats.countryCount == 1 ? "country" : "countries")
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(.white.opacity(0.85))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(stats.tripCount)")
-                            .font(.system(size: 52, weight: .bold))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.5)
-                        Text(stats.tripCount == 1 ? "trip" : "trips")
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(.white.opacity(0.85))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    countBlock(stats.countryCount, stats.countryCount == 1 ? "country" : "countries")
+                    countBlock(stats.tripCount, stats.tripCount == 1 ? "trip" : "trips")
                 }
             }
 
@@ -554,6 +531,20 @@ struct TravelPassportCard: View {
             ),
             in: RoundedRectangle(cornerRadius: 24, style: .continuous)
         )
+    }
+
+    private func countBlock(_ value: Int, _ label: LocalizedStringKey) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("\(value)")
+                .font(.system(size: 52, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+            Text(label)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.85))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func statBlock(_ value: String, _ label: LocalizedStringResource) -> some View {
@@ -608,13 +599,13 @@ struct CountryTripsSheet: View {
     @State private var pendingDeletion: RecordDeletion?
 
     private var visits: [Visit] { appState.visits(for: country.code) }
-    private var totalDays: Int { visits.compactMap { $0.dayCount }.reduce(0, +) }
 
     var body: some View {
+        let visits = visits
         NavigationStack {
             List {
                 VStack(alignment: .leading, spacing: 16) {
-                    header
+                    header(visits: visits)
 
                     Button {
                         showAddTrip = true
@@ -687,7 +678,8 @@ struct CountryTripsSheet: View {
         if visits.isEmpty { dismiss() }
     }
 
-    private var header: some View {
+    private func header(visits: [Visit]) -> some View {
+        let totalDays = visits.compactMap(\.dayCount).reduce(0, +)
         let tripNoun = visits.count == 1 ? String(localized: "trip") : String(localized: "trips")
         let dayNoun = totalDays == 1 ? String(localized: "day") : String(localized: "days")
         return HStack(spacing: 14) {
@@ -851,9 +843,9 @@ struct TripEditorSheet: View {
                         .padding()
                         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
 
-                    if existingVisit != nil {
+                    if let existingVisit {
                         Button("Delete Visit", role: .destructive) {
-                            if let existingVisit { appState.removeVisit(existingVisit.id) }
+                            appState.removeVisit(existingVisit.id)
                             dismiss()
                         }
                         .frame(maxWidth: .infinity)

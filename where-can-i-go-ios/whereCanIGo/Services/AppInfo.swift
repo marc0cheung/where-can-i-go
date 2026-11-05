@@ -11,7 +11,6 @@ enum AppInfo {
     static let repositoryURL = URL(string: "https://github.com/marc0cheung/where-can-i-go")!
     static let newIssueURL = URL(string: "https://github.com/marc0cheung/where-can-i-go/issues/new")!
     static let licenseURL = URL(string: "https://github.com/marc0cheung/where-can-i-go/blob/main/LICENSE")!
-    static let privacyPolicyURL = URL(string: "https://github.com/marc0cheung/where-can-i-go/blob/main/PRIVACY.md")!
 
     static var displayName: String {
         Bundle.main.localizedInfoDictionary?["CFBundleDisplayName"] as? String
