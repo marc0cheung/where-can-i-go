@@ -167,6 +167,15 @@ class MapCamera {
 }
 
 private const val COUNTRY_CODE = "ISO3166-1-Alpha-3"
+
+internal fun countryCodeFilter(codes: Set<String>): Expression =
+    if (codes.isEmpty()) {
+        Expression.eq(Expression.get(COUNTRY_CODE), Expression.literal(""))
+    } else {
+        // The JNI bridge accepts literal arrays, not Kotlin/Java collections.
+        Expression.`in`(Expression.get(COUNTRY_CODE), Expression.literal(codes.toTypedArray()))
+    }
+
 private const val STYLE = """{
   "version": 8,
   "sources": {
@@ -377,11 +386,7 @@ fun WorldMap(
                 VisaCategory.Eta to "eta",
             ).forEach { (category, layerId) ->
                 val codes = categoryByCode.filterValues { it == category }.keys
-                val filter = if (codes.isEmpty()) {
-                    Expression.eq(Expression.get(COUNTRY_CODE), Expression.literal(""))
-                } else {
-                    Expression.`in`(Expression.get(COUNTRY_CODE), Expression.literal(codes.toList()))
-                }
+                val filter = countryCodeFilter(codes)
                 style.getLayerAs<FillLayer>(layerId)?.apply {
                     setProperties(PropertyFactory.fillColor(category.color.toArgb()))
                     setFilter(filter)
