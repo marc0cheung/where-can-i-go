@@ -7,7 +7,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -20,6 +21,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,7 +37,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -59,11 +66,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -120,15 +131,27 @@ fun OverviewTab(
         visitStatus = null
     }
 
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val compact = maxHeight < 430.dp
+    val reportPeek = LocalPeekContentReporter.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val bottomPadding = LocalSheetBottomPadding.current
+    val clearWidth by animateDpAsState(
+        if (hasFilters) 48.dp else 0.dp,
+        animationSpec = tween(220),
+        label = "filter-clear-width",
+    )
+    Box(Modifier.fillMaxSize()) {
+        // Short windows (landscape phones) scroll the stats horizontally to save height.
+        val compact = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp < 480
         LazyColumn(
             Modifier.fillMaxSize().testTag("country-list"),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = bottomPadding + 16.dp),
+            verticalArrangement = Arrangement.spacedBy(GroupedListGap),
         ) {
             item(key = "header") {
-                Column(Modifier.testTag("content-Overview"), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Spacer(Modifier)
+                Column(
+                    Modifier.testTag("content-Overview").padding(top = 4.dp, bottom = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
                     val stats: List<@Composable RowScope.(Modifier) -> Unit> = listOf(
                         { m -> StatCard(vf, R.string.visa_free, VisaCategory.VisaFree.color, VisaCategory.VisaFree in categories, m) { toggle(VisaCategory.VisaFree) } },
                         { m -> StatCard(voa, R.string.visa_on_arrival, VisaCategory.VisaOnArrival.color, VisaCategory.VisaOnArrival in categories, m) { toggle(VisaCategory.VisaOnArrival) } },
@@ -143,19 +166,28 @@ fun OverviewTab(
                     )
                     if (compact) {
                         Row(
-                            Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        ) { stats.forEach { it(Modifier.width(152.dp)) } }
+                            Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp)
+                                .onSizeChanged { reportPeek(with(density) { it.height.toDp() } + 4.dp) },
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) { stats.forEach { it(Modifier.width(140.dp)) } }
                     } else {
-                        Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { stats.take(3).forEach { it(Modifier.weight(1f)) } }
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { stats.drop(3).forEach { it(Modifier.weight(1f)) } }
+                        Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                Modifier.height(IntrinsicSize.Min)
+                                    .onSizeChanged { reportPeek(with(density) { it.height.toDp() } + 4.dp) },
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) { stats.take(3).forEach { it(Modifier.weight(1f).fillMaxHeight()) } }
+                            Row(
+                                Modifier.height(IntrinsicSize.Min),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) { stats.drop(3).forEach { it(Modifier.weight(1f).fillMaxHeight()) } }
                         }
                     }
                     SearchField(search, { search = it }, Modifier.padding(horizontal = 16.dp))
-                    FlowRow(
-                        Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("filter-row"),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         FilterMenu(
                             title = stringResource(R.string.entry),
@@ -163,6 +195,7 @@ fun OverviewTab(
                             count = categories.size,
                             active = categories.isNotEmpty(),
                             tag = "filter-entry",
+                            modifier = Modifier.weight(1f),
                         ) {
                             CheckItem(stringResource(R.string.all_entry_requirements), categories.isEmpty()) { categories = emptySet() }
                             HorizontalDivider()
@@ -177,6 +210,7 @@ fun OverviewTab(
                             count = continents.size,
                             active = continents.isNotEmpty(),
                             tag = "filter-continent",
+                            modifier = Modifier.weight(1f),
                         ) {
                             CheckItem(stringResource(R.string.all_continents), continents.isEmpty()) { continents = emptySet() }
                             HorizontalDivider()
@@ -192,6 +226,7 @@ fun OverviewTab(
                             count = 0,
                             active = visitStatus != null,
                             tag = "filter-visited",
+                            modifier = Modifier.weight(1f),
                         ) {
                             RadioItem(stringResource(R.string.all_visit_statuses), visitStatus == null) { visitStatus = null }
                             HorizontalDivider()
@@ -199,8 +234,12 @@ fun OverviewTab(
                                 RadioItem(stringResource(status.label), visitStatus == status) { visitStatus = status }
                             }
                         }
-                        if (hasFilters) {
-                            IconButton(onClick = clearFilters, modifier = Modifier.testTag("clear-filters")) {
+                        Box(Modifier.width(clearWidth).height(48.dp).clip(CircleShape)) {
+                            if (hasFilters || clearWidth > 0.dp) IconButton(
+                                onClick = clearFilters,
+                                enabled = hasFilters,
+                                modifier = Modifier.size(48.dp).alpha(clearWidth / 48.dp).testTag("clear-filters"),
+                            ) {
                                 Icon(
                                     painterResource(R.drawable.ic_close),
                                     contentDescription = stringResource(R.string.clear_filters),
@@ -219,10 +258,10 @@ fun OverviewTab(
                     }
                 }
             }
-            items(countries, key = { it.code }) { country ->
-                LocateSwipe(onLocate = { onLocate(country.code) }) {
+            itemsIndexed(countries, key = { _, country -> country.code }) { index, country ->
+                LocateSwipe(onLocate = { onLocate(country.code) }, shape = groupedShape(index, countries.size)) {
                     CountryRow(state, country, Modifier.clickable { onOpenPolicy(country.code) },
-                        { onAddVisit(country.code) }, { onWishlist(country.code) })
+                        { onAddVisit(country.code) }, { onWishlist(country.code) }, { onLocate(country.code) })
                 }
             }
             if (countries.isEmpty() && state.countries.isNotEmpty()) item(key = "empty") {
@@ -239,7 +278,7 @@ fun OverviewTab(
                 }
             }
             if (search.isEmpty() && !hasFilters) item(key = "footer") {
-                Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(Modifier.padding(horizontal = 16.dp).padding(top = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     state.bundledUpdatedAt?.let {
                         Text(
                             stringResource(R.string.policy_updated, formatUpdatedDate(it)),
@@ -249,21 +288,10 @@ fun OverviewTab(
                             textAlign = TextAlign.Center,
                         )
                     }
-                    Surface(
+                    androidx.compose.material3.OutlinedButton(
                         onClick = { confirmReset = true },
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.fillMaxWidth().testTag("reset-defaults"),
-                    ) {
-                        Text(
-                            stringResource(R.string.reset_default_data),
-                            modifier = Modifier.padding(16.dp),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                    Spacer(Modifier)
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("reset-defaults"),
+                    ) { Text(stringResource(R.string.reset_default_data)) }
                 }
             }
         }
@@ -295,11 +323,11 @@ fun SearchField(value: String, onValueChange: (String) -> Unit, modifier: Modifi
         } else null,
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search, autoCorrectEnabled = false),
-        shape = RoundedCornerShape(10.dp),
+        shape = CircleShape,
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ),
     )
@@ -314,34 +342,37 @@ private fun StatCard(
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
+    val container = if (selected) color.copy(alpha = 0.14f).compositeOver(listItemColor()) else listItemColor()
     Surface(
         onClick = onClick,
         modifier = modifier.testTag("stat-$label").semantics { this.selected = selected },
-        shape = MaterialTheme.shapes.large,
-        color = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
-        border = BorderStroke(if (selected) 2.dp else 1.dp, color),
+        shape = RoundedCornerShape(20.dp),
+        color = container,
+        border = if (selected) BorderStroke(2.dp, color) else null,
     ) {
         Box {
             Column(
-                Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                Text("$value", fontSize = 32.sp, fontWeight = FontWeight.Bold)
-                Text(
-                    stringResource(label),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
+                Text("$value", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(Modifier.size(8.dp).clip(CircleShape).background(color))
+                    Text(
+                        stringResource(label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             if (selected) {
                 Icon(
                     painterResource(R.drawable.ic_check),
                     contentDescription = null,
                     tint = color,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(14.dp),
+                    modifier = Modifier.align(Alignment.TopEnd).padding(10.dp).size(16.dp),
                 )
             }
         }
@@ -355,19 +386,47 @@ private fun FilterMenu(
     count: Int,
     active: Boolean,
     tag: String,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
-    Box {
-        FilterChip(
-            selected = active,
-            onClick = { open = true },
-            label = { Text(if (count > 0) "$title $count" else title) },
-            leadingIcon = { AppIcon(icon, Modifier.size(18.dp)) },
-            trailingIcon = { AppIcon(R.drawable.ic_dropdown, Modifier.size(18.dp)) },
-            modifier = Modifier.testTag(tag),
+    val label = if (count > 0) "$title $count" else title
+    val labelStyle = MaterialTheme.typography.labelLarge
+    val labelWidth = with(LocalDensity.current) {
+        rememberTextMeasurer().measure(AnnotatedString(label), style = labelStyle, maxLines = 1).size.width.toDp()
+    }
+    BoxWithConstraints(modifier) {
+        val iconWidth by animateDpAsState(
+            if (maxWidth >= labelWidth + 54.dp) 22.dp else 0.dp,
+            animationSpec = tween(220),
+            label = "filter-icon-width",
         )
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) { content() }
+        Surface(
+            onClick = { open = true },
+            shape = RoundedCornerShape(16.dp),
+            color = if (active) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+            border = if (active) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(tag).semantics { selected = active },
+        ) {
+            Row(
+                Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(Modifier.width(iconWidth).height(18.dp).clip(RoundedCornerShape(0.dp))) {
+                    AppIcon(icon, Modifier.size(18.dp).alpha(iconWidth / 22.dp))
+                }
+                Text(
+                    label,
+                    Modifier.weight(1f),
+                    style = labelStyle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.width(4.dp))
+                AppIcon(R.drawable.ic_dropdown, Modifier.size(16.dp))
+            }
+        }
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) { content() }
     }
 }
 
@@ -391,8 +450,8 @@ private fun RadioItem(text: String, selected: Boolean, onClick: () -> Unit) {
 
 /** Trailing swipe action that triggers instead of dismissing, like iOS `swipeActions`. */
 @Composable
-fun LocateSwipe(onLocate: () -> Unit, content: @Composable () -> Unit) {
-    SwipeAction(MaterialTheme.colorScheme.primary, R.drawable.ic_pin, stringResource(R.string.locate), onLocate, content)
+fun LocateSwipe(onLocate: () -> Unit, shape: Shape = MaterialTheme.shapes.large, content: @Composable () -> Unit) {
+    SwipeAction(MaterialTheme.colorScheme.primary, R.drawable.ic_pin, stringResource(R.string.locate), onLocate, shape, content)
 }
 
 @Composable
@@ -401,6 +460,7 @@ fun SwipeAction(
     icon: Int,
     description: String,
     onAction: () -> Unit,
+    shape: Shape = MaterialTheme.shapes.large,
     content: @Composable () -> Unit,
 ) {
     val action by rememberUpdatedState(onAction)
@@ -413,7 +473,7 @@ fun SwipeAction(
             if (it == SwipeToDismissBoxValue.EndToStart) action()
             scope.launch { swipe.reset() }
         },
-        modifier = Modifier.padding(horizontal = 16.dp).clip(MaterialTheme.shapes.large).semantics {
+        modifier = Modifier.padding(horizontal = 16.dp).clip(shape).semantics {
             customActions = listOf(CustomAccessibilityAction(description) { action(); true })
         },
         backgroundContent = {
@@ -425,7 +485,7 @@ fun SwipeAction(
 }
 
 @Composable
-private fun CountryRow(state: AppState, country: Country, modifier: Modifier, onVisit: () -> Unit, onWishlist: () -> Unit) {
+private fun CountryRow(state: AppState, country: Country, modifier: Modifier, onVisit: () -> Unit, onWishlist: () -> Unit, onLocate: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
     val visitLabel = stringResource(R.string.log_visit)
     val wishlistLabel = stringResource(if (state.data.plannedTripRecords.any { it.countryCode == country.code })
@@ -454,31 +514,44 @@ private fun CountryRow(state: AppState, country: Country, modifier: Modifier, on
             customActions = listOf(CustomAccessibilityAction(visitLabel) { onVisit(); true },
                 CustomAccessibilityAction(wishlistLabel) { onWishlist(); true })
         },
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = listItemColor(),
     ) {
-        Row(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(country.flag, fontSize = 28.sp)
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(country.localizedName(locale), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = source?.expiryColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+        Row(
+            Modifier.heightIn(min = 64.dp).padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(country.flag, fontSize = 20.sp)
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(country.localizedName(locale), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(Modifier.size(8.dp).clip(CircleShape).background(eligibility.category.color))
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = source?.expiryColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             Box {
                 IconButton(onClick = { menu = true }, modifier = Modifier.testTag("country-travel-menu-${country.code}")) {
-                    Icon(painterResource(R.drawable.ic_more), stringResource(R.string.country_actions))
+                    Icon(painterResource(R.drawable.ic_more), stringResource(R.string.country_actions),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                DropdownMenu(menu, { menu = false }) {
+                AppDropdownMenu(menu, { menu = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.locate_on_map)) },
+                        leadingIcon = { AppIcon(R.drawable.ic_pin) },
+                        modifier = Modifier.testTag("country-locate-${country.code}"),
+                        onClick = { menu = false; onLocate() },
+                    )
                     DropdownMenuItem(text = { Text(visitLabel) }, onClick = { menu = false; onVisit() })
                     DropdownMenuItem(text = { Text(wishlistLabel) }, onClick = { menu = false; onWishlist() })
                 }
             }
-            Box(Modifier.size(10.dp).clip(CircleShape).background(eligibility.category.color))
         }
     }
 }

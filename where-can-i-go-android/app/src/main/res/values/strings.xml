@@ -53,6 +53,7 @@
     <string name="cancel">Cancel</string>
     <string name="done">Done</string>
     <string name="locate">Locate</string>
+    <string name="locate_on_map">Locate on Map</string>
     <string name="see_remark">see remark</string>
     <string name="expires">Expires %1$s</string>
     <string name="schengen_issued_by">Schengen visa · Issued by %1$s</string>

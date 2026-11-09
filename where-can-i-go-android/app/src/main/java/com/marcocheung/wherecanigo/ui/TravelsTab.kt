@@ -8,6 +8,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -76,10 +78,11 @@ fun TravelsTab(state: AppState) {
         if (wishlist) it else it.sortedWith(compareByDescending<Country> { country -> latest[country.code] }
             .thenBy { country -> country.localizedName(locale) })
     }
-    LazyColumn(Modifier.fillMaxSize().testTag("content-Travels"), contentPadding = PaddingValues(vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyColumn(Modifier.fillMaxSize().testTag("content-Travels"),
+        contentPadding = PaddingValues(top = 8.dp, bottom = LocalSheetBottomPadding.current + 16.dp),
+        verticalArrangement = Arrangement.spacedBy(GroupedListGap)) {
         item {
-            Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 TravelSegments(wishlist, friends) {
                     if (it == null) friends = true else { friends = false; wishlist = it }
                 }
@@ -88,41 +91,40 @@ fun TravelsTab(state: AppState) {
                 TravelSummaryCard(state, wishlist, Modifier.testTag("travel-summary")
                     .then(if (!wishlist) Modifier.clickable { summary = true } else Modifier))
                 Button(onClick = { initialCountry = null; editorKey = PersonalVisa.newId() },
-                    modifier = Modifier.fillMaxWidth().testTag("travel-add")) {
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("travel-add")) {
                     AppIcon(R.drawable.ic_add, Modifier.size(20.dp))
                     Text(stringResource(if (wishlist) R.string.add_wishlist else R.string.log_visit), Modifier.padding(start = 8.dp))
                 }
-                if (countries.isNotEmpty()) SectionLabel(stringResource(R.string.travel_countries))
+                if (countries.isNotEmpty()) Text(stringResource(R.string.travel_countries),
+                    style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp, top = 8.dp))
             }
         }
-        items(countries, key = { it.code }) { country ->
+        itemsIndexed(countries, key = { _, country -> country.code }) { index, country ->
             SwipeAction(MaterialTheme.colorScheme.error, R.drawable.ic_delete,
                 stringResource(if (wishlist) R.string.delete_all_plans else R.string.delete_all_visits),
-                { deleteCountry = country.code }) {
-                Surface(onClick = { detailCountry = country.code }, color = MaterialTheme.colorScheme.surfaceContainerLow,
+                { deleteCountry = country.code }, groupedShape(index, countries.size)) {
+                Surface(onClick = { detailCountry = country.code }, color = listItemColor(),
                     modifier = Modifier.fillMaxWidth().testTag("travel-country-${country.code}")) {
-                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(country.flag, style = MaterialTheme.typography.headlineMedium)
-                        Column(Modifier.weight(1f)) {
-                            Text(country.localizedName(locale), fontWeight = FontWeight.SemiBold)
+                    Row(Modifier.heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(country.flag, fontSize = 20.sp)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(country.localizedName(locale), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
                             Text(stringResource(if (wishlist) R.string.planned_count else R.string.trips_count, grouped.getValue(country.code)),
-                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         if (wishlist && country.code in state.data.visitedCountryCodes) Icon(painterResource(R.drawable.ic_check),
                             stringResource(R.string.visited_before), tint = MaterialTheme.colorScheme.primary)
-                        AppIcon(R.drawable.ic_chevron_right, Modifier.size(16.dp))
+                        AppIcon(R.drawable.ic_chevron_right, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
         }
         if (countries.isEmpty()) item {
-            Column(Modifier.fillMaxWidth().padding(32.dp).testTag("travel-empty"), horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                AppIcon(R.drawable.ic_travel, Modifier.size(40.dp))
-                Text(stringResource(if (wishlist) R.string.empty_wishlist else R.string.no_visits))
-                if (!wishlist) Text(stringResource(R.string.no_visits_hint), style = MaterialTheme.typography.bodySmall)
-            }
+            EmptyState(R.drawable.ic_travel, stringResource(if (wishlist) R.string.empty_wishlist else R.string.no_visits),
+                if (!wishlist) stringResource(R.string.no_visits_hint) else null, Modifier.testTag("travel-empty"))
         }
     }
     editorKey?.let { id ->
@@ -138,14 +140,18 @@ fun TravelsTab(state: AppState) {
     if (summary) TravelSummarySheet(state) { summary = false }
 }
 
+/** Been | Wishlist | Friends, in the same order as iOS. `onSelect(null)` selects Friends. */
 @Composable
 internal fun TravelSegments(wishlist: Boolean, friends: Boolean, onSelect: (Boolean?) -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        listOf(null to R.string.friends, false to R.string.been, true to R.string.wishlist).forEach { (value, label) ->
-            FilterChip(selected = if (value == null) friends else !friends && wishlist == value,
+    val options = listOf(false to R.string.been, true to R.string.wishlist, null to R.string.friends)
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+        options.forEachIndexed { index, (value, label) ->
+            SegmentedButton(
+                selected = if (value == null) friends else !friends && wishlist == value,
                 onClick = { onSelect(value) },
-                label = { Text(stringResource(label)) },
-                modifier = Modifier.weight(1f).testTag("segment-${value?.let { if (it) "Wishlist" else "Been" } ?: "Friends"}"))
+                shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                modifier = Modifier.testTag("segment-${value?.let { if (it) "Wishlist" else "Been" } ?: "Friends"}"),
+            ) { Text(stringResource(label), maxLines = 1) }
         }
     }
 }
@@ -159,7 +165,7 @@ private fun TravelSummaryCard(state: AppState, wishlist: Boolean, modifier: Modi
         color = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             if (detailed) TravelMiniMap(stats.countryCodes, Modifier.fillMaxWidth().height(160.dp), onMapReady)
-            Text(stringResource(if (wishlist) R.string.wishlist else R.string.where_been), fontWeight = FontWeight.SemiBold)
+            if (detailed) Text(stringResource(if (wishlist) R.string.wishlist else R.string.where_been), fontWeight = FontWeight.SemiBold)
             Row(Modifier.fillMaxWidth()) {
                 SummaryNumber(stats.countryCodes.size.toString(), stringResource(R.string.travel_countries), Modifier.weight(1f))
                 SummaryNumber(stats.tripCount.toString(), stringResource(R.string.travel_trips), Modifier.weight(1f))

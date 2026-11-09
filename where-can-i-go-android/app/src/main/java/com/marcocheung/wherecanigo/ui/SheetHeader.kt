@@ -1,14 +1,18 @@
 package com.marcocheung.wherecanigo.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,13 +38,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.collapse
+import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marcocheung.wherecanigo.R
@@ -78,11 +86,11 @@ fun SheetHeader(
     var diceMenu by rememberSaveable { mutableStateOf(false) }
     Column(modifier) {
         Row(
-            Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 4.dp, bottom = 10.dp),
+            Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 0.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.app_title), fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.app_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Text(
                     passportLabel(state),
                     style = MaterialTheme.typography.bodySmall,
@@ -94,7 +102,6 @@ fun SheetHeader(
             Spacer(Modifier.width(8.dp))
             ProfileButton(onOpenProfile, onOpenSettings)
         }
-        HorizontalDivider()
     }
 }
 
@@ -103,6 +110,8 @@ fun SheetHeader(
 private fun DiceButton(state: AppState, dice: DiceOptions, menu: Boolean, onMenuChange: (Boolean) -> Unit, onPicked: (String) -> Unit) {
     var noMatch by remember { mutableStateOf(false) }
     var airlineError by remember { mutableStateOf(false) }
+    var expandedSection by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(menu) { if (!menu) expandedSection = null }
     val badge = dice.continents.size + dice.airlines.size
     val description = stringResource(R.string.random_country)
     val optionsDescription = stringResource(R.string.dice_options)
@@ -129,7 +138,7 @@ private fun DiceButton(state: AppState, dice: DiceOptions, menu: Boolean, onMenu
         Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            modifier = Modifier.size(48.dp).clip(CircleShape)
+            modifier = Modifier.size(56.dp).clip(CircleShape)
                 .combinedClickable(onClick = ::roll, onLongClickLabel = optionsDescription, onLongClick = { onMenuChange(true) })
                 .semantics { contentDescription = description; stateDescription = selectedOptions }
                 .testTag("dice-button"),
@@ -137,7 +146,7 @@ private fun DiceButton(state: AppState, dice: DiceOptions, menu: Boolean, onMenu
             Box(contentAlignment = Alignment.Center) {
                 AppIcon(
                     R.drawable.ic_dice,
-                    Modifier.size(22.dp),
+                    Modifier.size(28.dp),
                     tint = if (dice.includeAll) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -151,31 +160,49 @@ private fun DiceButton(state: AppState, dice: DiceOptions, menu: Boolean, onMenu
                 Text("$badge", color = MaterialTheme.colorScheme.onPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         }
-        DropdownMenu(expanded = menu, onDismissRequest = { onMenuChange(false) }, modifier = Modifier.testTag("dice-menu")) {
-            Header(stringResource(R.string.continent))
-            Check(stringResource(R.string.all_continents), dice.continents.isEmpty()) { dice.continents = emptySet() }
-            Continent.entries.forEach { continent ->
-                Check(stringResource(continent.label), continent in dice.continents) {
-                    dice.continents = if (continent in dice.continents) dice.continents - continent else dice.continents + continent
-                }
-            }
-            val airlines = state.airlines.orEmpty()
-            if (airlines.isNotEmpty()) {
-                HorizontalDivider()
-                Header(stringResource(R.string.airlines))
-                Check(stringResource(R.string.no_airline_restriction), dice.airlines.isEmpty()) { dice.airlines = emptySet() }
-                val allIds = airlines.map { it.id }.toSet()
-                Check(stringResource(R.string.all_airlines), dice.airlines.containsAll(allIds)) {
-                    dice.airlines = if (dice.airlines.containsAll(allIds)) emptySet() else allIds
-                }
-                airlines.forEach { airline ->
-                    Check(airlineName(airline), airline.id in dice.airlines) {
-                        dice.airlines = if (airline.id in dice.airlines) dice.airlines - airline.id else dice.airlines + airline.id
+        AppDropdownMenu(expanded = menu, onDismissRequest = { onMenuChange(false) }, modifier = Modifier.testTag("dice-menu")) {
+            DiceSection(
+                stringResource(R.string.continent), R.drawable.ic_globe,
+                expandedSection == "continent", "dice-continent",
+            ) { expandedSection = if (expandedSection == "continent") null else "continent" }
+            AnimatedVisibility(expandedSection == "continent") {
+                Column {
+                    Check(stringResource(R.string.all_continents), dice.continents.isEmpty()) { dice.continents = emptySet() }
+                    Continent.entries.forEach { continent ->
+                        Check(stringResource(continent.label), continent in dice.continents) {
+                            dice.continents = if (continent in dice.continents) dice.continents - continent else dice.continents + continent
+                        }
                     }
                 }
             }
-            HorizontalDivider()
-            Check(stringResource(R.string.accessible_only), !dice.includeAll) { dice.includeAll = false }
+            DiceSection(
+                stringResource(R.string.airlines), R.drawable.ic_travel,
+                expandedSection == "airlines", "dice-airlines",
+            ) { expandedSection = if (expandedSection == "airlines") null else "airlines" }
+            val airlines = state.airlines.orEmpty()
+            AnimatedVisibility(expandedSection == "airlines") {
+                Column {
+                    if (airlines.isNotEmpty()) {
+                        Check(stringResource(R.string.no_airline_restriction), dice.airlines.isEmpty()) { dice.airlines = emptySet() }
+                        val allIds = airlines.map { it.id }.toSet()
+                        Check(stringResource(R.string.all_airlines), dice.airlines.containsAll(allIds)) {
+                            dice.airlines = if (dice.airlines.containsAll(allIds)) emptySet() else allIds
+                        }
+                        airlines.forEach { airline ->
+                            Check(airlineName(airline), airline.id in dice.airlines) {
+                                dice.airlines = if (airline.id in dice.airlines) dice.airlines - airline.id else dice.airlines + airline.id
+                            }
+                        }
+                    } else {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.airline_unavailable)) },
+                            onClick = { onMenuChange(false); airlineError = true },
+                        )
+                    }
+                }
+            }
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+            Check(stringResource(R.string.accessible_only), !dice.includeAll) { dice.includeAll = !dice.includeAll }
             Check(stringResource(R.string.include_all_requirements), dice.includeAll) { dice.includeAll = !dice.includeAll }
         }
     }
@@ -211,12 +238,20 @@ private fun DiceButton(state: AppState, dice: DiceOptions, menu: Boolean, onMenu
 }
 
 @Composable
-private fun Header(text: String) {
-    Text(
-        text,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+private fun DiceSection(text: String, icon: Int, expanded: Boolean, tag: String, onClick: () -> Unit) {
+    val rotation by animateFloatAsState(if (expanded) 180f else 0f, label = "dice-section-arrow")
+    DropdownMenuItem(
+        text = { Text(text, fontWeight = FontWeight.Medium) },
+        leadingIcon = { AppIcon(icon) },
+        trailingIcon = { AppIcon(R.drawable.ic_dropdown, Modifier.size(20.dp).rotate(rotation)) },
+        onClick = onClick,
+        modifier = Modifier.testTag(tag).semantics {
+            if (expanded) {
+                collapse { onClick(); true }
+            } else {
+                expand { onClick(); true }
+            }
+        },
     )
 }
 
@@ -239,31 +274,32 @@ private fun ProfileButton(onOpenProfile: () -> Unit, onOpenSettings: () -> Unit)
             onClick = { menu = true },
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            modifier = Modifier.size(48.dp).testTag("profile-button")
+            modifier = Modifier.size(56.dp).testTag("profile-button")
                 .semantics { contentDescription = description },
         ) {
-            Box(contentAlignment = Alignment.Center) { Avatar(32, profile.photoData) }
+            Box(contentAlignment = Alignment.Center) { Avatar(40, profile.photoData) }
         }
-        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, modifier = Modifier.testTag("profile-menu")) {
+        AppDropdownMenu(expanded = menu, onDismissRequest = { menu = false }, modifier = Modifier.width(280.dp).testTag("profile-menu")) {
             DropdownMenuItem(
                 text = {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Avatar(48, profile.photoData)
-                        Column {
-                            Text(profile.name.ifBlank { stringResource(R.string.your_profile) }, fontWeight = FontWeight.SemiBold)
-                            Text(stringResource(R.string.edit_profile), color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodySmall)
-                        }
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(profile.name.ifBlank { stringResource(R.string.your_profile) }, fontWeight = FontWeight.SemiBold,
+                            maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(stringResource(R.string.edit_profile), color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall)
                     }
                 },
+                leadingIcon = { Avatar(40, profile.photoData) },
                 onClick = { menu = false; onOpenProfile() },
-                modifier = Modifier.testTag("menu-profile"),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                modifier = Modifier.heightIn(min = 80.dp).testTag("menu-profile"),
             )
-            HorizontalDivider()
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.settings)) },
                 leadingIcon = { AppIcon(R.drawable.ic_settings) },
                 onClick = { menu = false; onOpenSettings() },
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 modifier = Modifier.testTag("menu-settings"),
             )
         }

@@ -53,6 +53,7 @@
     <string name="cancel">取消</string>
     <string name="done">完成</string>
     <string name="locate">定位</string>
+    <string name="locate_on_map">在地图上定位</string>
     <string name="see_remark">查看备注</string>
     <string name="expires">有效期至 %1$s</string>
     <string name="schengen_issued_by">申根签证 · %1$s签发</string>

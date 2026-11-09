@@ -14,6 +14,8 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextReplacement
@@ -28,6 +30,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -43,7 +46,7 @@ class InterfaceTest {
         if (compose.onAllNodes(hasTestTag("passport-gate")).fetchSemanticsNodes().isNotEmpty()) {
             compose.onNodeWithTag("passport-HKG").performClick()
             compose.onNodeWithTag("use-passport").performClick()
-            compose.onNodeWithTag("i-understand").performClick()
+            compose.onNodeWithTag("i-understand").performScrollTo().performClick()
             compose.waitForIdle()
         }
     }
@@ -106,6 +109,73 @@ class InterfaceTest {
         compose.onNodeWithTag("result-count").assertIsDisplayed()
         compose.onNodeWithTag("country-list").performScrollToNode(hasTestTag("country-JPN"))
         compose.onNodeWithTag("country-JPN").assertIsDisplayed()
+    }
+
+    @Test
+    fun filtersAndClearButtonStayOnOneLine() {
+        expandIfCompact()
+        compose.onNodeWithTag("filter-row").performScrollTo()
+        val originalWidth = compose.onNodeWithTag("filter-entry").fetchSemanticsNode().boundsInRoot.width
+        compose.onNodeWithTag("stat-${R.string.visa_free}").performScrollTo().performClick()
+        compose.onNodeWithTag("filter-row").performScrollTo()
+        compose.waitForIdle()
+        val row = compose.onNodeWithTag("filter-row").fetchSemanticsNode().boundsInRoot
+        val buttons = listOf("filter-entry", "filter-continent", "filter-visited", "clear-filters")
+            .map { tag ->
+                compose.onNodeWithTag(tag).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+            }
+        buttons.forEach { bounds ->
+            assertEquals(row.center.y, bounds.center.y, 1f)
+            assertTrue(bounds.left >= row.left && bounds.right <= row.right)
+        }
+        buttons.zipWithNext().forEach { (left, right) -> assertTrue(left.right <= right.left) }
+        assertTrue(buttons.first().width < originalWidth)
+        compose.onNodeWithTag("clear-filters").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("clear-filters").assertDoesNotExist()
+        assertEquals(originalWidth, compose.onNodeWithTag("filter-entry").fetchSemanticsNode().boundsInRoot.width, 1f)
+    }
+
+    @Test
+    fun overviewMenuLocatesCountryOnMap() {
+        expandIfCompact()
+        compose.onNodeWithTag("country-search").performTextReplacement("Japan")
+        compose.onNodeWithTag("country-list").performScrollToNode(hasTestTag("country-JPN"))
+        compose.onNodeWithTag("country-travel-menu-JPN").performClick()
+        compose.onNodeWithTag("country-locate-JPN").assertIsDisplayed().performClick()
+        compose.onNodeWithTag("country-card").assertIsDisplayed()
+        compose.onNodeWithTag("country-locate-JPN").assertDoesNotExist()
+    }
+
+    @Test
+    fun diceSectionsExpandCollapseAndKeepSelections() {
+        compose.onNodeWithTag("dice-button").performTouchInput { longClick() }
+        compose.onNodeWithTag("dice-menu").assertIsDisplayed()
+        compose.onNodeWithText(compose.activity.getString(R.string.all_continents)).assertDoesNotExist()
+        compose.onNodeWithTag("dice-continent").performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.all_continents)).assertIsDisplayed()
+        compose.onNodeWithText(compose.activity.getString(R.string.asia)).performClick()
+        compose.onNodeWithTag("dice-menu").assertIsDisplayed()
+        compose.onNodeWithTag("dice-continent").performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.all_continents)).assertDoesNotExist()
+        compose.onNodeWithTag("dice-airlines").performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.no_airline_restriction)).assertIsDisplayed()
+        compose.onNodeWithTag("dice-airlines").performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.no_airline_restriction)).assertDoesNotExist()
+        compose.onNodeWithTag("dice-continent").performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.all_continents)).performClick()
+    }
+
+    @Test
+    fun profileMenuHasRoomBetweenRows() {
+        compose.onNodeWithTag("profile-button").performClick()
+        val profile = compose.onNodeWithTag("menu-profile").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+        val settings = compose.onNodeWithTag("menu-settings").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+        val density = compose.activity.resources.displayMetrics.density
+        assertTrue(profile.height >= 80f * density)
+        assertTrue(settings.top - profile.bottom >= 16f * density)
+        compose.onNodeWithTag("menu-settings").performClick()
+        compose.onNodeWithTag("page-settings").assertIsDisplayed()
     }
 
     @Test

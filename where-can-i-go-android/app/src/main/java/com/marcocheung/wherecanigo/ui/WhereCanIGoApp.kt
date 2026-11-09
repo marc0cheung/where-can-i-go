@@ -1,6 +1,18 @@
 package com.marcocheung.wherecanigo.ui
 
 import android.app.Activity
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -32,11 +44,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
@@ -281,24 +290,10 @@ private fun MainScreen(state: AppState, onOpenProfile: () -> Unit, onOpenSetting
                     )
                 }
             } else {
-                Column(Modifier.fillMaxSize().testTag("compact-layout")) {
-                    PhoneContent(actions, camera, categoryByCode, flyRequest, onCountrySelected, Modifier.weight(1f))
-                    NavigationBar(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        tonalElevation = 0.dp,
-                        windowInsets = WindowInsets.navigationBars,
-                    ) {
-                        Destination.entries.forEach { item ->
-                            NavigationBarItem(
-                                modifier = Modifier.testTag("tab-${item.name}"),
-                                selected = destination == item,
-                                onClick = { onTab(item) },
-                                icon = { AppIcon(item.icon) },
-                                label = { Text(stringResource(item.title)) },
-                            )
-                        }
-                    }
-                }
+                PhoneContent(
+                    actions, camera, categoryByCode, flyRequest, onCountrySelected, onTab,
+                    Modifier.fillMaxSize().testTag("compact-layout"),
+                )
             }
         }
     }
@@ -322,8 +317,12 @@ private fun SelectedCountryCard(actions: MainActions, code: String, modifier: Mo
     )
 }
 
-private val PeekHeight = 172.dp
 private enum class PanelDetent { Peek, Half, Expanded }
+
+private val FloatingBarHeight = 64.dp
+private val FloatingBarMargin = 12.dp
+private val DefaultHeaderHeight = 104.dp
+private val DefaultPeekContent = 120.dp
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -333,15 +332,22 @@ private fun PhoneContent(
     categoryByCode: Map<String, VisaCategory>,
     flyRequest: FlyRequest?,
     onCountrySelected: (MapCountry) -> Unit,
+    onTab: (Destination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
+    val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    // Area at the bottom of the panel covered by the floating navigation bar.
+    val barZone = navInset + FloatingBarMargin + FloatingBarHeight + FloatingBarMargin
     var cardHeight by remember { mutableStateOf(140.dp) }
+    var headerHeight by remember { mutableStateOf(DefaultHeaderHeight) }
+    var peekContent by rememberSaveable(stateSaver = DpSaver) { mutableStateOf(DefaultPeekContent) }
     var containerHeightPx by remember { mutableFloatStateOf(0f) }
     var detent by rememberSaveable { mutableStateOf(PanelDetent.Peek) }
     var dragging by remember { mutableStateOf(false) }
     var dragOffsetPx by remember { mutableFloatStateOf(Float.NaN) }
-    val peekOffset = (containerHeightPx - with(density) { PeekHeight.toPx() }).coerceAtLeast(0f)
+    val peekHeightPx = with(density) { (headerHeight + peekContent + barZone).toPx() }
+    val peekOffset = (containerHeightPx - peekHeightPx).coerceAtLeast(0f)
     val halfOffset = minOf(containerHeightPx * 0.42f, peekOffset)
     val targetOffset = when (detent) {
         PanelDetent.Peek -> peekOffset
@@ -422,10 +428,11 @@ private fun PhoneContent(
                 )
             }
         }
+        val sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         if (containerHeightPx > 0f) Column(
-            Modifier.fillMaxSize()
-                .offset { IntOffset(0, panelOffset.roundToInt()) }
-                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 0.dp, bottomEnd = 0.dp))
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(visibleHeight)
+                .shadow(8.dp, sheetShape, clip = false)
+                .clip(sheetShape)
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .nestedScroll(nestedScrollConnection),
         ) {
@@ -435,31 +442,105 @@ private fun PhoneContent(
                 PanelDetent.Half -> R.string.sheet_half
                 PanelDetent.Expanded -> R.string.sheet_expanded
             })
-            BottomSheetDefaults.DragHandle(
-                modifier = Modifier.fillMaxWidth().draggable(
-                    state = dragState,
-                    orientation = Orientation.Vertical,
-                    onDragStopped = { settleDrag() },
-                ).clickable {
-                    detent = when (detent) {
-                        PanelDetent.Peek -> PanelDetent.Half
-                        PanelDetent.Half -> PanelDetent.Expanded
-                        PanelDetent.Expanded -> PanelDetent.Peek
-                    }
-                }.semantics {
-                    contentDescription = handleLabel
-                    stateDescription = detentLabel
-                    collapse { detent = PanelDetent.Peek; true }
-                    expand { detent = PanelDetent.Expanded; true }
-                }.testTag("sheet-handle"),
-            )
-            SheetHeader(
-                actions.state, actions.dice,
-                onDicePicked = { actions.locate(it); detent = PanelDetent.Peek },
-                onOpenProfile = actions.openProfile,
-                onOpenSettings = actions.openSettings,
-            )
-            PanelContent(actions, onLocate = { actions.locate(it); detent = PanelDetent.Peek }, modifier = Modifier.weight(1f))
+            Column(
+                Modifier.fillMaxWidth()
+                    .draggable(state = dragState, orientation = Orientation.Vertical, onDragStopped = { settleDrag() })
+                    .onSizeChanged { headerHeight = with(density) { it.height.toDp() } },
+            ) {
+                Box(
+                    Modifier.fillMaxWidth().height(24.dp).clickable {
+                        detent = when (detent) {
+                            PanelDetent.Peek -> PanelDetent.Half
+                            PanelDetent.Half -> PanelDetent.Expanded
+                            PanelDetent.Expanded -> PanelDetent.Peek
+                        }
+                    }.semantics {
+                        contentDescription = handleLabel
+                        stateDescription = detentLabel
+                        collapse { detent = PanelDetent.Peek; true }
+                        expand { detent = PanelDetent.Expanded; true }
+                    }.testTag("sheet-handle"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        Modifier.size(width = 32.dp, height = 4.dp).clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)),
+                    )
+                }
+                SheetHeader(
+                    actions.state, actions.dice,
+                    onDicePicked = { actions.locate(it); detent = PanelDetent.Peek },
+                    onOpenProfile = actions.openProfile,
+                    onOpenSettings = actions.openSettings,
+                )
+            }
+            CompositionLocalProvider(
+                LocalSheetBottomPadding provides barZone,
+                LocalPeekContentReporter provides { if (it > 0.dp) peekContent = it },
+            ) {
+                PanelContent(actions, onLocate = { actions.locate(it); detent = PanelDetent.Peek }, modifier = Modifier.weight(1f))
+            }
+        }
+        FloatingNavBar(
+            selected = actions.destination,
+            onSelect = onTab,
+            modifier = Modifier.align(Alignment.BottomCenter)
+                .padding(bottom = navInset + FloatingBarMargin, start = 16.dp, end = 16.dp),
+        )
+    }
+}
+
+private val DpSaver = androidx.compose.runtime.saveable.Saver<androidx.compose.ui.unit.Dp, Float>(
+    save = { it.value },
+    restore = { it.dp },
+)
+
+/**
+ * Material 3 Expressive style floating navigation bar: a pill that floats over the
+ * panel; the selected destination expands into a tonal pill showing icon and label.
+ */
+@Composable
+private fun FloatingNavBar(selected: Destination, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.height(FloatingBarHeight),
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        shadowElevation = 6.dp,
+        tonalElevation = 2.dp,
+    ) {
+        Row(
+            Modifier.fillMaxHeight().selectableGroup().padding(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Destination.entries.forEach { item ->
+                val isSelected = item == selected
+                val container by animateColorAsState(
+                    if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent, label = "nav-container",
+                )
+                val content by animateColorAsState(
+                    if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                    label = "nav-content",
+                )
+                Row(
+                    Modifier.weight(1f, fill = false).fillMaxHeight().clip(CircleShape).background(container)
+                        .selectable(selected = isSelected, role = Role.Tab, onClick = { onSelect(item) })
+                        .padding(horizontal = 16.dp)
+                        .testTag("tab-${item.name}"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    AppIcon(item.icon, Modifier.size(22.dp), tint = content)
+                    Text(
+                        stringResource(item.title),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                        color = content,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
         }
     }
 }

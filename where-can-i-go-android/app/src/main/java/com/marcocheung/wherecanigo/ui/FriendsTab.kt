@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -96,26 +97,33 @@ internal fun FriendsTab(state: AppState, onSelectSegment: (Boolean?) -> Unit) {
 
     LazyColumn(
         Modifier.fillMaxSize().testTag("content-Friends"),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            start = 16.dp, end = 16.dp, top = 8.dp, bottom = LocalSheetBottomPadding.current + 16.dp,
+        ),
+        verticalArrangement = Arrangement.spacedBy(GroupedListGap),
     ) {
         item {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.padding(bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                TravelSegments(wishlist = false, friends = true, onSelect = onSelectSegment)
                 Text(stringResource(R.string.friends), style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold)
-            }
-            TravelSegments(wishlist = false, friends = true, onSelect = onSelectSegment)
-            Button(onClick = { sharing = true }, modifier = Modifier.fillMaxWidth().testTag("share-travel-card")) {
-                Text(stringResource(R.string.share_my_travel_card))
-            }
-            OutlinedButton(onClick = {
-                picker.launch(arrayOf("application/vnd.com.marcocheung.wherecanigo.travelcard",
-                    "application/json", "text/plain", "application/octet-stream"))
-            }, modifier = Modifier.fillMaxWidth().testTag("add-travel-card")) {
-                Text(stringResource(R.string.add_friend))
-            }
-            OutlinedButton(onClick = { identity = true }, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.sharing_identity))
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { sharing = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
+                        .testTag("share-travel-card")) {
+                        Text(stringResource(R.string.share_my_travel_card))
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = {
+                            picker.launch(arrayOf("application/vnd.com.marcocheung.wherecanigo.travelcard",
+                                "application/json", "text/plain", "application/octet-stream"))
+                        }, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("add-travel-card")) {
+                            Text(stringResource(R.string.add_friend), maxLines = 1)
+                        }
+                        OutlinedButton(onClick = { identity = true }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                            Text(stringResource(R.string.sharing_identity), maxLines = 1)
+                        }
+                    }
+                }
             }
         }
         if (state.friendStore.loadFailed) {
@@ -125,15 +133,15 @@ internal fun FriendsTab(state: AppState, onSelectSegment: (Boolean?) -> Unit) {
             }
         } else if (state.friendStore.friends.isEmpty()) {
             item {
-                Text(stringResource(R.string.no_friends), modifier = Modifier.padding(vertical = 24.dp))
-                Text(stringResource(R.string.friends_offline_hint), style = MaterialTheme.typography.bodySmall)
+                EmptyState(R.drawable.ic_person, stringResource(R.string.no_friends), stringResource(R.string.friends_offline_hint))
             }
         } else {
-            items(state.friendStore.friends.sortedBy { it.name.lowercase() }, key = TravelCardFriend::sharerID) { friend ->
+            val friends = state.friendStore.friends.sortedBy { it.name.lowercase() }
+            itemsIndexed(friends, key = { _, friend -> friend.sharerID }) { index, friend ->
                 Surface(
                     onClick = { detail = friend },
-                    shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    shape = groupedShape(index, friends.size),
+                    color = listItemColor(),
                     modifier = Modifier.fillMaxWidth().testTag("friend-${friend.sharerID}"),
                 ) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

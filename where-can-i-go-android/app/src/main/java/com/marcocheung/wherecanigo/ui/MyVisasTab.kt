@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -77,13 +78,15 @@ fun MyVisasTab(state: AppState, retainDraftOnDispose: () -> Boolean) {
 
     LazyColumn(
         Modifier.fillMaxSize().testTag("content-Visas"),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = LocalSheetBottomPadding.current + 16.dp),
+        verticalArrangement = Arrangement.spacedBy(GroupedListGap),
     ) {
         item(key = "add") {
-            Column(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.padding(horizontal = 16.dp).padding(top = 8.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.add_personal_visa), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     ButtonCard(
+                        icon = R.drawable.ic_globe,
                         title = stringResource(R.string.issuing_country),
                         body = country?.let { "${it.flag} ${it.localizedName(locale)}" },
                         tag = "draft-country",
@@ -93,6 +96,7 @@ fun MyVisasTab(state: AppState, retainDraftOnDispose: () -> Boolean) {
                         "${draft.duration}\n${formatDate(draft.expiryDate!!)}"
                     } else null
                     ButtonCard(
+                        icon = R.drawable.ic_visa,
                         title = stringResource(R.string.visa_details),
                         body = details,
                         tag = "draft-details",
@@ -114,33 +118,33 @@ fun MyVisasTab(state: AppState, retainDraftOnDispose: () -> Boolean) {
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp).testTag("add-visa"),
-                    shape = MaterialTheme.shapes.extraLarge,
+                    modifier = Modifier.fillMaxWidth().height(52.dp).testTag("add-visa"),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (canAdd) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
-                        contentColor = if (canAdd) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        containerColor = if (canAdd) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = if (canAdd) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
                     ),
                 ) {
                     AppIcon(R.drawable.ic_add, Modifier.size(20.dp))
                     Text(stringResource(R.string.add_visa), Modifier.padding(start = 8.dp), fontWeight = FontWeight.SemiBold)
                 }
-                Spacer(Modifier.height(4.dp))
-                Text(stringResource(R.string.saved_personal_visas), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                if (state.data.personalVisas.isEmpty()) {
-                    Text(
-                        stringResource(R.string.no_personal_visas),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.testTag("no-visas"),
-                    )
-                }
+                Text(
+                    stringResource(R.string.saved_personal_visas),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp, top = 12.dp),
+                )
             }
         }
-        items(state.data.personalVisas, key = { it.id }) { visa ->
-            SwipeAction(MaterialTheme.colorScheme.error, R.drawable.ic_delete, stringResource(R.string.delete), { deletingId = visa.id }) {
+        if (state.data.personalVisas.isEmpty()) item(key = "empty") {
+            EmptyState(R.drawable.ic_visa, stringResource(R.string.no_personal_visas), modifier = Modifier.testTag("no-visas"))
+        }
+        val visas = state.data.personalVisas
+        itemsIndexed(visas, key = { _, visa -> visa.id }) { index, visa ->
+            SwipeAction(MaterialTheme.colorScheme.error, R.drawable.ic_delete, stringResource(R.string.delete), { deletingId = visa.id },
+                groupedShape(index, visas.size)) {
                 SavedVisaRow(state, visa, onDelete = { deletingId = visa.id }) { editingId = visa.id }
             }
         }
-        item(key = "bottom") { Spacer(Modifier.height(24.dp)) }
     }
 
     if (editingDraft) {
@@ -174,18 +178,19 @@ fun MyVisasTab(state: AppState, retainDraftOnDispose: () -> Boolean) {
 }
 
 @Composable
-private fun ButtonCard(title: String, body: String?, tag: String, modifier: Modifier, onClick: () -> Unit) {
+private fun ButtonCard(icon: Int, title: String, body: String?, tag: String, modifier: Modifier, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         modifier = modifier.fillMaxHeight().testTag(tag),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(20.dp),
+        color = listItemColor(),
     ) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            AppIcon(icon, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
+            Text(title, style = MaterialTheme.typography.titleSmall)
             Text(
                 body ?: stringResource(R.string.tap_to_edit),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = if (body == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
             )
         }
@@ -199,7 +204,7 @@ private fun SavedVisaRow(state: AppState, visa: PersonalVisa, onDelete: () -> Un
     val secondary = MaterialTheme.colorScheme.onSurfaceVariant
     Surface(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).testTag("visa-${visa.id}"),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = listItemColor(),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

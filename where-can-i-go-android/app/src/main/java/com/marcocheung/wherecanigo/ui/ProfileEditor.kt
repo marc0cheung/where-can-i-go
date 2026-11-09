@@ -159,7 +159,7 @@ fun ProfileEditorPage(state: AppState, onBack: () -> Unit) {
             Box {
                 IconButton(enabled = !busy, onClick = { photoMenu = true },
                     modifier = Modifier.size(96.dp).testTag("profile-photo")) { Avatar(88, avatar) }
-                DropdownMenu(expanded = photoMenu, onDismissRequest = { photoMenu = false }) {
+                AppDropdownMenu(expanded = photoMenu, onDismissRequest = { photoMenu = false }) {
                     if (avatar != null) DropdownMenuItem(text = { Text(stringResource(R.string.edit_photo)) }, onClick = {
                         photoMenu = false
                         val source = sourcePath

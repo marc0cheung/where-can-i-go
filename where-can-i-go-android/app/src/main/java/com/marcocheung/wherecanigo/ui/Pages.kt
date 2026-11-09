@@ -199,7 +199,7 @@ fun CountryCard(
         shadowElevation = 4.dp,
     ) {
         Row(Modifier.padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(country.flag, fontSize = 44.sp)
+            Text(country.flag, fontSize = 28.sp)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -224,7 +224,7 @@ fun CountryCard(
                     androidx.compose.material3.Icon(painter = androidx.compose.ui.res.painterResource(R.drawable.ic_more),
                         contentDescription = stringResource(R.string.country_actions))
                 }
-                androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                AppDropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                     val hasPlans = state.data.plannedTripRecords.any { it.countryCode == code }
                     androidx.compose.material3.DropdownMenuItem(
                         text = { Text(stringResource(if (hasPlans) R.string.review_wishlist else R.string.add_wishlist)) },
