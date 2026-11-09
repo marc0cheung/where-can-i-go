@@ -1,7 +1,23 @@
 package com.marcocheung.wherecanigo.ui
 
 import android.app.Activity
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.selection.selectable
@@ -255,7 +271,7 @@ private fun MainScreen(state: AppState, onOpenProfile: () -> Unit, onOpenSetting
                                 modifier = Modifier.testTag("tab-${item.name}"),
                                 selected = destination == item,
                                 onClick = { onTab(item) },
-                                icon = { AppIcon(item.icon) },
+                                icon = { AnimatedNavIcon(item, destination == item, androidx.compose.material3.LocalContentColor.current) },
                                 label = { Text(stringResource(item.title)) },
                             )
                         }
@@ -530,7 +546,7 @@ private fun FloatingNavBar(selected: Destination, onSelect: (Destination) -> Uni
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    AppIcon(item.icon, Modifier.size(22.dp), tint = content)
+                    AnimatedNavIcon(item, isSelected, content)
                     Text(
                         stringResource(item.title),
                         style = MaterialTheme.typography.labelLarge,
@@ -551,9 +567,22 @@ private fun PanelContent(
     onLocate: (String) -> Unit = actions.locate,
     modifier: Modifier = Modifier,
 ) {
-    actions.panelState.SaveableStateProvider("panel") {
-        Box(modifier.fillMaxSize()) {
-            when (actions.destination) {
+    AnimatedContent(
+        targetState = actions.destination,
+        modifier = modifier.fillMaxSize(),
+        transitionSpec = {
+            // M3 shared-axis (X) transition: direction follows the tab order.
+            val direction = if (targetState.ordinal > initialState.ordinal) 1 else -1
+            (slideInHorizontally(tween(320, easing = FastOutSlowInEasing)) { direction * it / 6 } +
+                fadeIn(tween(210, delayMillis = 90, easing = LinearOutSlowInEasing))) togetherWith
+                (slideOutHorizontally(tween(320, easing = FastOutSlowInEasing)) { -direction * it / 6 } +
+                    fadeOut(tween(90, easing = FastOutLinearInEasing)))
+        },
+        label = "tab-content",
+    ) { destination ->
+      actions.panelState.SaveableStateProvider("panel-${destination.name}") {
+        Box(Modifier.fillMaxSize()) {
+            when (destination) {
                 Destination.Overview -> if (actions.state.loadError) {
                     val locale = currentLocale()
                     Column(Modifier.padding(20.dp).testTag("content-Overview")) {
@@ -571,5 +600,63 @@ private fun PanelContent(
                 Destination.Travels -> TravelsTab(actions.state)
             }
         }
+      }
     }
+}
+
+/**
+ * Destination icon that plays a short, characterful motion when its tab becomes selected:
+ * the globe spins, the visa card pops, and the plane flies off and lands again.
+ */
+@Composable
+private fun AnimatedNavIcon(item: Destination, selected: Boolean, tint: Color, modifier: Modifier = Modifier) {
+    val rotation = remember { Animatable(0f) }
+    val scale = remember { Animatable(1f) }
+    val travel = remember { Animatable(0f) }
+    val alpha = remember { Animatable(1f) }
+    var wasSelected by remember { mutableStateOf(selected) }
+    LaunchedEffect(selected) {
+        val play = selected && !wasSelected
+        wasSelected = selected
+        if (!play) {
+            rotation.snapTo(0f); scale.snapTo(1f); travel.snapTo(0f); alpha.snapTo(1f)
+            return@LaunchedEffect
+        }
+        when (item) {
+            Destination.Overview -> {
+                rotation.snapTo(0f)
+                rotation.animateTo(360f, tween(900, easing = FastOutSlowInEasing))
+                rotation.snapTo(0f)
+            }
+            Destination.Visas -> {
+                scale.animateTo(1.35f, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
+                scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+            }
+            Destination.Travels -> {
+                coroutineScope {
+                    launch { travel.animateTo(1f, tween(240, easing = FastOutLinearInEasing)) }
+                    launch { alpha.animateTo(0f, tween(240, easing = FastOutLinearInEasing)) }
+                }
+                travel.snapTo(-1f)
+                coroutineScope {
+                    launch { travel.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMediumLow)) }
+                    launch { alpha.animateTo(1f, tween(180)) }
+                }
+            }
+        }
+    }
+    AppIcon(
+        item.icon,
+        modifier.size(22.dp).graphicsLayer {
+            rotationY = rotation.value
+            cameraDistance = 12f * density
+            scaleX = scale.value
+            scaleY = scale.value
+            val distance = 22.dp.toPx() * 1.4f
+            translationX = travel.value * distance
+            translationY = -travel.value * distance
+            this.alpha = alpha.value
+        },
+        tint = tint,
+    )
 }

@@ -396,10 +396,11 @@ private fun FilterMenu(
         rememberTextMeasurer().measure(AnnotatedString(label), style = labelStyle, maxLines = 1).size.width.toDp()
     }
     BoxWithConstraints(modifier) {
-        val iconWidth by animateDpAsState(
-            if (maxWidth >= labelWidth + 54.dp) 22.dp else 0.dp,
+        // The category icon is always kept; when space is tight the trailing arrow yields first.
+        val arrowWidth by animateDpAsState(
+            if (maxWidth >= labelWidth + 58.dp) 20.dp else 0.dp,
             animationSpec = tween(220),
-            label = "filter-icon-width",
+            label = "filter-arrow-width",
         )
         Surface(
             onClick = { open = true },
@@ -409,21 +410,21 @@ private fun FilterMenu(
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(tag).semantics { selected = active },
         ) {
             Row(
-                Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
+                Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box(Modifier.width(iconWidth).height(18.dp).clip(RoundedCornerShape(0.dp))) {
-                    AppIcon(icon, Modifier.size(18.dp).alpha(iconWidth / 22.dp))
-                }
+                AppIcon(icon, Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
                 Text(
                     label,
-                    Modifier.weight(1f),
+                    Modifier.weight(1f, fill = false),
                     style = labelStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.width(4.dp))
-                AppIcon(R.drawable.ic_dropdown, Modifier.size(16.dp))
+                Box(Modifier.width(arrowWidth).height(16.dp), contentAlignment = Alignment.CenterEnd) {
+                    AppIcon(R.drawable.ic_dropdown, Modifier.size(16.dp).alpha(arrowWidth / 20.dp))
+                }
             }
         }
         AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) { content() }
@@ -488,8 +489,8 @@ fun SwipeAction(
 private fun CountryRow(state: AppState, country: Country, modifier: Modifier, onVisit: () -> Unit, onWishlist: () -> Unit, onLocate: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
     val visitLabel = stringResource(R.string.log_visit)
-    val wishlistLabel = stringResource(if (state.data.plannedTripRecords.any { it.countryCode == country.code })
-        R.string.review_wishlist else R.string.add_wishlist)
+    val hasPlans = state.data.plannedTripRecords.any { it.countryCode == country.code }
+    val wishlistLabel = stringResource(if (hasPlans) R.string.review_wishlist else R.string.add_wishlist)
     val locale = currentLocale()
     val eligibility = state.eligibility(country.code)
     val entry = state.data.defaultVisas.firstOrNull { it.countryCode == country.code }
@@ -548,8 +549,16 @@ private fun CountryRow(state: AppState, country: Country, modifier: Modifier, on
                         modifier = Modifier.testTag("country-locate-${country.code}"),
                         onClick = { menu = false; onLocate() },
                     )
-                    DropdownMenuItem(text = { Text(visitLabel) }, onClick = { menu = false; onVisit() })
-                    DropdownMenuItem(text = { Text(wishlistLabel) }, onClick = { menu = false; onWishlist() })
+                    DropdownMenuItem(
+                        text = { Text(visitLabel) },
+                        leadingIcon = { AppIcon(R.drawable.ic_add_location) },
+                        onClick = { menu = false; onVisit() },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(wishlistLabel) },
+                        leadingIcon = { AppIcon(if (hasPlans) R.drawable.ic_favorite_filled else R.drawable.ic_favorite) },
+                        onClick = { menu = false; onWishlist() },
+                    )
                 }
             }
         }

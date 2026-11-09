@@ -72,4 +72,18 @@
     <string name="maplibre_license">MapLibre 许可条款</string>
     <string name="policy_sources">入境政策来源</string>
     <string name="wikipedia_attribution">Wikipedia 参考资料的署名列于仓库来源文件，依 CC BY-SA 4.0 提供。最新规定及署名请参阅原始页面。</string>
+    <string name="sharing">分享</string>
+    <string name="sharing_footer">选择旅行卡默认包含的内容。</string>
+    <string name="sharing_defaults_intro">这些设置会作为下一张旅行卡的默认值，每次分享时仍可更改。</string>
+    <string name="travel_card">旅行卡</string>
+    <string name="kept_on_device">仅保留在此设备</string>
+    <string name="notes_title">备注</string>
+    <string name="visas_and_attachments">我的签证及附件</string>
+    <string name="safety_code_title">安全码</string>
+    <string name="faq_footer">找不到答案？欢迎告诉我们。</string>
+    <string name="follow_us">关注我们</string>
+    <string name="source_code_github">GitHub 上的源代码</string>
+    <string name="acknowledgements_sources">致谢与资料来源</string>
+    <string name="diagnostics_copied">已复制诊断信息</string>
+    <string name="third_party_licenses">开源许可</string>
 </resources>

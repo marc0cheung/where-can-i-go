@@ -72,4 +72,18 @@
     <string name="maplibre_license">MapLibre License</string>
     <string name="policy_sources">Entry Policy Sources</string>
     <string name="wikipedia_attribution">Wikipedia-derived references are attributed in the repository’s source files and are available under CC BY-SA 4.0. Check the original pages for current rules and attribution.</string>
+    <string name="sharing">Sharing</string>
+    <string name="sharing_footer">Choose what your travel card includes by default.</string>
+    <string name="sharing_defaults_intro">These settings are the defaults for your next travel card. You can change them each time you share.</string>
+    <string name="travel_card">Travel Card</string>
+    <string name="kept_on_device">Kept on This Device</string>
+    <string name="notes_title">Notes</string>
+    <string name="visas_and_attachments">My Visas and Attachments</string>
+    <string name="safety_code_title">Safety Code</string>
+    <string name="faq_footer">Can\'t find your answer? Let us know.</string>
+    <string name="follow_us">Follow Us</string>
+    <string name="source_code_github">Source Code on GitHub</string>
+    <string name="acknowledgements_sources">Acknowledgements &amp; Sources</string>
+    <string name="diagnostics_copied">Diagnostics copied</string>
+    <string name="third_party_licenses">Open-Source Licenses</string>
 </resources>

@@ -199,8 +199,8 @@ fun CountryCard(
         shadowElevation = 4.dp,
     ) {
         Row(Modifier.padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(country.flag, fontSize = 28.sp)
-            Spacer(Modifier.width(12.dp))
+            Text(country.flag, fontSize = 32.sp)
+            Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 val title = if (source?.coverage == VisaCoverage.SchengenArea) {
@@ -228,11 +228,13 @@ fun CountryCard(
                     val hasPlans = state.data.plannedTripRecords.any { it.countryCode == code }
                     androidx.compose.material3.DropdownMenuItem(
                         text = { Text(stringResource(if (hasPlans) R.string.review_wishlist else R.string.add_wishlist)) },
+                        leadingIcon = { AppIcon(if (hasPlans) R.drawable.ic_favorite_filled else R.drawable.ic_favorite) },
                         onClick = { menu = false; if (hasPlans) onReviewWishlist() else onAddWishlist() },
                         modifier = Modifier.testTag("card-wishlist"),
                     )
                     androidx.compose.material3.DropdownMenuItem(
                         text = { Text(stringResource(R.string.log_visit)) },
+                        leadingIcon = { AppIcon(R.drawable.ic_add_location) },
                         onClick = { menu = false; onAddVisit() },
                         modifier = Modifier.testTag("card-log-visit"),
                     )
