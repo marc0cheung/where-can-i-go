@@ -5,6 +5,11 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.derivedStateOf
@@ -21,12 +26,12 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -35,20 +40,18 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.saveable.SaveableStateHolder
@@ -56,10 +59,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -69,11 +79,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.collapse
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.marcocheung.wherecanigo.R
-import kotlinx.coroutines.launch
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 private enum class Destination(@param:StringRes val title: Int, @param:DrawableRes val icon: Int) {
     Overview(R.string.overview, R.drawable.ic_globe),
@@ -310,9 +323,10 @@ private fun SelectedCountryCard(actions: MainActions, code: String, modifier: Mo
 }
 
 private val PeekHeight = 172.dp
+private enum class PanelDetent { Peek, Half, Expanded }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun PhoneContent(
     actions: MainActions,
     camera: MapCamera,
@@ -321,46 +335,73 @@ private fun PhoneContent(
     onCountrySelected: (MapCountry) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state = rememberBottomSheetScaffoldState()
-    val scope = rememberCoroutineScope()
     val density = LocalDensity.current
     var cardHeight by remember { mutableStateOf(140.dp) }
-    val expanded = state.bottomSheetState.currentValue == SheetValue.Expanded
-    val collapse: () -> Unit = { scope.launch { state.bottomSheetState.partialExpand() } }
-    LaunchedEffect(actions.destination) {
-        if (actions.destination == Destination.Travels) state.bottomSheetState.expand()
+    var containerHeightPx by remember { mutableFloatStateOf(0f) }
+    var detent by rememberSaveable { mutableStateOf(PanelDetent.Peek) }
+    var dragging by remember { mutableStateOf(false) }
+    var dragOffsetPx by remember { mutableFloatStateOf(Float.NaN) }
+    val peekOffset = (containerHeightPx - with(density) { PeekHeight.toPx() }).coerceAtLeast(0f)
+    val halfOffset = minOf(containerHeightPx * 0.42f, peekOffset)
+    val targetOffset = when (detent) {
+        PanelDetent.Peek -> peekOffset
+        PanelDetent.Half -> halfOffset
+        PanelDetent.Expanded -> 0f
     }
-    BackHandler(enabled = expanded && actions.selectedCode == null) { collapse() }
-    BottomSheetScaffold(
-        modifier = modifier.clipToBounds().testTag("bottom-sheet"),
-        scaffoldState = state,
-        sheetPeekHeight = PeekHeight,
-        sheetContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-        sheetTonalElevation = 0.dp,
-        sheetShadowElevation = 3.dp,
-        sheetDragHandle = {
-            BottomSheetDefaults.DragHandle(
-                modifier = Modifier.testTag("sheet-handle").semantics {
-                    if (expanded) {
-                        collapse { collapse(); true }
-                    } else {
-                        expand {
-                            scope.launch { state.bottomSheetState.expand() }
-                            true
-                        }
-                    }
-                },
-            )
-        },
-        sheetContent = {
-            SheetHeader(
-                actions.state, actions.dice,
-                onDicePicked = { actions.locate(it); collapse() },
-                onOpenProfile = actions.openProfile,
-                onOpenSettings = actions.openSettings,
-            )
-            PanelContent(actions, onLocate = { actions.locate(it); collapse() })
-        },
+    val animatedOffset by androidx.compose.animation.core.animateFloatAsState(targetOffset, label = "panel-offset")
+    val panelOffset = if (dragging && dragOffsetPx.isFinite()) dragOffsetPx else animatedOffset
+    val visibleHeight = with(density) { (containerHeightPx - panelOffset).coerceAtLeast(0f).toDp() }
+    fun nearestDetent(offset: Float): PanelDetent = listOf(
+        PanelDetent.Peek to peekOffset,
+        PanelDetent.Half to halfOffset,
+        PanelDetent.Expanded to 0f,
+    ).minBy { abs(it.second - offset) }.first
+    fun beginDrag() {
+        if (!dragging) {
+            dragOffsetPx = animatedOffset
+            dragging = true
+        }
+    }
+    fun settleDrag() {
+        if (dragging) {
+            detent = nearestDetent(dragOffsetPx)
+            dragging = false
+        }
+    }
+    val nestedScrollConnection = remember(peekOffset, halfOffset, animatedOffset) {
+        object : NestedScrollConnection {
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                if (available.y == 0f || containerHeightPx == 0f) return Offset.Zero
+                beginDrag()
+                val old = dragOffsetPx
+                dragOffsetPx = (old + available.y).coerceIn(0f, peekOffset)
+                return Offset(0f, dragOffsetPx - old)
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                settleDrag()
+                return Velocity.Zero
+            }
+        }
+    }
+    val dragState = rememberDraggableState { delta ->
+        beginDrag()
+        dragOffsetPx = (dragOffsetPx + delta).coerceIn(0f, peekOffset)
+    }
+    val collapse: () -> Unit = {
+        detent = when (detent) {
+            PanelDetent.Expanded -> PanelDetent.Half
+            PanelDetent.Half -> PanelDetent.Peek
+            PanelDetent.Peek -> PanelDetent.Peek
+        }
+    }
+    LaunchedEffect(actions.destination) {
+        if (actions.destination == Destination.Travels) detent = PanelDetent.Expanded
+    }
+    BackHandler(enabled = detent != PanelDetent.Peek && actions.selectedCode == null) { collapse() }
+    Box(
+        modifier.fillMaxSize().clipToBounds().testTag("bottom-sheet")
+            .onSizeChanged { containerHeightPx = it.height.toFloat() },
     ) {
         WorldMap(
             camera,
@@ -369,25 +410,68 @@ private fun PhoneContent(
             onCountrySelected,
             Modifier.fillMaxSize(),
             flyRequest = flyRequest,
-            cameraBottomPadding = PeekHeight + cardHeight + 24.dp,
+            cameraBottomPadding = visibleHeight + cardHeight + 24.dp,
             visitedCodes = actions.state.data.visitedCountryCodes,
         ) {
-            actions.selectedCode?.let { code ->
+            actions.selectedCode?.takeIf { detent != PanelDetent.Expanded }?.let { code ->
                 SelectedCountryCard(
                     actions,
                     code,
-                    Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = PeekHeight + 12.dp)
+                    Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = visibleHeight + 12.dp)
                         .onSizeChanged { cardHeight = with(density) { it.height.toDp() } },
                 )
             }
+        }
+        if (containerHeightPx > 0f) Column(
+            Modifier.fillMaxSize()
+                .offset { IntOffset(0, panelOffset.roundToInt()) }
+                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 0.dp, bottomEnd = 0.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .nestedScroll(nestedScrollConnection),
+        ) {
+            val handleLabel = stringResource(R.string.sheet_drag_handle)
+            val detentLabel = stringResource(when (detent) {
+                PanelDetent.Peek -> R.string.sheet_peek
+                PanelDetent.Half -> R.string.sheet_half
+                PanelDetent.Expanded -> R.string.sheet_expanded
+            })
+            BottomSheetDefaults.DragHandle(
+                modifier = Modifier.fillMaxWidth().draggable(
+                    state = dragState,
+                    orientation = Orientation.Vertical,
+                    onDragStopped = { settleDrag() },
+                ).clickable {
+                    detent = when (detent) {
+                        PanelDetent.Peek -> PanelDetent.Half
+                        PanelDetent.Half -> PanelDetent.Expanded
+                        PanelDetent.Expanded -> PanelDetent.Peek
+                    }
+                }.semantics {
+                    contentDescription = handleLabel
+                    stateDescription = detentLabel
+                    collapse { detent = PanelDetent.Peek; true }
+                    expand { detent = PanelDetent.Expanded; true }
+                }.testTag("sheet-handle"),
+            )
+            SheetHeader(
+                actions.state, actions.dice,
+                onDicePicked = { actions.locate(it); detent = PanelDetent.Peek },
+                onOpenProfile = actions.openProfile,
+                onOpenSettings = actions.openSettings,
+            )
+            PanelContent(actions, onLocate = { actions.locate(it); detent = PanelDetent.Peek }, modifier = Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-private fun PanelContent(actions: MainActions, onLocate: (String) -> Unit = actions.locate) {
+private fun PanelContent(
+    actions: MainActions,
+    onLocate: (String) -> Unit = actions.locate,
+    modifier: Modifier = Modifier,
+) {
     actions.panelState.SaveableStateProvider("panel") {
-        Box(Modifier.fillMaxSize()) {
+        Box(modifier.fillMaxSize()) {
             when (actions.destination) {
                 Destination.Overview -> if (actions.state.loadError) {
                     val locale = currentLocale()

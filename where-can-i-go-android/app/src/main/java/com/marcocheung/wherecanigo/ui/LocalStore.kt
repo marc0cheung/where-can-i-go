@@ -17,12 +17,13 @@ internal fun writeAtomic(file: File, text: String) {
 
 /** A durable rollback journal keeps app data and profile consistent after interrupted imports. */
 internal object LocalStore {
-    private val files = listOf("app_data.json", "user_profile.json")
+    private val files = listOf("app_data.json", "user_profile.json", "friends.json", "sharing_identity.json")
     fun recover(root: File) {
         val journal = File(root, "data_transaction.json")
         if (!journal.exists()) return
         val originals = JSONObject(journal.readText())
         files.forEach { name ->
+            if (!originals.has(name)) return@forEach
             val target = File(root, name)
             if (originals.isNull(name)) {
                 if (target.exists() && !target.delete()) throw java.io.IOException("Cannot restore absent file")
@@ -31,12 +32,18 @@ internal object LocalStore {
         if (!journal.delete()) throw java.io.IOException("Cannot clear transaction journal")
     }
 
-    fun commit(root: File, app: JSONObject, profile: JSONObject) {
+    fun begin(root: File) {
         recover(root)
         val original = JSONObject()
-        files.forEach { name -> original.put(name, File(root, name).takeIf(File::exists)?.readText() ?: JSONObject.NULL) }
+        files.forEach { name ->
+            original.put(name, File(root, name).takeIf(File::exists)?.readText() ?: JSONObject.NULL)
+        }
+        writeAtomic(File(root, "data_transaction.json"), original.toString())
+    }
+
+    fun commit(root: File, app: JSONObject, profile: JSONObject) {
         val journal = File(root, "data_transaction.json")
-        writeAtomic(journal, original.toString())
+        if (!journal.exists()) begin(root)
         try {
             writeAtomic(File(root, files[0]), app.toString(2))
             writeAtomic(File(root, files[1]), profile.toString())

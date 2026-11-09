@@ -40,12 +40,22 @@ import java.time.LocalDate
 @Composable
 fun TravelsTab(state: AppState) {
     var wishlist by rememberSaveable { mutableStateOf(false) }
+    var friends by rememberSaveable { mutableStateOf(false) }
     var editorKey by rememberSaveable { mutableStateOf<String?>(null) }
     var initialCountry by rememberSaveable { mutableStateOf<String?>(null) }
     var detailCountry by rememberSaveable { mutableStateOf<String?>(null) }
     var summary by rememberSaveable { mutableStateOf(false) }
     var deleteCountry by rememberSaveable { mutableStateOf<String?>(null) }
     val locale = currentLocale()
+    LaunchedEffect(state.incomingTravelCard) {
+        if (state.incomingTravelCard != null) friends = true
+    }
+    if (friends) {
+        FriendsTab(state) {
+            if (it == null) friends = true else { friends = false; wishlist = it }
+        }
+        return
+    }
     val visits = state.data.visitRecords
     val plans = state.data.plannedTripRecords
     LaunchedEffect(state.pendingAddVisitCountryCode, state.pendingAddWishlistCountryCode, state.pendingReviewWishlistCountryCode) {
@@ -70,7 +80,9 @@ fun TravelsTab(state: AppState) {
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
             Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                TravelSegments(wishlist) { wishlist = it }
+                TravelSegments(wishlist, friends) {
+                    if (it == null) friends = true else { friends = false; wishlist = it }
+                }
                 Text(stringResource(if (wishlist) R.string.where_want else R.string.where_been),
                     style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 TravelSummaryCard(state, wishlist, Modifier.testTag("travel-summary")
@@ -127,20 +139,23 @@ fun TravelsTab(state: AppState) {
 }
 
 @Composable
-private fun TravelSegments(wishlist: Boolean, onSelect: (Boolean) -> Unit) {
+internal fun TravelSegments(wishlist: Boolean, friends: Boolean, onSelect: (Boolean?) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        listOf(false to R.string.been, true to R.string.wishlist).forEach { (value, label) ->
-            FilterChip(selected = wishlist == value, onClick = { onSelect(value) },
-                label = { Text(stringResource(label)) }, modifier = Modifier.weight(1f).testTag(if (value) "segment-Wishlist" else "segment-Been"))
+        listOf(null to R.string.friends, false to R.string.been, true to R.string.wishlist).forEach { (value, label) ->
+            FilterChip(selected = if (value == null) friends else !friends && wishlist == value,
+                onClick = { onSelect(value) },
+                label = { Text(stringResource(label)) },
+                modifier = Modifier.weight(1f).testTag("segment-${value?.let { if (it) "Wishlist" else "Been" } ?: "Friends"}"))
         }
     }
 }
 
 @Composable
 private fun TravelSummaryCard(state: AppState, wishlist: Boolean, modifier: Modifier = Modifier, detailed: Boolean = false,
-    onMapReady: () -> Unit = {}) {
+    onMapReady: () -> Unit = {}, onPassportCardTap: () -> Unit = {}) {
     val stats = if (wishlist) TravelStats.plans(state.data.plannedTripRecords) else TravelStats.visits(state.data.visitRecords)
-    Surface(modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge,
+    Surface(modifier.fillMaxWidth().then(if (detailed) Modifier.clickable(onClick = onPassportCardTap) else Modifier),
+        shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             if (detailed) TravelMiniMap(stats.countryCodes, Modifier.fillMaxWidth().height(160.dp), onMapReady)
@@ -180,13 +195,24 @@ private fun TravelSummarySheet(state: AppState, onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()
     var sharing by remember { mutableStateOf(false) }
     var mapReady by remember { mutableStateOf(false) }
+    var cardTaps by remember { mutableIntStateOf(0) }
+    var lastCardTap by remember { mutableLongStateOf(0L) }
+    var showEasterEgg by remember { mutableStateOf(false) }
     FullScreenSheet(stringResource(R.string.where_been), onDismiss, null, testTag = "travel-summary-sheet") {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             TravelSummaryCard(state, false, Modifier.widthIn(max = 400.dp).drawWithContent {
                 layer.record { this@drawWithContent.drawContent() }
                 drawLayer(layer)
-            }, detailed = true, onMapReady = { mapReady = true })
+            }, detailed = true, onMapReady = { mapReady = true }, onPassportCardTap = {
+                val now = android.os.SystemClock.elapsedRealtime()
+                cardTaps = if (now - lastCardTap < 1_500L) cardTaps + 1 else 1
+                lastCardTap = now
+                if (cardTaps >= 5) {
+                    cardTaps = 0
+                    showEasterEgg = true
+                }
+            })
             Button(enabled = !sharing && mapReady, onClick = {
                 sharing = true
                 scope.launch {
@@ -215,6 +241,7 @@ private fun TravelSummarySheet(state: AppState, onDismiss: () -> Unit) {
             }) { Text(stringResource(R.string.share_summary)) }
         }
     }
+    if (showEasterEgg) OpenWorldEasterEgg { showEasterEgg = false }
 }
 
 @Composable

@@ -38,6 +38,8 @@ fun AppSettingsPage(state: AppState, onBack: () -> Unit) {
     var section by rememberSaveable { mutableStateOf("main") }
     var includePhoto by rememberSaveable { mutableStateOf(true) }
     var includeAttachments by rememberSaveable { mutableStateOf(true) }
+    var includeFriends by rememberSaveable { mutableStateOf(false) }
+    var includeIdentity by rememberSaveable { mutableStateOf(false) }
     var importUri by rememberSaveable { mutableStateOf<String?>(null) }
     var document by remember { mutableStateOf<BackupDocument?>(null) }
     var plan by remember { mutableStateOf<RestorePlan?>(null) }
@@ -45,6 +47,13 @@ fun AppSettingsPage(state: AppState, onBack: () -> Unit) {
     var confirm by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var result by rememberSaveable { mutableStateOf<String?>(null) }
+    val identityAvailable = remember {
+        try { SharingIdentity.current(context) != null }
+        catch (failure: Exception) {
+            state.reportError(R.string.identity_access_error, failure)
+            false
+        }
+    }
     val back = { if (!busy) { if (section == "main") onBack() else { section = "main"; importUri = null; document = null; plan = null } } }
     BackHandler(onBack = back)
     val exportResultText = stringResource(R.string.backup_exported)
@@ -60,7 +69,8 @@ fun AppSettingsPage(state: AppState, onBack: () -> Unit) {
             scope.launch {
                 try {
                     val skipped = withContext(NonCancellable + Dispatchers.IO) {
-                        val (bytes, skipped) = UserDataBackup.export(context, state.data, state.profile, includePhoto, includeAttachments)
+                        val (bytes, skipped) = UserDataBackup.export(context, state.data, state.profile,
+                            includePhoto, includeAttachments, includeFriends, includeIdentity)
                         context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(bytes) }
                             ?: throw IOException("Cannot write backup")
                         skipped
@@ -87,14 +97,18 @@ fun AppSettingsPage(state: AppState, onBack: () -> Unit) {
                     ?: throw IOException("Cannot read backup")
             }
         } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
-        catch (failure: FriendsBackupUnsupported) { state.reportError(R.string.backup_friends_unsupported, failure); importUri = null }
         catch (failure: Exception) { state.reportError(R.string.backup_import_error, failure); importUri = null }
         finally { busy = false }
     }
     LaunchedEffect(document, replacing) {
         val backup = document ?: return@LaunchedEffect
         busy = true
-        try { plan = withContext(Dispatchers.IO) { UserDataBackup.plan(context, backup, state.data, state.profile, replacing) } }
+        try {
+            plan = withContext(Dispatchers.IO) {
+                UserDataBackup.plan(context, backup, state.data, state.profile,
+                    replacing, state.friendStore.friends, identityAvailable)
+            }
+        }
         catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
         catch (failure: Exception) { state.reportError(R.string.backup_import_error, failure); document = null; importUri = null }
         finally { busy = false }
@@ -148,6 +162,19 @@ fun AppSettingsPage(state: AppState, onBack: () -> Unit) {
                         Checkbox(includeAttachments, { includeAttachments = it }, enabled = !busy)
                         Text(stringResource(R.string.include_attachments), Modifier.padding(top = 12.dp))
                     }
+                    Row {
+                        Checkbox(includeFriends, { includeFriends = it },
+                            enabled = !busy && state.friendStore.friends.isNotEmpty() && !state.friendStore.loadFailed)
+                        Text(stringResource(R.string.include_friends, state.friendStore.friends.size), Modifier.padding(top = 12.dp))
+                    }
+                    Row {
+                        Checkbox(includeIdentity, { includeIdentity = it }, enabled = !busy && identityAvailable)
+                        Text(stringResource(R.string.include_sharing_identity), Modifier.padding(top = 12.dp))
+                    }
+                    if (includeFriends) Text(stringResource(R.string.backup_friends_warning),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (includeIdentity) Text(stringResource(R.string.backup_identity_warning),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                     Button(onClick = { export.launch("wherecanigo-backup-${java.time.LocalDate.now()}.json") },
                         enabled = !busy && !state.profileLoadFailed, modifier = Modifier.fillMaxWidth().testTag("backup-export")) {
                         Text(stringResource(R.string.export_data))
@@ -167,6 +194,8 @@ fun AppSettingsPage(state: AppState, onBack: () -> Unit) {
                         Text(stringResource(if (replacing) R.string.replace_explanation else R.string.merge_explanation))
                         Text(stringResource(R.string.restore_counts, preview.data.personalVisas.size,
                             preview.data.visitRecords.size, preview.data.plannedTripRecords.size))
+                        preview.friends?.let { Text(stringResource(R.string.restore_friend_count, it.size)) }
+                        if (preview.sharingIdentity != null) Text(stringResource(R.string.restore_identity_included))
                         Text("$skipText: ${preview.skippedRecords + preview.skippedMedia}")
                         Text(stringResource(R.string.passport) + ": " + preview.data.passportCode)
                         Button(onClick = { confirm = true }, enabled = !busy, modifier = Modifier.testTag("backup-restore")) {

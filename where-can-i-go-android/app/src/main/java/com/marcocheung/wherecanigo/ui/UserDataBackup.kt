@@ -12,12 +12,13 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
-internal class FriendsBackupUnsupported : IOException("Friends and sharing identity are not supported yet")
 internal data class BackupFile(val name: String, val bytes: ByteArray)
 internal data class BackupDocument(val json: JSONObject, val attachments: Map<String, List<BackupFile>>,
-    val photo: BackupFile?, val skippedMedia: Int)
+    val photo: BackupFile?, val skippedMedia: Int, val friends: List<TravelCardFriend>?,
+    val sharingIdentity: JSONObject?)
 internal data class RestorePlan(val data: AppData, val profile: UserProfile,
-    val attachments: Map<String, List<BackupFile>>, val skippedRecords: Int, val skippedMedia: Int)
+    val attachments: Map<String, List<BackupFile>>, val skippedRecords: Int, val skippedMedia: Int,
+    val friends: List<TravelCardFriend>?, val sharingIdentity: JSONObject?)
 
 internal object UserDataBackup {
     const val maxBytes = 100 * 1024 * 1024
@@ -42,7 +43,8 @@ internal object UserDataBackup {
     }
 
     fun export(context: Context, data: AppData, profile: UserProfile, includePhoto: Boolean,
-        includeAttachments: Boolean): Pair<ByteArray, Int> {
+        includeAttachments: Boolean, includeFriends: Boolean = false,
+        includeSharingIdentity: Boolean = false): Pair<ByteArray, Int> {
         val defaults = BundledRepository.loadPolicy(context, data.passportCode).entries.associateBy { it.countryCode }
         val overrides = data.defaultVisas.filter { defaults[it.countryCode] != it }
         val removed = defaults.keys - data.defaultVisas.map { it.countryCode }.toSet()
@@ -76,6 +78,14 @@ internal object UserDataBackup {
                 .put("removedCountryCodes", JSONArray(removed.toList())))
             .put("personalVisas", JSONArray(visas)).put("visits", JSONArray(data.visitRecords.map { it.toJson(true) }))
             .put("wishlist", JSONArray(data.plannedTripRecords.map { it.toJson(true) }))
+        if (includeFriends) {
+            val store = AppState.get(context).friendStore
+            check(!store.loadFailed) { "Saved friends could not be read" }
+            root.put("friends", JSONArray(store.friends.map(TravelCardFriend::toJson)))
+        }
+        if (includeSharingIdentity) {
+            SharingIdentity.export(context)?.let { root.put("sharingIdentity", it) }
+        }
         val bytes = root.toString(2).toByteArray(Charsets.UTF_8)
         require(bytes.size <= maxBytes) { "Backup exceeds 100 MiB" }
         return bytes to skipped
@@ -88,8 +98,15 @@ internal object UserDataBackup {
         require(root.getString("format") == "wherecanigo.backup" && root.getInt("schemaVersion") == 1 &&
             root.getString("kind") == "fullBackup") { "Unsupported backup format, version or kind" }
         Instant.parse(root.getString("exportedAt"))
-        if (!root.isNull("sharingIdentity") || (root.optJSONArray("friends")?.length() ?: 0) > 0)
-            throw FriendsBackupUnsupported()
+        val identity = root.optJSONObject("sharingIdentity")?.also {
+            val privateKey = Base64.decode(it.getString("privateKey"), Base64.DEFAULT)
+            require(privateKey.size == 32 && it.getLong("lastRevision") >= 0)
+            TravelCardCrypto.publicKeyFromPrivate(privateKey)
+        }
+        val friendRecords = root.optJSONArray("friends")?.objects()?.map(TravelCardFriend::fromJson)
+        friendRecords?.let {
+            require(it.map(TravelCardFriend::sharerID).distinct().size == it.size) { "Duplicate friend identity" }
+        }
         root.optJSONObject("passport")?.let { require(it.getString("code") in SupportedPassports) }
         val attachments = mutableMapOf<String, List<BackupFile>>()
         var skipped = 0
@@ -156,10 +173,12 @@ internal object UserDataBackup {
             }
         }
         val photo = root.optJSONObject("profile")?.optJSONObject("photo")?.let { unpack(it, true) }
-        return BackupDocument(root, attachments, photo, skipped)
+        return BackupDocument(root, attachments, photo, skipped, friendRecords, identity)
     }
 
-    fun plan(context: Context, backup: BackupDocument, local: AppData, localProfile: UserProfile, replace: Boolean): RestorePlan {
+    fun plan(context: Context, backup: BackupDocument, local: AppData, localProfile: UserProfile,
+        replace: Boolean, localFriends: List<TravelCardFriend> = emptyList(),
+        hasLocalIdentity: Boolean = false): RestorePlan {
         val root = backup.json
         val passport = if (replace) root.optJSONObject("passport")?.getString("code") ?: local.passportCode else local.passportCode
         var skipped = 0
@@ -207,13 +226,21 @@ internal object UserDataBackup {
             if ((replace || profile.photoData == null) && backup.photo != null)
                 profile = profile.copy(photoData = prepareProfilePhoto(backup.photo.bytes, 512), photoSourceData = null, photoCrop = null)
         }
+        val friends = backup.friends?.let { incoming ->
+            if (replace) incoming else mergeFriends(localFriends, incoming)
+        }
+        val identity = backup.sharingIdentity?.takeIf { replace || !hasLocalIdentity }
         return RestorePlan(AppData(passport, entries, visas, JSONArray(visits.map { it.toJson() }), JSONArray(plans.map { it.toJson() })),
-            profile, media, skipped, backup.skippedMedia)
+            profile, media, skipped, backup.skippedMedia, friends, identity)
     }
 
     fun restore(context: Context, state: AppState, plan: RestorePlan): Boolean {
         val staged = mutableListOf<Pair<String, String>>()
+        if ((plan.friends != null || plan.sharingIdentity != null) && state.friendStore.loadFailed)
+            throw IOException("Saved friends could not be read; refusing to overwrite them")
         val originalIds = state.data.personalVisas.map { it.id }.toSet()
+        val changesFriends = plan.friends != null
+        val changesIdentity = plan.sharingIdentity != null
         try {
             val visas = plan.data.personalVisas.map { visa ->
                 val files = plan.attachments[visa.id] ?: return@map visa
@@ -223,12 +250,26 @@ internal object UserDataBackup {
                 }
                 visa.copy(attachmentFileNames = names)
             }
-            if (!state.commitRestoredData(plan.data.copy(personalVisas = visas), plan.profile)) return false
+            LocalStore.begin(context.filesDir)
+            if (changesFriends) state.friendStore.replaceAll(requireNotNull(plan.friends))
+            if (changesIdentity) SharingIdentity.install(context, plan.sharingIdentity)
+            if (!state.commitRestoredData(plan.data.copy(personalVisas = visas), plan.profile)) {
+                state.friendStore.load()
+                return false
+            }
             staged.clear()
             (originalIds + visas.map { it.id }).forEach { id ->
                 state.pruneAttachments(id, visas.firstOrNull { it.id == id }?.attachmentFileNames.orEmpty())
             }
             return true
+        } catch (failure: Exception) {
+            try {
+                LocalStore.recover(context.filesDir)
+                state.friendStore.load()
+            } catch (rollback: Exception) {
+                failure.addSuppressed(rollback)
+            }
+            throw failure
         } finally {
             staged.forEach { (id, name) ->
                 try { VisaAttachmentStore.delete(context, name, id) }
@@ -236,4 +277,20 @@ internal object UserDataBackup {
             }
         }
     }
+
+    private fun mergeFriends(local: List<TravelCardFriend>, incoming: List<TravelCardFriend>): List<TravelCardFriend> {
+            val merged = local.associateBy { it.sharerID }.toMutableMap()
+            incoming.forEach { friend ->
+                val old = merged[friend.sharerID]
+                when {
+                    old == null -> merged[friend.sharerID] = friend
+                    old.publicKey.contentEquals(friend.publicKey) && friend.card.cardRevision > old.card.cardRevision ->
+                        merged[friend.sharerID] = old.copy(card = friend.card,
+                            lastReceivedAt = maxOf(old.lastReceivedAt, friend.lastReceivedAt),
+                            nickname = old.nickname ?: friend.nickname)
+                }
+            }
+            return merged.values.toList()
+        }
+
 }

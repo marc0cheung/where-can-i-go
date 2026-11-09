@@ -45,6 +45,8 @@ class AppState private constructor(private val context: Context) {
         private set
     var profile by mutableStateOf(UserProfile())
         private set
+    internal val friendStore: FriendStore by lazy { FriendStore(context) }
+    var incomingTravelCard by mutableStateOf<Uri?>(null)
     var profileLoadFailed by mutableStateOf(false)
         private set
     var searchEngine by mutableStateOf(SearchEngine.google)

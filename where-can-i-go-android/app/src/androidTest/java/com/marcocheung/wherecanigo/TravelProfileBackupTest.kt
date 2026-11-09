@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Base64
 import androidx.test.platform.app.InstrumentationRegistry
 import com.marcocheung.wherecanigo.ui.*
 import org.json.JSONArray
@@ -118,7 +119,7 @@ class TravelProfileBackupTest {
     }
 
     @Test
-    fun backupRejectsFriendsDuplicatesInvalidDatesAndTamperedMedia() {
+    fun backupAcceptsFriendSectionsAndRejectsDuplicatesInvalidDatesAndTamperedMedia() {
         val visit = Visit(countryCode = "JPN", startDate = day)
         val data = local().copy(visits = JSONArray(listOf(visit.toJson())))
         val root = JSONObject(UserDataBackup.export(context, data, UserProfile(), false, false).first.toString(Charsets.UTF_8))
@@ -126,7 +127,7 @@ class TravelProfileBackupTest {
             assertThrows(Exception::class.java) { UserDataBackup.decode(json.toString().byteInputStream()) }
         }
         val friends = JSONObject(root.toString()).put("sharingIdentity", JSONObject())
-        assertThrows(FriendsBackupUnsupported::class.java) { UserDataBackup.decode(friends.toString().byteInputStream()) }
+        rejected(friends)
         val duplicates = JSONObject(root.toString())
         duplicates.getJSONArray("visits").put(duplicates.getJSONArray("visits").getJSONObject(0))
         rejected(duplicates)
@@ -137,6 +138,27 @@ class TravelProfileBackupTest {
         badMedia.getJSONObject("profile").put("photo", JSONObject().put("fileName", "photo.jpg")
             .put("byteCount", 3).put("sha256", "invalid").put("data", "YWJj"))
         rejected(badMedia)
+    }
+
+    @Test
+    fun travelCardSignatureCoversExactPayloadBytes() {
+        val pair = java.security.KeyPairGenerator.getInstance("EC").apply {
+            initialize(java.security.spec.ECGenParameterSpec("secp256r1"))
+        }.generateKeyPair()
+        val publicKey = TravelCardCrypto.publicKeyBytes(pair.public.encoded)
+        val payload = TravelCardPayload(
+            TravelCardCrypto.sharerID(publicKey), 1, Instant.parse("2026-04-01T12:00:00Z").toString(),
+            "Traveller", null, listOf(TravelCardRecord("JPN")), null,
+            false, TravelCardFields(), null,
+        )
+        val encoded = TravelCardCrypto.encode(payload, pair.private, publicKey)
+        assertEquals(payload, TravelCardCrypto.decodeAndVerify(encoded).payload)
+
+        val envelope = JSONObject(encoded.toString(Charsets.UTF_8))
+        val payloadBytes = Base64.decode(envelope.getString("payload"), Base64.DEFAULT)
+        payloadBytes[payloadBytes.lastIndex] = (payloadBytes.last().toInt() xor 1).toByte()
+        envelope.put("payload", Base64.encodeToString(payloadBytes, Base64.NO_WRAP))
+        assertThrows(Exception::class.java) { TravelCardCrypto.decodeAndVerify(envelope.toString().toByteArray()) }
     }
 
     @Test
