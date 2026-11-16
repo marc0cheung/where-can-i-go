@@ -9,58 +9,65 @@ struct ManageDataTab: View {
     @State private var confirmReset = false
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Manage Default Entry Policy").font(.headline)
-                Text("Add or remove visa-free, visa-on-arrival, and ETA countries for your selected passport.")
-                    .font(.caption).foregroundStyle(.secondary)
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Button { showCountryPicker = true } label: {
-                        HStack {
-                            Text(country.map { "\($0.flag)  \($0.localizedName())" } ?? String(localized: "Select country…"))
-                                .foregroundStyle(country == nil ? .secondary : .primary)
-                            Spacer()
-                            Image(systemName: "chevron.down").foregroundStyle(.gray)
-                        }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+        Form {
+            Section {
+                Button { showCountryPicker = true } label: {
+                    HStack {
+                        Text(country.map { "\($0.flag)  \($0.localizedName())" } ?? String(localized: "Select country…"))
+                            .foregroundStyle(country == nil ? .secondary : .primary)
+                        Spacer()
+                        Image(systemName: "chevron.down").foregroundStyle(.gray)
                     }
-
-                    Picker("Visa type", selection: $category) {
-                        Text("Visa Free").tag(VisaCategory.visaFree)
-                        Text("Visa on Arrival").tag(VisaCategory.visaOnArrival)
-                        Text("ETA").tag(VisaCategory.eta)
-                    }
-                    .pickerStyle(.segmented)
-
-                    TextField("Duration (e.g., 30 days)", text: $duration)
-                        .padding().background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-
-                    Button(action: addEntry) {
-                        Text("ADD")
-                            .font(.headline).foregroundStyle(.white)
-                            .frame(maxWidth: .infinity).padding()
-                            .background(country == nil ? Color.gray.opacity(0.6) : Color.primary,
-                                        in: RoundedRectangle(cornerRadius: 10))
-                    }
-                    .disabled(country == nil)
+                    .contentShape(Rectangle())
                 }
-                .padding()
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .buttonStyle(.plain)
 
-                ForEach(sortedDefaults) { entry in
-                    defaultRow(entry)
+                Picker("Visa type", selection: $category) {
+                    Text("Visa Free").tag(VisaCategory.visaFree)
+                    Text("Visa on Arrival").tag(VisaCategory.visaOnArrival)
+                    Text("ETA").tag(VisaCategory.eta)
                 }
+                .pickerStyle(.segmented)
 
+                TextField("Duration (e.g., 30 days)", text: $duration)
+
+                Button(action: addEntry) {
+                    Text("ADD")
+                        .font(.headline)
+                        .foregroundStyle(Color(.systemBackground))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glassProminent)
+                .controlSize(.large)
+                .tint(.primary)
+                .disabled(country == nil)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 0, trailing: 0))
+            } header: {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Manage Default Entry Policy").font(.headline).foregroundStyle(.primary)
+                    Text("Add or remove visa-free, visa-on-arrival, and ETA countries for your selected passport.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                .textCase(nil)
+            }
+
+            if !sortedDefaults.isEmpty {
+                Section {
+                    ForEach(sortedDefaults) { entry in
+                        defaultRow(entry)
+                    }
+                }
+            }
+
+            Section {
                 Button {
                     confirmReset = true
                 } label: {
                     Text("RESET TO DEFAULT DATA")
                         .font(.subheadline.bold())
-                        .frame(maxWidth: .infinity).padding()
+                        .frame(maxWidth: .infinity)
                         .foregroundStyle(.primary)
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                 }
                 .confirmationDialog(
                     "Reset to bundled defaults? Your custom edits will be lost.",
@@ -70,8 +77,9 @@ struct ManageDataTab: View {
                     Button("Cancel", role: .cancel) {}
                 }
             }
-            .padding()
         }
+        .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.interactively)
         .sheet(isPresented: $showCountryPicker) {
             CountryPickerSheet(selected: $country)
         }
@@ -121,8 +129,7 @@ struct ManageDataTab: View {
             } label: {
                 Image(systemName: "xmark.circle.fill").foregroundStyle(.gray)
             }
+            .buttonStyle(.plain)
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
     }
 }

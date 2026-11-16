@@ -3040,13 +3040,36 @@
         }
       }
     },
-    "EntryPolicy.VisaOnArrival" : {
-      "comment" : "Short label used only in the entry policy type segmented picker.",
+    "EntryPolicy.ETA" : {
+      "comment" : "Label used only in the entry policy type picker.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "VoA"
+            "value" : "Electronic Travel Authorization (eTA)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eTA"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eTA"
+          }
+        }
+      }
+    },
+    "EntryPolicy.VisaOnArrival" : {
+      "comment" : "Label used only in the entry policy type picker.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa on Arrival (VoA)"
           }
         },
         "zh-Hans" : {

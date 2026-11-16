@@ -312,9 +312,8 @@ struct PlannedTripEditorSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    label("COUNTRY")
+            Form {
+                Section {
                     Button {
                         focusedField = nil
                         showCountryPicker = true
@@ -329,77 +328,99 @@ struct PlannedTripEditorSheet: View {
                             Spacer()
                             Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
                         }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                } header: {
+                    label("COUNTRY")
+                }
 
-                    label("LOCATION (OPTIONAL)")
+                Section {
                     TextField("States / Province / City / Place", text: $location)
                         .focused($focusedField, equals: .location)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                } header: {
+                    label("LOCATION (OPTIONAL)")
+                }
 
-                    label("PURPOSE")
+                Section {
                     VisitPurposePicker(selection: $purpose)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                } header: {
+                    label("PURPOSE")
+                }
 
-                    label("Duration")
-                    Picker("Duration", selection: $durationMode) {
+                Section {
+                    Picker("Duration", selection: $durationMode.animation(.smooth(duration: 0.3))) {
                         Text("Not set").tag(PlannedDurationMode.notSet)
                         Text("Estimate").tag(PlannedDurationMode.estimatedDays)
                         Text("Dates").tag(PlannedDurationMode.dates)
                     }
                     .pickerStyle(.segmented)
-                    if durationMode == .estimatedDays {
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                } header: {
+                    label("Duration")
+                }
+
+                if durationMode == .estimatedDays {
+                    Section {
                         estimatedDaysRow
+                    } footer: {
                         if (Int(estimatedDays) ?? 0) <= 0 {
                             Text("Enter a positive whole number of days.")
-                                .font(.caption).foregroundStyle(.red)
-                        }
-                    } else if durationMode == .dates {
-                        VStack(spacing: 0) {
-                            DateInputRow(title: "Start date", clearLabel: "Clear start date", date: $startDate,
-                                         range: Date.distantPast...(endDate ?? .distantFuture),
-                                         onPresent: { focusedField = nil })
-                            Divider().padding(.vertical, 6)
-                            DateInputRow(title: "End date", clearLabel: "Clear end date", date: $endDate,
-                                         range: (startDate ?? .distantPast)...Date.distantFuture, preferredDate: startDate,
-                                         onPresent: { focusedField = nil })
-                        }
-                        .padding(.vertical, 4)
-                        if let days = makeTrip()?.plannedDayCount {
-                            Text("\(days) days planned").font(.caption).foregroundStyle(.secondary)
+                                .foregroundStyle(.red)
                         }
                     }
+                } else if durationMode == .dates {
+                    Section {
+                        DateInputRow(title: "Start date", clearLabel: "Clear start date", date: $startDate,
+                                     range: Date.distantPast...(endDate ?? .distantFuture),
+                                     onPresent: { focusedField = nil })
+                        DateInputRow(title: "End date", clearLabel: "Clear end date", date: $endDate,
+                                     range: (startDate ?? .distantPast)...Date.distantFuture, preferredDate: startDate,
+                                     onPresent: { focusedField = nil })
+                    } footer: {
+                        if let days = makeTrip()?.plannedDayCount {
+                            Text("\(days) days planned")
+                        }
+                    }
+                }
 
-                    label("NOTES")
+                Section {
                     TextField("Optional notes", text: $notes, axis: .vertical)
                         .focused($focusedField, equals: .notes)
                         .lineLimit(2...4)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                } header: {
+                    label("NOTES")
+                }
 
-                    if existingTrip != nil {
+                if existingTrip != nil {
+                    Section {
                         Button("Mark Completed") {
                             focusedField = nil
                             completingTrip = makeTrip()
                         }
                         .disabled(!canSave)
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 8)
+                    }
+                    .listSectionSpacing(.compact)
+                    Section {
                         Button("Delete Planned Trip", role: .destructive) { delete() }
                             .frame(maxWidth: .infinity)
-                            .padding(.top, 8)
                     }
                 }
-                .padding()
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle(titleKey)
             .centeredNavigationTitle(titleKey)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement: .topBarTrailing) { Button("Save") { save() }.disabled(!canSave) }
+                ToolbarItem(placement: .topBarLeading) { Button(role: .cancel) { dismiss() } }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(role: .confirm) { save() }
+                        .accessibilityLabel(Text("Save"))
+                        .disabled(!canSave)
+                }
             }
             .sheet(isPresented: $showCountryPicker) { CountryPickerSheet(selected: $country) }
             .sheet(item: $completingTrip, onDismiss: dismissIfCompleted) { plan in

@@ -1046,9 +1046,8 @@ private struct FlightyStayEditorSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    sectionLabel("COUNTRY")
+            Form {
+                Section {
                     Button {
                         focusedField = nil
                         showCountryPicker = true
@@ -1065,82 +1064,91 @@ private struct FlightyStayEditorSheet: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                } header: {
+                    sectionLabel("COUNTRY")
+                }
 
-                    sectionLabel("LOCATION (OPTIONAL)")
+                Section {
                     TextField("States / Province / City / Place", text: $location)
                         .focused($focusedField, equals: .location)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                } header: {
+                    sectionLabel("LOCATION (OPTIONAL)")
+                }
 
-                    sectionLabel("PURPOSE")
+                Section {
                     VisitPurposePicker(selection: $purpose)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                } header: {
+                    sectionLabel("PURPOSE")
+                }
 
+                Section {
+                    DateInputRow(
+                        title: "Start date",
+                        clearLabel: "Clear start date",
+                        date: $startDate,
+                        range: Date.distantPast...(endDate ?? Date.distantFuture),
+                        onPresent: { focusedField = nil }
+                    )
+                    DateInputRow(
+                        title: "End date",
+                        clearLabel: "Clear end date",
+                        date: $endDate,
+                        range: (startDate ?? Date.distantPast)...Date.distantFuture,
+                        preferredDate: startDate,
+                        onPresent: { focusedField = nil }
+                    )
+                } header: {
                     sectionLabel("DATES")
-                    VStack(spacing: 0) {
-                        DateInputRow(
-                            title: "Start date",
-                            clearLabel: "Clear start date",
-                            date: $startDate,
-                            range: Date.distantPast...(endDate ?? Date.distantFuture),
-                            onPresent: { focusedField = nil }
-                        )
-                        Divider().padding(.vertical, 6)
-                        DateInputRow(
-                            title: "End date",
-                            clearLabel: "Clear end date",
-                            date: $endDate,
-                            range: (startDate ?? Date.distantPast)...Date.distantFuture,
-                            preferredDate: startDate,
-                            onPresent: { focusedField = nil }
-                        )
-                    }
-                    .padding(.vertical, 4)
+                }
 
-                    sectionLabel("NOTES")
+                Section {
                     TextField("Optional notes", text: $notes, axis: .vertical)
                         .focused($focusedField, equals: .notes)
                         .lineLimit(2...4)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                } header: {
+                    sectionLabel("NOTES")
+                }
 
-                    if !stay.flights.isEmpty {
-                        sectionLabel("flighty.editor.flightsHeader")
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(stay.flights) { flight in
-                                HStack {
-                                    Text(verbatim: flightLabel(flight))
-                                        .font(.caption.monospaced())
-                                    Spacer()
-                                    Text(flight.departure.day.toDate(), format: .dateTime.year().month(.abbreviated).day())
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
+                if !stay.flights.isEmpty {
+                    Section {
+                        ForEach(stay.flights) { flight in
+                            HStack {
+                                Text(verbatim: flightLabel(flight))
+                                    .font(.caption.monospaced())
+                                Spacer()
+                                Text(flight.departure.day.toDate(), format: .dateTime.year().month(.abbreviated).day())
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                         }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    }
-
-                    if onSplit != nil || !sameCountryPeers.isEmpty {
-                        stayActionButtons
-                            .padding(.top, 4)
+                    } header: {
+                        sectionLabel("flighty.editor.flightsHeader")
                     }
                 }
-                .padding()
+
+                if onSplit != nil || !sameCountryPeers.isEmpty {
+                    Section {
+                        stayActionButtons
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets())
+                    }
+                }
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Edit Trip")
             .centeredNavigationTitle("Edit Trip")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button(role: .cancel) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Save") { saveChanges() }
+                    Button(role: .confirm) { saveChanges() }
+                        .accessibilityLabel(Text("Save"))
                         .disabled(!canSave)
                 }
             }

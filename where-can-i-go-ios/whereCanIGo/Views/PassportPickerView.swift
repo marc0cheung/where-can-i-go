@@ -60,21 +60,8 @@ struct PassportPickerView: View {
                 .padding(.bottom, 16)
             }
 
-            HStack {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Search countries…", text: $search)
-                    .autocorrectionDisabled()
-                if !search.isEmpty {
-                    Button { search = "" } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(10)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-            .padding(.horizontal)
+            CapsuleSearchField(text: $search)
+                .padding(.horizontal)
 
             List {
                 let countries = appState.countries.filtered(matching: search)
@@ -97,12 +84,13 @@ struct PassportPickerView: View {
                 if !isFirstLaunch { dismiss() }
             } label: {
                 Text("Use this Passport")
-                    .font(.headline).foregroundStyle(.white)
-                    .frame(maxWidth: .infinity).padding()
-                    .background(Color.black, in: RoundedRectangle(cornerRadius: 12))
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.glassProminent)
+            .controlSize(.large)
+            .tint(.black)
             .disabled(!supportedPassportCodes.contains(selectedCode))
-            .opacity(supportedPassportCodes.contains(selectedCode) ? 1 : 0.45)
             .padding()
         }
         .background(Color(.systemBackground))
@@ -135,10 +123,12 @@ struct PassportPickerView: View {
                 appState.completePassportSelection(selectedCode)
             } label: {
                 Text("I Understand")
-                    .font(.headline).foregroundStyle(.white)
-                    .frame(maxWidth: .infinity).padding()
-                    .background(Color.black, in: RoundedRectangle(cornerRadius: 12))
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.glassProminent)
+            .controlSize(.large)
+            .tint(.black)
             .padding()
         }
         .background(Color(.systemBackground))

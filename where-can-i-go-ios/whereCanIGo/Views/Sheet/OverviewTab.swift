@@ -68,23 +68,8 @@ struct OverviewTab: View {
                         .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)))
                     }
 
-                    HStack {
-                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                        TextField("Search countries…", text: $search)
-                            .autocorrectionDisabled()
-                        if !search.isEmpty {
-                            Button {
-                                search = ""
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(10)
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .padding(.horizontal)
+                    CapsuleSearchField(text: $search)
+                        .padding(.horizontal)
 
                     filterControls
 
@@ -608,9 +593,8 @@ struct EntryPolicySheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    formLabel("COUNTRY")
+            Form {
+                Section {
                     Button {
                         focusedField = nil
                         showCountryPicker = true
@@ -629,88 +613,115 @@ struct EntryPolicySheet: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                } header: {
+                    formLabel("COUNTRY")
+                }
 
-                    formLabel("ENTRY POLICY TYPE")
-                    Picker("Entry policy type", selection: $category) {
-                        Text("Visa Required").tag(VisaCategory.visaRequired)
-                        Text("Visa Free").tag(VisaCategory.visaFree)
-                        Text("EntryPolicy.VisaOnArrival").tag(VisaCategory.visaOnArrival)
-                        Text(verbatim: "eTA").tag(VisaCategory.eta)
+                Section {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        GlassEffectContainer(spacing: 8) {
+                            HStack(spacing: 8) {
+                                policyTypeChip(.visaRequired) { Text("Visa Required") }
+                                policyTypeChip(.visaFree) { Text("Visa Free") }
+                                policyTypeChip(.visaOnArrival) { Text("EntryPolicy.VisaOnArrival") }
+                                policyTypeChip(.eta) { Text("EntryPolicy.ETA") }
+                            }
+                            .padding(.vertical, 4)
+                            .padding(.horizontal, 4)
+                        }
                     }
-                    .pickerStyle(.segmented)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Entry policy type")
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                } header: {
+                    formLabel("ENTRY POLICY TYPE")
+                }
 
-                    formLabel("DURATION")
+                Section {
                     clearableTextField("e.g., 30 days", text: $policyDuration, field: .policyDuration)
+                } header: {
+                    formLabel("DURATION")
+                }
 
-                    formLabel("REMARK")
+                Section {
                     TextField("Additional notes\u{2026}", text: $policyRemark, axis: .vertical)
                         .focused($focusedField, equals: .policyRemark)
                         .lineLimit(3...8)
                         .accessibilityLabel("Remark")
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-
+                } header: {
+                    formLabel("REMARK")
+                } footer: {
                     if isUsingBundledPolicy {
                         VStack(alignment: .leading, spacing: 6) {
                             BundledPolicyUpdatedNote(style: .leading)
                             TravelConfirmationNotice()
                         }
                     }
+                }
 
-                    if hasExistingPolicy {
+                if hasExistingPolicy {
+                    Section {
                         Button("Remove Policy", role: .destructive) {
                             guard let selectedCountry else { return }
                             appState.removeDefaultVisa(selectedCountry.code)
                             dismiss()
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 8)
                     }
+                }
 
-                    if hasPersonalVisa {
-                        Divider().padding(.vertical, 8)
-
-                        Text("Personal Visa").font(.headline)
-
+                if hasPersonalVisa {
+                    Section {
                         if VisaCoverage.schengenCountryCodes.contains(selectedCountry?.code ?? "") {
                             Toggle("Valid throughout the Schengen Area", isOn: Binding(
                                 get: { visaCoverage == .schengenArea },
                                 set: { visaCoverage = $0 ? .schengenArea : .issuingCountry }
                             ))
-                            .padding()
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                         }
+                    } header: {
+                        Text("Personal Visa")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .textCase(nil)
+                            .padding(.top, 8)
+                    }
 
-                        formLabel("VISA TYPE")
+                    Section {
                         clearableTextField("e.g., Single / Multiple / Student / Work", text: $visaType, field: .visaType)
+                    } header: {
+                        formLabel("VISA TYPE")
+                    }
 
-                        formLabel("DURATION PER VISIT")
+                    Section {
                         clearableTextField("e.g., 90 days", text: $visaDuration, field: .visaDuration)
+                    } header: {
+                        formLabel("DURATION PER VISIT")
+                    }
 
-                        formLabel("VALIDITY DATES")
+                    Section {
                         VisaValidityFields(
                             hasEffectiveDate: $hasVisaEffectiveDate,
                             effectiveDate: $visaEffectiveDate,
                             expiryDate: $visaExpiry,
                             onPresent: { focusedField = nil }
                         )
-                        .padding(.vertical, 4)
+                    } header: {
+                        formLabel("VALIDITY DATES")
+                    }
 
-                        formLabel("NOTES (OPTIONAL)")
+                    Section {
                         TextField("Additional notes\u{2026}", text: $visaNotes, axis: .vertical)
                             .focused($focusedField, equals: .visaNotes)
                             .lineLimit(3...6)
-                            .padding()
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    } header: {
+                        formLabel("NOTES (OPTIONAL)")
+                    }
 
-                        Divider()
-                            .padding(.vertical, 4)
-
-                        formLabel("ATTACHMENTS (OPTIONAL)")
+                    Section {
                         Button {
                             showAttachmentActionSheet = true
                         } label: {
@@ -719,9 +730,8 @@ struct EntryPolicySheet: View {
                                 Text("Add Attachment")
                                 Spacer()
                             }
-                            .padding()
                             .foregroundStyle(.primary)
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .confirmationDialog("Add Attachment", isPresented: $showAttachmentActionSheet) {
@@ -746,8 +756,11 @@ struct EntryPolicySheet: View {
                                     }
                                 }
                             }
+                            .padding(.vertical, 4)
                         }
-
+                    } header: {
+                        formLabel("ATTACHMENTS (OPTIONAL)")
+                    } footer: {
                         if showVisaError, let message = visaValidationMessage {
                             HStack(spacing: 6) {
                                 Image(systemName: "exclamationmark.triangle.fill")
@@ -759,17 +772,16 @@ struct EntryPolicySheet: View {
                         }
                     }
                 }
-                .padding()
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Entry Policy")
             .centeredNavigationTitle("Entry Policy")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button(role: .cancel) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { commitChanges() }
-                        .fontWeight(.semibold)
+                    Button(role: .confirm) { commitChanges() }
                         .disabled(!canSave)
                 }
             }
@@ -969,13 +981,20 @@ struct EntryPolicySheet: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
     }
 
     private func formLabel(_ text: LocalizedStringResource) -> some View {
         Text(text)
             .font(.caption.weight(.semibold))
             .foregroundStyle(.secondary)
+    }
+
+    private func policyTypeChip(_ option: VisaCategory, @ViewBuilder label: @escaping () -> Text) -> some View {
+        GlassChip(
+            isSelected: category == option,
+            color: option == .visaRequired ? Color(.systemGray) : option.color,
+            action: { category = option },
+            label: label
+        )
     }
 }

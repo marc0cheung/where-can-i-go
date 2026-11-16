@@ -783,9 +783,8 @@ struct TripEditorSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    label("COUNTRY")
+            Form {
+                Section {
                     Button {
                         focusedField = nil
                         showCountryPicker = true
@@ -801,68 +800,76 @@ struct TripEditorSheet: View {
                             Image(systemName: "chevron.right")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                } header: {
+                    label("COUNTRY")
+                }
 
-                    label("LOCATION (OPTIONAL)")
+                Section {
                     TextField("States / Province / City / Place", text: $location)
                         .focused($focusedField, equals: .location)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                } header: {
+                    label("LOCATION (OPTIONAL)")
+                }
 
-                    label("PURPOSE")
+                Section {
                     VisitPurposePicker(selection: $purpose)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                } header: {
+                    label("PURPOSE")
+                }
 
+                Section {
+                    DateInputRow(
+                        title: "Start date",
+                        clearLabel: "Clear start date",
+                        date: $startDate,
+                        range: Date.distantPast...(endDate ?? Date.distantFuture),
+                        onPresent: { focusedField = nil }
+                    )
+                    DateInputRow(
+                        title: "End date",
+                        clearLabel: "Clear end date",
+                        date: $endDate,
+                        range: (startDate ?? Date.distantPast)...Date.distantFuture,
+                        preferredDate: startDate,
+                        onPresent: { focusedField = nil }
+                    )
+                } header: {
                     label("DATES")
-                    VStack(spacing: 0) {
-                        DateInputRow(
-                            title: "Start date",
-                            clearLabel: "Clear start date",
-                            date: $startDate,
-                            range: Date.distantPast...(endDate ?? Date.distantFuture),
-                            onPresent: { focusedField = nil }
-                        )
-                        Divider().padding(.vertical, 6)
-                        DateInputRow(
-                            title: "End date",
-                            clearLabel: "Clear end date",
-                            date: $endDate,
-                            range: (startDate ?? Date.distantPast)...Date.distantFuture,
-                            preferredDate: startDate,
-                            onPresent: { focusedField = nil }
-                        )
-                    }
-                    .padding(.vertical, 4)
+                }
 
-                    label("NOTES")
+                Section {
                     TextField("Optional notes", text: $notes, axis: .vertical)
                         .focused($focusedField, equals: .notes)
                         .lineLimit(2...4)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                } header: {
+                    label("NOTES")
+                }
 
-                    if let existingVisit {
+                if let existingVisit {
+                    Section {
                         Button("Delete Visit", role: .destructive) {
                             appState.removeVisit(existingVisit.id)
                             dismiss()
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 8)
                     }
                 }
-                .padding()
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle(titleKey)
             .centeredNavigationTitle(titleKey)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button(role: .cancel) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(completingTrip == nil ? "Save" : "Complete") { save() }
+                    Button(role: .confirm) { save() }
+                        .accessibilityLabel(completingTrip == nil ? Text("Save") : Text("Complete"))
                         .disabled(!canSave || isSaving)
                 }
             }
@@ -920,30 +927,59 @@ struct VisitPurposePicker: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(VisitPurpose.allCases) { option in
-                    Button { selection = option } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: option.systemImage).imageScale(.small)
+            GlassEffectContainer(spacing: 8) {
+                HStack(spacing: 8) {
+                    ForEach(VisitPurpose.allCases) { option in
+                        GlassChip(
+                            isSelected: selection == option,
+                            color: option.color,
+                            systemImage: option.systemImage
+                        ) {
+                            selection = option
+                        } label: {
                             Text(option.localizedDisplayName)
                         }
-                        .font(.caption.weight(.semibold))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .foregroundStyle(selection == option ? option.color : .secondary)
-                        .background(
-                            Capsule().fill(selection == option ? option.color.opacity(0.18) : Color(.systemGray6))
-                        )
-                        .overlay(
-                            Capsule().stroke(selection == option ? option.color : .clear, lineWidth: 1.5)
-                        )
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(selection == option ? .isSelected : [])
                 }
+                .padding(.vertical, 4)
+                .padding(.horizontal, 4)
             }
-            .padding(.vertical, 2)
         }
+    }
+}
+
+struct GlassChip<Label: View>: View {
+    let isSelected: Bool
+    let color: Color
+    var systemImage: String? = nil
+    let action: () -> Void
+    @ViewBuilder let label: () -> Label
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if let systemImage {
+                    Image(systemName: systemImage).imageScale(.small)
+                }
+                label()
+            }
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .foregroundStyle(isSelected ? color : .secondary)
+            .contentShape(Capsule())
+            .glassEffect(
+                isSelected
+                    ? .regular.tint(color.opacity(0.25)).interactive()
+                    : .regular.interactive(),
+                in: .capsule
+            )
+            .overlay(
+                Capsule().stroke(isSelected ? color : .clear, lineWidth: 1.5)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

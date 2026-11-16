@@ -402,36 +402,34 @@ private struct VisaDetailsSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    formLabel("ISSUING COUNTRY")
-                    Button {
-                        focusedField = nil
-                        showCountryPicker = true
-                    } label: {
-                        HStack {
-                            if let country = draftCountry {
-                                Text(country.flag)
-                                    .font(.title2)
-                                Text(country.localizedName())
-                                    .foregroundStyle(.primary)
-                            } else {
-                                Text("Select a country")
-                                    .foregroundStyle(.secondary)
+            Form {
+                Section {
+                    HStack {
+                        Button {
+                            focusedField = nil
+                            showCountryPicker = true
+                        } label: {
+                            HStack {
+                                if let country = draftCountry {
+                                    Text(country.flag)
+                                        .font(.title2)
+                                    Text(country.localizedName())
+                                        .foregroundStyle(.primary)
+                                } else {
+                                    Text("Select a country")
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
                             }
-                            Spacer()
+                            .contentShape(Rectangle())
                         }
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    }
-                    .buttonStyle(.plain)
-                    .overlay(alignment: .trailing) {
+                        .buttonStyle(.plain)
+
                         if draftCountry != nil {
                             Button { draftCountry = nil } label: {
                                 Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
                             }
                             .buttonStyle(.plain)
-                            .padding(.trailing, 16)
                         }
                     }
 
@@ -440,36 +438,43 @@ private struct VisaDetailsSheet: View {
                             get: { draftCoverage == .schengenArea },
                             set: { draftCoverage = $0 ? .schengenArea : .issuingCountry }
                         ))
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
                     }
+                } header: {
+                    formLabel("ISSUING COUNTRY")
+                }
 
-                    formLabel("VISA TYPE")
+                Section {
                     clearableTextField("e.g., Single / Multiple / Student / Work", text: $draftVisaType, field: .visaType)
+                } header: {
+                    formLabel("VISA TYPE")
+                }
 
-                    formLabel("DURATION PER VISIT")
+                Section {
                     clearableTextField("e.g., 90 days", text: $draftDuration, field: .duration)
+                } header: {
+                    formLabel("DURATION PER VISIT")
+                }
 
-                    formLabel("VALIDITY DATES")
+                Section {
                     VisaValidityFields(
                         hasEffectiveDate: $draftHasEffectiveDate,
                         effectiveDate: $draftEffectiveDate,
                         expiryDate: $draftExpiry,
                         onPresent: { focusedField = nil }
                     )
-                    .padding(.vertical, 4)
+                } header: {
+                    formLabel("VALIDITY DATES")
+                }
 
-                    formLabel("NOTES (OPTIONAL)")
+                Section {
                     TextField("Additional notes…", text: $draftNotes, axis: .vertical)
                         .focused($focusedField, equals: .notes)
                         .lineLimit(3...6)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                } header: {
+                    formLabel("NOTES (OPTIONAL)")
+                }
 
-                    Divider()
-                        .padding(.vertical, 4)
-
-                    formLabel("ATTACHMENTS (OPTIONAL)")
+                Section {
                     Button {
                         showAttachmentActionSheet = true
                     } label: {
@@ -478,9 +483,8 @@ private struct VisaDetailsSheet: View {
                             Text("Add Attachment")
                             Spacer()
                         }
-                        .padding()
                         .foregroundStyle(.primary)
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .confirmationDialog("Add Attachment", isPresented: $showAttachmentActionSheet) {
@@ -503,9 +507,11 @@ private struct VisaDetailsSheet: View {
                                 )
                             }
                         }
+                        .padding(.vertical, 4)
                     }
+                } header: {
+                    formLabel("ATTACHMENTS (OPTIONAL)")
                 }
-                .padding()
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Visa Details")
@@ -513,10 +519,10 @@ private struct VisaDetailsSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     // Same result as swiping the sheet down.
-                    Button("Cancel") { dismiss() }
+                    Button(role: .cancel) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
+                    Button(role: .confirm) {
                         onDone(
                             draftCountry,
                             draftVisaType,
@@ -529,7 +535,6 @@ private struct VisaDetailsSheet: View {
                         )
                         dismiss()
                     }
-                    .fontWeight(.semibold)
                     .disabled(!canDone)
                 }
             }
@@ -608,8 +613,6 @@ private struct VisaDetailsSheet: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
     }
 
     private func formLabel(_ text: LocalizedStringResource) -> some View {

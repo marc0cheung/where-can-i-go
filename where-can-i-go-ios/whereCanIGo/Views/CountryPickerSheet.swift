@@ -9,15 +9,9 @@ struct CountryPickerSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                HStack {
-                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                    TextField("Search countries…", text: $search)
-                        .autocorrectionDisabled()
-                }
-                .padding(10)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                .padding(.horizontal)
-                .padding(.top, 8)
+                CapsuleSearchField(text: $search)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
 
                 List(appState.countries.filtered(matching: search)) { country in
                     Button {

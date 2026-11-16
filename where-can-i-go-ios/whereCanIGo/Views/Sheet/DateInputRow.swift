@@ -70,6 +70,7 @@ struct DateInputRow: View {
             }
         }
         .frame(maxWidth: .infinity, minHeight: 44)
+        .listRowInsets(.vertical, 4)
         .animation(reduceMotion ? nil : .smooth(duration: 0.22), value: date != nil)
         .popover(item: $selection, attachmentAnchor: .rect(.bounds), arrowEdge: .top) { selection in
             DateInputSheet(title: title, initialDate: selection.date, range: range) { date = $0 }
@@ -132,14 +133,15 @@ private struct DateInputSheet: View {
 }
 
 struct VisaValidityFields: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var hasEffectiveDate: Bool
     @Binding var effectiveDate: Date?
     @Binding var expiryDate: Date?
     var onPresent: () -> Void = {}
 
     var body: some View {
-        VStack(spacing: 12) {
-            Toggle("Has effective date", isOn: $hasEffectiveDate)
+        Group {
+            Toggle("Has effective date", isOn: $hasEffectiveDate.animation(reduceMotion ? nil : .smooth(duration: 0.3)))
 
             if hasEffectiveDate {
                 DateInputRow(
@@ -147,6 +149,7 @@ struct VisaValidityFields: View {
                     range: Date.distantPast...(expiryDate ?? Date.distantFuture),
                     onPresent: onPresent
                 )
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
             DateInputRow(
