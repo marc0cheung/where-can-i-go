@@ -121,6 +121,14 @@ final class AppState: ObservableObject {
         data.visits.append(visit); save()
     }
 
+    func addVisits(_ newVisits: [Visit]) throws {
+        guard !newVisits.isEmpty else { return }
+        var updated = data
+        updated.visits.append(contentsOf: newVisits)
+        try store.saveAppData(updated)
+        data = updated
+    }
+
     func updateVisit(_ visit: Visit) {
         guard let index = data.visits.firstIndex(where: { $0.id == visit.id }) else { return }
         data.visits[index] = visit

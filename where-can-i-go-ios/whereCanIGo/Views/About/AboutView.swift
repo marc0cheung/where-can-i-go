@@ -141,6 +141,14 @@ struct AcknowledgementsView: View {
             } header: {
                 Text("acknowledgements.map.title")
             }
+
+            Section {
+                Text("acknowledgements.airports.body")
+                Link("OurAirports",
+                     destination: URL(string: "https://ourairports.com/data/")!)
+            } header: {
+                Text("acknowledgements.airports.title")
+            }
         }
         .navigationTitle("Acknowledgements & Sources")
         .navigationBarTitleDisplayMode(.inline)
