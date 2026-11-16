@@ -271,7 +271,7 @@ If a step fails, earlier steps are rolled back, including the previous friends l
 
 ## Flighty CSV import
 
-Reached from Settings › Manage Data › *Import from Flighty (CSV)*. Converts a Flighty flight log into `Visit` records without touching Wishlist (`PlannedTrip`) or passport settings.
+Reached from Settings › Manage Data › *Import from Flighty*. Opens a step-by-step export guide first, then converts a selected Flighty flight log into `Visit` records without touching Wishlist (`PlannedTrip`) or passport settings.
 
 ### Parsing and normalization
 

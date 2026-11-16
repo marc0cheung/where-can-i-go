@@ -1,10 +1,114 @@
 import SwiftUI
+import UniformTypeIdentifiers
+
+struct FlightyImportGuideView: View {
+    @EnvironmentObject private var appState: AppState
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var showImporter = false
+    @State private var flightyURL: URL?
+    @State private var flightySelection: FlightySelection?
+    @State private var importError: String?
+
+    private struct FlightySelection: Identifiable {
+        let id = UUID()
+        let parsedLog: FlightyParsedLog
+    }
+
+    private var isBusy: Bool { flightyURL != nil || appState.isRestoring }
+
+    var body: some View {
+        Form {
+            Section("flighty.guide.header") {
+                guideStep(number: 1, text: "flighty.guide.step1")
+                guideStep(number: 2, text: "flighty.guide.step2")
+                guideStep(number: 3, text: "flighty.guide.step3")
+            }
+
+            Section {
+                Button {
+                    showImporter = true
+                } label: {
+                    Text("flighty.guide.selectFile")
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                }
+                .modifier(LiquidGlassProminentButtonModifier())
+                .disabled(isBusy)
+                .listRowInsets(EdgeInsets(top: 6, leading: 4, bottom: 6, trailing: 4))
+                .listRowBackground(Color.clear)
+
+                if flightyURL != nil {
+                    ProgressView("import.reading")
+                        .frame(maxWidth: .infinity)
+                        .listRowBackground(Color.clear)
+                }
+            }
+        }
+        .navigationTitle("flighty.settings.entry")
+        .navigationBarTitleDisplayMode(.inline)
+        .fileImporter(
+            isPresented: $showImporter,
+            allowedContentTypes: [.commaSeparatedText, .plainText]
+        ) { result in
+            switch result {
+            case .success(let url):
+                flightyURL = url
+            case .failure(let error):
+                if let cocoaError = error as? CocoaError, cocoaError.code == .userCancelled { return }
+                importError = error.localizedDescription
+            }
+        }
+        .task(id: flightyURL) {
+            guard let flightyURL else { return }
+            defer { self.flightyURL = nil }
+            do {
+                let parsed = try await FlightyCSV.readLog(from: flightyURL)
+                try Task.checkCancellation()
+                flightySelection = FlightySelection(parsedLog: parsed)
+            } catch is CancellationError {
+                // A cancelled file read ends quietly.
+            } catch {
+                importError = error.localizedDescription
+            }
+        }
+        .sheet(item: $flightySelection) { selection in
+            FlightyImportView(parsedLog: selection.parsedLog) {
+                dismiss()
+            }
+        }
+        .alert("import.error.title", isPresented: Binding(
+            get: { importError != nil },
+            set: { if !$0 { importError = nil } }
+        )) {
+            Button("OK", role: .cancel) { importError = nil }
+        } message: {
+            Text(verbatim: importError ?? "")
+        }
+        .interactiveDismissDisabled(isBusy)
+    }
+
+    private func guideStep(number: Int, text: LocalizedStringKey) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "\(number).circle.fill")
+                .font(.title3)
+                .foregroundStyle(Color.primary)
+                .accessibilityHidden(true)
+            Text(text)
+                .font(.subheadline)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.vertical, 2)
+    }
+}
 
 struct FlightyImportView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
 
     let parsedLog: FlightyParsedLog
+    var onImported: (() -> Void)? = nil
 
     @State private var airports: [String: AirportInfo] = [:]
     @State private var airportOverrides: [String: String] = [:]
@@ -788,6 +892,7 @@ struct FlightyImportView: View {
         do {
             try appState.addVisits(toCreate)
             dismiss()
+            onImported?()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -856,6 +961,36 @@ private struct LiquidChipModifier: ViewModifier {
                 .overlay(
                     Capsule().strokeBorder(isActive ? Color.accentColor.opacity(0.45) : Color.secondary.opacity(0.2), lineWidth: 1)
                 )
+        }
+    }
+}
+
+private struct LiquidGlassActionButtonModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .controlSize(.large)
+                .buttonSizing(.flexible)
+                .buttonStyle(.glass)
+        } else {
+            content
+                .controlSize(.large)
+                .buttonStyle(.bordered)
+        }
+    }
+}
+
+private struct LiquidGlassProminentButtonModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .controlSize(.large)
+                .buttonSizing(.flexible)
+                .buttonStyle(.glassProminent)
+        } else {
+            content
+                .controlSize(.large)
+                .buttonStyle(.borderedProminent)
         }
     }
 }
@@ -991,34 +1126,8 @@ private struct FlightyStayEditorSheet: View {
                     }
 
                     if onSplit != nil || !sameCountryPeers.isEmpty {
-                        VStack(spacing: 10) {
-                            if let onSplit {
-                                Button {
-                                    onSplit()
-                                    dismiss()
-                                } label: {
-                                    Label("flighty.action.split", systemImage: "arrow.branch")
-                                        .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(.bordered)
-                            }
-
-                            if !sameCountryPeers.isEmpty {
-                                Menu {
-                                    ForEach(sameCountryPeers) { peer in
-                                        Button(peerLabel(peer)) {
-                                            onMerge(peer)
-                                            dismiss()
-                                        }
-                                    }
-                                } label: {
-                                    Label("flighty.action.mergeWith", systemImage: "arrow.triangle.merge")
-                                        .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(.bordered)
-                            }
-                        }
-                        .padding(.top, 4)
+                        stayActionButtons
+                            .padding(.top, 4)
                     }
                 }
                 .padding()
@@ -1042,6 +1151,47 @@ private struct FlightyStayEditorSheet: View {
                 if country == nil {
                     country = appState.country(for: stay.countryCode)
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var stayActionButtons: some View {
+        if #available(iOS 26, *) {
+            GlassEffectContainer(spacing: 10) {
+                stayActionButtonsStack
+            }
+        } else {
+            stayActionButtonsStack
+        }
+    }
+
+    private var stayActionButtonsStack: some View {
+        VStack(spacing: 10) {
+            if let onSplit {
+                Button {
+                    onSplit()
+                    dismiss()
+                } label: {
+                    Label("flighty.action.split", systemImage: "arrow.branch")
+                        .frame(maxWidth: .infinity)
+                }
+                .modifier(LiquidGlassActionButtonModifier())
+            }
+
+            if !sameCountryPeers.isEmpty {
+                Menu {
+                    ForEach(sameCountryPeers) { peer in
+                        Button(peerLabel(peer)) {
+                            onMerge(peer)
+                            dismiss()
+                        }
+                    }
+                } label: {
+                    Label("flighty.action.mergeWith", systemImage: "arrow.triangle.merge")
+                        .frame(maxWidth: .infinity)
+                }
+                .modifier(LiquidGlassActionButtonModifier())
             }
         }
     }

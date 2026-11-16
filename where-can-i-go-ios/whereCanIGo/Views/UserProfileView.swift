@@ -282,11 +282,8 @@ struct SettingsView: View {
     @StateObject private var service: UserDataTransferService
     @State private var showExport = false
     @State private var showImporter = false
-    @State private var importerKind: ImporterKind = .backup
     @State private var importURL: URL?
-    @State private var flightyURL: URL?
     @State private var importSelection: ImportSelection?
-    @State private var flightySelection: FlightySelection?
     @State private var importError: String?
     @AppStorage(SearchEngine.storageKey) private var searchEngine: SearchEngine = .google
 
@@ -296,28 +293,11 @@ struct SettingsView: View {
         ))
     }
 
-    private var isBusy: Bool { importURL != nil || flightyURL != nil || appState.isRestoring }
-
-    private enum ImporterKind {
-        case backup
-        case flighty
-
-        var allowedContentTypes: [UTType] {
-            switch self {
-            case .backup: [.json]
-            case .flighty: [.commaSeparatedText, .plainText]
-            }
-        }
-    }
+    private var isBusy: Bool { importURL != nil || appState.isRestoring }
 
     private struct ImportSelection: Identifiable {
         let id = UUID()
         let backup: UserDataBackup
-    }
-
-    private struct FlightySelection: Identifiable {
-        let id = UUID()
-        let parsedLog: FlightyParsedLog
     }
 
     var body: some View {
@@ -359,20 +339,18 @@ struct SettingsView: View {
                             .foregroundStyle(Color.primary)
                     }
                     Button {
-                        importerKind = .backup
                         showImporter = true
                     } label: {
                         Label("Import Data", systemImage: "square.and.arrow.down")
                             .foregroundStyle(Color.primary)
                     }
-                    Button {
-                        importerKind = .flighty
-                        showImporter = true
+                    NavigationLink {
+                        FlightyImportGuideView()
                     } label: {
-                        Label("flighty.settings.entry", systemImage: "airplane")
+                        Label("flighty.settings.entry", systemImage: "paperplane")
                             .foregroundStyle(Color.primary)
                     }
-                    if importURL != nil || flightyURL != nil {
+                    if importURL != nil {
                         ProgressView("import.reading")
                     }
                 } header: {
@@ -390,7 +368,7 @@ struct SettingsView: View {
                     NavigationLink {
                         FeedbackView()
                     } label: {
-                        Label("Send Feedback", systemImage: "paperplane")
+                        Label("Send Feedback", systemImage: "envelope")
                             .foregroundStyle(Color.primary)
                     }
                 } header: {
@@ -434,13 +412,10 @@ struct SettingsView: View {
             .sheet(isPresented: $showExport) {
                 ExportDataView(service: service)
             }
-            .fileImporter(isPresented: $showImporter, allowedContentTypes: importerKind.allowedContentTypes) { result in
+            .fileImporter(isPresented: $showImporter, allowedContentTypes: [.json]) { result in
                 switch result {
                 case .success(let url):
-                    switch importerKind {
-                    case .backup: importURL = url
-                    case .flighty: flightyURL = url
-                    }
+                    importURL = url
                 case .failure(let error):
                     if let cocoaError = error as? CocoaError, cocoaError.code == .userCancelled { return }
                     importError = error.localizedDescription
@@ -459,24 +434,8 @@ struct SettingsView: View {
                     importError = error.localizedDescription
                 }
             }
-            .task(id: flightyURL) {
-                guard let flightyURL else { return }
-                defer { self.flightyURL = nil }
-                do {
-                    let parsed = try await FlightyCSV.readLog(from: flightyURL)
-                    try Task.checkCancellation()
-                    flightySelection = FlightySelection(parsedLog: parsed)
-                } catch is CancellationError {
-                    // A cancelled file read ends quietly.
-                } catch {
-                    importError = error.localizedDescription
-                }
-            }
             .sheet(item: $importSelection) { selection in
                 ImportPreviewView(service: service, backup: selection.backup)
-            }
-            .sheet(item: $flightySelection) { selection in
-                FlightyImportView(parsedLog: selection.parsedLog)
             }
             .alert("import.error.title", isPresented: errorBinding($importError)) {
                 Button("OK", role: .cancel) { importError = nil }

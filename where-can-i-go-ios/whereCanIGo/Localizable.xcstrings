@@ -4305,6 +4305,116 @@
         }
       }
     },
+    "flighty.guide.header" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to Import"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入步骤"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯入步驟"
+          }
+        }
+      }
+    },
+    "flighty.guide.selectFile" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select .csv file from Flighty"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择来自 Flighty 的 .csv 文件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇來自 Flighty 的 .csv 檔案"
+          }
+        }
+      }
+    },
+    "flighty.guide.step1" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Flighty and go to Settings → Account Data → Export Your Flights."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开 Flighty，前往 Settings → Account Data → Export Your Flights。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打開 Flighty，前往 Settings → Account Data → Export Your Flights。"
+          }
+        }
+      }
+    },
+    "flighty.guide.step2" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter your email address to receive the exported CSV file from Flighty."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入你的电子邮件地址，获取 Flighty 导出的 CSV 文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輸入你的電子郵件地址，取得 Flighty 匯出的 CSV 檔案。"
+          }
+        }
+      }
+    },
+    "flighty.guide.step3" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import the CSV file into Where Can I Go? using the button below."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击下方按钮，在“文件”中选择该 CSV 文件并导入 Where Can I Go?。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "點擊下方按鈕，在「檔案」中選擇該 CSV 檔案並匯入 Where Can I Go?。"
+          }
+        }
+      }
+    },
     "flighty.ignored.canceled" : {
       "localizations" : {
         "en" : {
@@ -4464,19 +4574,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Import from Flighty (CSV)"
+            "value" : "Import from Flighty"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "从 Flighty 导入 (CSV)"
+            "value" : "从 Flighty 导入"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "從 Flighty 匯入 (CSV)"
+            "value" : "從 Flighty 匯入"
           }
         }
       }
