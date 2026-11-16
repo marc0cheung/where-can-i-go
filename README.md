@@ -16,7 +16,7 @@ See which countries your passport can enter, keep track of your own visas, and l
 - **Overview.** A searchable list of countries with filters for entry requirement, continent and visited status.
 - **My Visas.** Save the visas you hold, with validity dates, notes and photo or PDF attachments. A valid visa updates the map. Schengen visas can cover the whole Schengen area.
 - **Travels.**
-  - *Been*: log trips with dates, purpose and location. A summary card shows countries, trips, continents and days, and you can share it as a passport-style image.
+  - *Been*: log trips with dates, purpose and location, or import your flight log from a Flighty CSV export in Settings. A summary card shows countries, trips, continents and days, and you can share it as a passport-style image.
   - *Wishlist*: plan future trips. When you go, mark the plan as visited and it moves to Been.
   - *Friends*: swap travel cards with friends over AirDrop, Messages or any app, then browse their Been and Wishlist offline. You choose what your card includes in Settings → Sharing: name, photo, Been, Wishlist, and how much detail (dates, length of stay, location, purpose). A friend's card updates when they share again.
 - **Random destination.** Tap the dice to pick a country. Long-press it to limit the pick by continent, airline (Cathay Pacific and HK Express for now), or entry requirement.
@@ -61,8 +61,10 @@ The project has no third-party dependencies.
 ### Where things are
 
 ```
+scripts/
+└── generate_airports.py   Builds Resources/airports_iata.json from OurAirports and countries.json
 where-can-i-go-ios/whereCanIGo/
-├── Models/       Data types, AppState, backup format
+├── Models/       Data types, AppState, backup format, Flighty CSV import
 ├── Services/     Persistence, bundled data loading, backup import/export
 ├── Views/        SwiftUI and MapKit views (Sheet/ holds the bottom panel tabs)
 └── Resources/    Bundled JSON data and the world GeoJSON
@@ -75,6 +77,7 @@ Architecture, data formats and design decisions are described in [tech_notes.md]
 - **Fix an entry policy.** Edit `Resources/default_visas_<ISO3>.json` and add the source to the section below.
 - **Add a passport.** Add `default_visas_<ISO3>.json`, add the code to `supportedPassportCodes` in `Views/PassportPickerView.swift`, and list the source below.
 - **Add an airline.** Add a record to `Resources/airline_destinations.json`. Add the name to `Localizable.xcstrings` if it needs translating.
+- **Refresh airport data.** Run `python3 scripts/generate_airports.py` to regenerate `Resources/airports_iata.json` from OurAirports.
 - **Translations.** All UI strings are in `Localizable.xcstrings`.
 
 ### Pull requests
@@ -97,6 +100,7 @@ Duration remarks are shortened. eVisas that need an application are listed as vi
 
 - **Wikipedia contributors:** [Visa requirements for Chinese citizens](https://en.wikipedia.org/wiki/Visa_requirements_for_Chinese_citizens) ([history](https://en.wikipedia.org/w/index.php?title=Visa_requirements_for_Chinese_citizens&action=history)) and [Visa requirements for Taiwanese citizens](https://en.wikipedia.org/wiki/Visa_requirements_for_Taiwanese_citizens) ([history](https://en.wikipedia.org/w/index.php?title=Visa_requirements_for_Taiwanese_citizens&action=history)). Article content is available under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The app adapts selected policy information into entry categories and shortened stay/condition remarks, supplemented by official sources. Adapted Wikipedia material in the CHN and TWN presets is distributed under CC BY-SA 4.0, separately from the MIT-licensed app code. Public source files remain available in this repository for reuse under those terms. No endorsement is implied.
 - **Map borders:** Made with [Natural Earth](https://www.naturalearthdata.com/), 1:10m Admin-0 Countries, distributed as GeoJSON by [datasets/geo-countries](https://github.com/datasets/geo-countries). Natural Earth data is [public domain](https://www.naturalearthdata.com/about/terms-of-use/); the GeoJSON package is offered under [PDDL 1.0](https://opendatacommons.org/licenses/pddl/1.0/). Credit also to Lexman and the Open Knowledge Foundation. The app simplifies geometry at runtime for rendering; boundaries are not an endorsement of territorial claims.
+- **Airport data:** Derived from [OurAirports](https://ourairports.com/data/) public-domain airport data and bundled offline as `airports_iata.json` for Flighty CSV import.
 - **Base map:** Apple Maps via MapKit, separate from the bundled border overlays.
 
 ## Known Issues
