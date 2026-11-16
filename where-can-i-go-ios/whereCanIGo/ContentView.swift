@@ -235,7 +235,7 @@ struct ContentView: View {
                        let code = appState.selectedCountryCode,
                        let country = appState.country(for: code) {
                         countryDetailCard(code: code, country: country)
-                            .padding(.bottom, hasSideStrip(proxy) ? PanelState.sideStripLowHeight + 20 : 310)
+                            .padding(.bottom, hasSideStrip(proxy) ? PanelState.sideStripLowHeight + 20 : 294)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }

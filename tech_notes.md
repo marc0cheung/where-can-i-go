@@ -177,7 +177,7 @@ When the camera changes, the coordinator picks the coarsest level whose error is
 ## UI structure
 
 - `ContentView` shows the map with a bottom panel.
-  - Compact width (iPhone, narrow iPad window): a system `.sheet` with three detents: 290 pt, medium, large.
+  - Compact width (iPhone, narrow iPad window): a system `.sheet` with three detents: 274 pt, medium, large.
   - Regular width: a custom floating panel, 390 pt wide, with its own drag handle and the same three states (`PanelState`).
   - Both use the same `panelContent`: `SheetHeader` (passport, dice, profile) and a `TabView`.
   - Compact-sheet visibility is derived from the size class so folding back from the regular-width panel cannot leave it dismissed. The floating panel uses tighter header spacing and clips tab content above the native tab bar.

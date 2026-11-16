@@ -46,7 +46,7 @@ struct OverviewTab: View {
                                 accessibleStat(total: counts.total)
                             }
                             .padding(.horizontal)
-                            .padding(.vertical)
+                            .padding(.vertical, 8)
                         }
                         .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)))
                     } else {

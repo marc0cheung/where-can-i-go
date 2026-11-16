@@ -36,7 +36,7 @@ enum PanelState: Hashable, CaseIterable {
     /// `.medium` sits clearly above it so a small drag doesn't jump detents.
     func presentationDetent(sideStrip: Bool = false) -> PresentationDetent {
         switch self {
-        case .low:    return sideStrip ? .height(Self.sideStripLowHeight) : .height(290)
+        case .low:    return sideStrip ? .height(Self.sideStripLowHeight) : .height(274)
         case .medium: return sideStrip ? Self.sideStripMediumDetent : .medium
         case .high:   return .large
         }
@@ -60,7 +60,7 @@ enum PanelState: Hashable, CaseIterable {
     func iPadHeight(availableHeight: CGFloat) -> CGFloat {
         switch self {
         case .low:
-            return 310
+            return 294
         case .medium:
             return max(400, availableHeight * 0.55)
         case .high:
